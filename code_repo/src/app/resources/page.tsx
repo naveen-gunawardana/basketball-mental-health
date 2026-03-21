@@ -10,7 +10,7 @@ import {
   Search,
   Clock,
   BookOpen,
-  FileText,
+  Video,
   Pen,
   MessageSquare,
   Filter,
@@ -21,7 +21,7 @@ const formatIcons: Record<ResourceFormat, typeof BookOpen> = {
   article: BookOpen,
   worksheet: Pen,
   script: MessageSquare,
-  video: FileText,
+  video: Video,
 };
 
 const categoryColors: Record<string, string> = {
@@ -109,7 +109,7 @@ export default function ResourcesPage() {
             <Filter className="h-4 w-4" />
             Format:
           </div>
-          {(["article", "worksheet", "script"] as const).map((fmt) => (
+          {(["article", "video", "worksheet", "script"] as const).map((fmt) => (
             <button
               key={fmt}
               onClick={() =>
