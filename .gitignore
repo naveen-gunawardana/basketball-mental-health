@@ -9,3 +9,6 @@ Thumbs.db
 
 # Misc
 *.log
+
+# Windows reserved device name (created accidentally)
+nul

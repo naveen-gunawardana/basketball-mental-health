@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand: Deep Navy as primary */
+    --background: 40 18% 94%;
+    --foreground: 217 46% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 217 46% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 46% 20%;
+
+    /* Primary: Deep Navy */
+    --primary: 217 46% 20%;
+    --primary-foreground: 40 18% 94%;
+
+    /* Secondary: Burnt Orange */
+    --secondary: 16 78% 54%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 215 16% 90%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 16 78% 54%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 215 20% 85%;
+    --input: 215 20% 85%;
+    --ring: 217 46% 20%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  .gradient-navy {
+    @apply bg-gradient-to-br from-navy-500 via-navy-700 to-navy-900;
+  }
+  .gradient-orange {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600;
+  }
+  .section-padding {
+    @apply px-6 py-20 md:px-12 lg:px-20 xl:px-32;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground));
+}
