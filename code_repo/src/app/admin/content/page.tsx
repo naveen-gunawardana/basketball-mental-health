@@ -11,6 +11,8 @@ interface Article {
   title: string;
   slug: string;
   category: string | null;
+  sport: string | null;
+  media_type: string | null;
   excerpt: string | null;
   content: string;
   status: string | null;
@@ -22,18 +24,32 @@ interface Article {
 
 type Filter = "published" | "pending" | "rejected";
 
+const SPORTS = [
+  "General", "Basketball", "Soccer", "Football", "Baseball", "Softball",
+  "Volleyball", "Track & Field", "Cross-Country", "Swimming", "Wrestling",
+  "Tennis", "Golf", "Lacrosse",
+];
+
+const ISSUES = [
+  "Confidence", "Resilience", "Motivation", "Goal Setting",
+  "Pressure & Anxiety", "Coach Communication", "Identity", "Injury Recovery", "Other",
+];
+
+const MEDIA_TYPES = ["Article", "Video", "Podcast", "Guide", "Infographic"];
+
 export default function AdminContentPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("published");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [actingId, setActingId] = useState<string | null>(null);
+  const [tagEdits, setTagEdits] = useState<Record<string, { sport: string; category: string; media_type: string }>>({});
 
   async function load() {
     const supabase = createClient();
     const { data } = await supabase
       .from("resources")
-      .select("id, title, slug, category, excerpt, content, status, submitted_by, submitted_by_name, published_at, created_at")
+      .select("id, title, slug, category, sport, media_type, excerpt, content, status, submitted_by, submitted_by_name, published_at, created_at")
       .order("created_at", { ascending: false });
     setArticles((data ?? []) as Article[]);
     setLoading(false);
@@ -41,12 +57,46 @@ export default function AdminContentPage() {
 
   useEffect(() => { load(); }, []);
 
+  function initTagEdit(article: Article) {
+    setTagEdits(prev => ({
+      ...prev,
+      [article.id]: {
+        sport: article.sport ?? "All Sports",
+        category: article.category ?? "Confidence",
+        media_type: article.media_type ?? "Article",
+      },
+    }));
+  }
+
+  function handleExpand(article: Article) {
+    const isExpanded = expandedId === article.id;
+    setExpandedId(isExpanded ? null : article.id);
+    if (!isExpanded && !tagEdits[article.id]) initTagEdit(article);
+  }
+
+  async function saveTags(id: string) {
+    const tags = tagEdits[id];
+    if (!tags) return;
+    setActingId(id);
+    const supabase = createClient();
+    await supabase.from("resources").update({
+      sport: tags.sport,
+      category: tags.category,
+      media_type: tags.media_type,
+    }).eq("id", id);
+    await load();
+    setActingId(null);
+  }
+
   async function setStatus(id: string, status: "published" | "pending" | "rejected") {
+    // Save any pending tag edits alongside status change
+    const tags = tagEdits[id];
     setActingId(id);
     const supabase = createClient();
     await supabase.from("resources").update({
       status,
       ...(status === "published" ? { published_at: new Date().toISOString() } : {}),
+      ...(tags ? { sport: tags.sport, category: tags.category, media_type: tags.media_type } : {}),
     }).eq("id", id);
 
     if (status === "published") {
@@ -148,11 +198,12 @@ export default function AdminContentPage() {
         <div className="space-y-2">
           {filtered.map(article => {
             const isExpanded = expandedId === article.id;
+            const tags = tagEdits[article.id];
             return (
               <div key={article.id} className="rounded-lg border border-offWhite-300 overflow-hidden">
                 <button
                   type="button"
-                  onClick={() => setExpandedId(isExpanded ? null : article.id)}
+                  onClick={() => handleExpand(article)}
                   className="w-full flex items-center justify-between p-4 text-left hover:bg-offWhite/40 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -161,12 +212,16 @@ export default function AdminContentPage() {
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {article.submitted_by_name ?? "Unknown"}
                         {article.category ? ` · ${article.category}` : ""}
+                        {article.sport && article.sport !== "General" ? ` · ${article.sport}` : ""}
                         {" · "}
                         {filter === "published" ? fmt(article.published_at) : fmt(article.created_at)}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
+                    {article.media_type && (
+                      <Badge variant="outline" className="text-xs hidden sm:flex">{article.media_type}</Badge>
+                    )}
                     {article.category && (
                       <Badge variant="outline" className="text-xs hidden sm:flex">{article.category}</Badge>
                     )}
@@ -183,6 +238,82 @@ export default function AdminContentPage() {
                       <pre className="text-xs text-navy/70 whitespace-pre-wrap font-sans leading-relaxed">{article.content}</pre>
                     </div>
 
+                    {/* Tag editor */}
+                    {tags && (
+                      <div className="rounded-md border border-offWhite-300 p-4 space-y-4 bg-white">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-navy/40">Tags</p>
+
+                        <div>
+                          <p className="text-xs font-medium text-navy mb-2">Sport</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {SPORTS.map(s => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => setTagEdits(prev => ({ ...prev, [article.id]: { ...prev[article.id], sport: s } }))}
+                                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                                  tags.sport === s
+                                    ? "bg-navy text-white"
+                                    : "bg-offWhite border border-offWhite-300 text-navy/60 hover:text-navy"
+                                }`}
+                              >
+                                {s}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-medium text-navy mb-2">Issue</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {ISSUES.map(i => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => setTagEdits(prev => ({ ...prev, [article.id]: { ...prev[article.id], category: i } }))}
+                                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                                  tags.category === i
+                                    ? "bg-navy text-white"
+                                    : "bg-offWhite border border-offWhite-300 text-navy/60 hover:text-navy"
+                                }`}
+                              >
+                                {i}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-medium text-navy mb-2">Media Type</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {MEDIA_TYPES.map(m => (
+                              <button
+                                key={m}
+                                type="button"
+                                onClick={() => setTagEdits(prev => ({ ...prev, [article.id]: { ...prev[article.id], media_type: m } }))}
+                                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                                  tags.media_type === m
+                                    ? "bg-orange-500 text-white"
+                                    : "bg-offWhite border border-offWhite-300 text-navy/60 hover:text-navy"
+                                }`}
+                              >
+                                {m}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => saveTags(article.id)}
+                          disabled={actingId === article.id}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-navy/20 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors disabled:opacity-50"
+                        >
+                          Save Tags
+                        </button>
+                      </div>
+                    )}
+
                     <div className="flex flex-wrap items-center gap-2 pt-1">
                       {/* View live */}
                       {filter === "published" && (
@@ -196,7 +327,7 @@ export default function AdminContentPage() {
                       {filter !== "published" && (
                         <button type="button" onClick={() => setStatus(article.id, "published")}
                           disabled={actingId === article.id}
-                          className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                          className="inline-flex items-center gap-1.5 rounded-md bg-sage px-3 py-1.5 text-xs font-medium text-white hover:bg-sage-600 transition-colors disabled:opacity-50">
                           <Eye className="h-3.5 w-3.5" /> Publish
                         </button>
                       )}
@@ -205,7 +336,7 @@ export default function AdminContentPage() {
                       {filter === "published" && (
                         <button type="button" onClick={() => setStatus(article.id, "pending")}
                           disabled={actingId === article.id}
-                          className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50 transition-colors disabled:opacity-50">
+                          className="inline-flex items-center gap-1.5 rounded-md border border-gold-400 px-3 py-1.5 text-xs font-medium text-gold-700 hover:bg-gold-50 transition-colors disabled:opacity-50">
                           <EyeOff className="h-3.5 w-3.5" /> Unpublish
                         </button>
                       )}

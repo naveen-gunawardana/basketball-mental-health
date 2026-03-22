@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Logo } from "@/components/logo";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -44,11 +45,14 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-20">
+    <div className="mx-auto max-w-sm px-4 py-16">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-navy mb-2">Sign In</h1>
+        <div className="flex justify-center mb-6">
+          <Logo href="/" size="md" variant="dark" />
+        </div>
+        <h1 className="text-2xl font-bold text-navy mb-1.5">Welcome back</h1>
         <p className="text-sm text-muted-foreground">
-          Welcome back. Sign in to your account.
+          Sign in to your account.
         </p>
       </div>
 
@@ -113,9 +117,9 @@ export default function SignInPage() {
           </div>
 
           {forgotStatus === "sent" ? (
-            <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-5 text-center mb-4">
-              <p className="font-medium text-emerald-700">Check your email</p>
-              <p className="text-sm text-emerald-600 mt-1">We sent a password reset link to {forgotEmail}.</p>
+            <div className="rounded-lg bg-sage-50 border border-sage-200 p-5 text-center mb-4">
+              <p className="font-medium text-sage-700">Check your email</p>
+              <p className="text-sm text-sage-600 mt-1">We sent a password reset link to {forgotEmail}.</p>
             </div>
           ) : (
             <form onSubmit={handleForgot} className="space-y-4">

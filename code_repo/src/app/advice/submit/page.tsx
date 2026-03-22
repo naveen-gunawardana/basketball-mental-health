@@ -75,10 +75,10 @@ export default function GiveAdvicePage() {
       </div>
 
       {status === "done" ? (
-        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-8 text-center">
-          <CheckCircle className="h-10 w-10 text-emerald-500 mx-auto mb-4" />
-          <p className="font-semibold text-emerald-700 text-lg mb-1">Submitted for review</p>
-          <p className="text-sm text-emerald-600 mb-6">Once approved it&apos;ll appear in the advice library.</p>
+        <div className="rounded-lg bg-sage-50 border border-sage-200 p-8 text-center">
+          <CheckCircle className="h-10 w-10 text-sage mx-auto mb-4" />
+          <p className="font-semibold text-sage-700 text-lg mb-1">Submitted for review</p>
+          <p className="text-sm text-sage-600 mb-6">Once approved it&apos;ll appear in the advice library.</p>
           <div className="flex justify-center gap-3">
             <Button asChild>
               <Link href="/advice">View the Advice Library</Link>

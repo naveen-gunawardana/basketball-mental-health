@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,6 +24,8 @@ interface Match { id: string; status: string; created_at: string; meeting_url: s
 interface FlaggedSession { id: string; date: string; flag_reason: string | null; match_id: string; player_name: string; mentor_name: string }
 interface PendingArticle { id: string; title: string; category: string | null; excerpt: string | null; content: string; submitted_by_name: string | null; created_at: string }
 
+type MatchFilter = "all" | "matched" | "unmatched";
+
 export default function AdminPage() {
   const [players, setPlayers] = useState<Person[]>([]);
   const [mentors, setMentors] = useState<Person[]>([]);
@@ -40,35 +42,50 @@ export default function AdminPage() {
   const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
   const [articleAction, setArticleAction] = useState<string | null>(null);
 
-  async function load() {
-    const supabase = createClient();
-    const [profilesRes, matchesRes, sessionsRes, articlesRes] = await Promise.all([
-      supabase.from("profiles").select(`
-        id, name, role, sport, created_at,
-        player_profiles(age, school, grade, level, challenges, goal, availability),
-        mentor_profiles(college, years_played, skills, why, availability, approved)
-      `).order("created_at", { ascending: false }),
-      supabase.from("matches").select("id, status, created_at, meeting_url, player:player_id(id, name, role, sport, created_at), mentor:mentor_id(id, name, role, sport, created_at)").order("created_at", { ascending: false }),
-      supabase.from("sessions").select("id, flagged, flag_reason, match_id, date"),
-      supabase.from("resources").select("id, title, category, excerpt, content, submitted_by_name, created_at").eq("status", "pending").order("created_at", { ascending: true }),
-    ]);
+  // Email + delete state
+  const [emails, setEmails] = useState<Record<string, string>>({});
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-    const all = (profilesRes.data ?? []) as unknown as Person[];
+  // Filter state
+  const [playerSportFilter, setPlayerSportFilter] = useState("all");
+  const [mentorSportFilter, setMentorSportFilter] = useState("all");
+  const [playerMatchFilter, setPlayerMatchFilter] = useState<MatchFilter>("all");
+  const [mentorMatchFilter, setMentorMatchFilter] = useState<MatchFilter>("all");
+
+  async function load() {
+    const res = await fetch("/api/admin/data");
+    if (!res.ok) { setLoading(false); return; }
+    const { profiles, matches: rawMatches, sessions, articles } = await res.json();
+
+    const all = (profiles ?? []) as unknown as Person[];
     setPlayers(all.filter(p => p.role === "player"));
     setMentors(all.filter(p => p.role === "mentor"));
 
-    const typedMatches = (matchesRes.data ?? []) as unknown as Match[];
+    const typedMatches = (rawMatches ?? []) as unknown as Match[];
     setMatches(typedMatches);
 
-    const flaggedSessions = (sessionsRes.data ?? []).filter(s => s.flagged);
-    setFlagged(flaggedSessions.map(s => {
+    const flaggedSessions = (sessions ?? []).filter((s: { flagged: boolean }) => s.flagged);
+    setFlagged(flaggedSessions.map((s: { id: string; date: string; flag_reason: string | null; match_id: string }) => {
       const match = typedMatches.find(m => m.id === s.match_id);
       return { id: s.id, date: s.date, flag_reason: s.flag_reason, match_id: s.match_id,
         player_name: match?.player?.name ?? "Unknown", mentor_name: match?.mentor?.name ?? "Unknown" };
     }));
 
-    setPendingArticles((articlesRes.data ?? []) as PendingArticle[]);
+    setPendingArticles((articles ?? []) as PendingArticle[]);
     setLoading(false);
+  }
+
+  async function loadEmails() {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const { emails: data } = await res.json();
+        setEmails(data ?? {});
+      }
+    } catch {
+      // emails are best-effort
+    }
   }
 
   async function reviewArticle(id: string, action: "published" | "rejected") {
@@ -83,16 +100,55 @@ export default function AdminPage() {
     setExpandedArticleId(null);
   }
 
-  useEffect(() => { load(); }, []);
+  async function deleteUser(id: string) {
+    setDeletingId(id);
+    const res = await fetch("/api/admin/delete-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: id }),
+    });
+    if (res.ok) {
+      setPlayers(prev => prev.filter(p => p.id !== id));
+      setMentors(prev => prev.filter(m => m.id !== id));
+      setExpandedPlayerId(null);
+      setExpandedMentorId(null);
+    }
+    setDeletingId(null);
+    setConfirmDeleteId(null);
+  }
+
+  useEffect(() => { load(); loadEmails(); }, []);
 
   const activeMatches = matches.filter(m => m.status === "active");
   const matchedPlayerIds = new Set(activeMatches.map(m => m.player?.id));
   const matchedMentorIds = new Set(activeMatches.map(m => m.mentor?.id));
   const pendingMentors = mentors.filter(m => !m.mentor_profiles?.approved);
-  const approvedUnmatchedMentors = mentors.filter(m => m.mentor_profiles?.approved && !matchedMentorIds.has(m.id));
+  const approvedMentors = mentors.filter(m => m.mentor_profiles?.approved);
 
-  function getMatchFor(id: string) {
-    return activeMatches.find(m => m.player?.id === id || m.mentor?.id === id);
+  // Unique sports for filter dropdowns
+  const playerSports = Array.from(new Set(players.map(p => p.sport).filter(Boolean))) as string[];
+  const mentorSports = Array.from(new Set(mentors.map(m => m.sport).filter(Boolean))) as string[];
+
+  // Filtered lists
+  const filteredPlayers = players.filter(p => {
+    if (playerSportFilter !== "all" && p.sport !== playerSportFilter) return false;
+    if (playerMatchFilter === "matched" && !matchedPlayerIds.has(p.id)) return false;
+    if (playerMatchFilter === "unmatched" && matchedPlayerIds.has(p.id)) return false;
+    return true;
+  });
+
+  const filteredMentors = mentors.filter(m => {
+    if (mentorSportFilter !== "all" && m.sport !== mentorSportFilter) return false;
+    if (mentorMatchFilter === "matched" && !matchedMentorIds.has(m.id)) return false;
+    if (mentorMatchFilter === "unmatched" && matchedMentorIds.has(m.id)) return false;
+    return true;
+  });
+
+  function getPlayerMatch(playerId: string) {
+    return activeMatches.find(m => m.player?.id === playerId);
+  }
+  function getMentorMatches(mentorId: string) {
+    return activeMatches.filter(m => m.mentor?.id === mentorId);
   }
 
   async function createMatch(mentorId: string) {
@@ -132,7 +188,7 @@ export default function AdminPage() {
     setTimeout(() => setCopiedMatchId(null), 2000);
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground text-sm">Loading...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground text-sm">Loading admin...</div>;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -166,6 +222,32 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Delete confirmation overlay */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-sm p-6">
+            <h2 className="text-base font-bold text-navy mb-2">Delete user?</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              This will permanently delete{" "}
+              <span className="font-medium text-navy">
+                {players.find(p => p.id === confirmDeleteId)?.name ?? mentors.find(m => m.id === confirmDeleteId)?.name ?? "this user"}
+              </span>{" "}
+              and log them out immediately. This cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setConfirmDeleteId(null)}
+                className="rounded-md border border-offWhite-300 px-4 py-2 text-sm font-medium text-navy hover:bg-offWhite transition-colors">
+                Cancel
+              </button>
+              <button type="button" onClick={() => deleteUser(confirmDeleteId)} disabled={deletingId === confirmDeleteId}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50">
+                {deletingId === confirmDeleteId ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Match picker overlay */}
       {matchingPlayer && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -181,15 +263,23 @@ export default function AdminPage() {
             </div>
             <p className="text-sm font-medium text-navy/60 mb-3">Select a mentor:</p>
             <div className="space-y-2 max-h-72 overflow-y-auto">
-              {approvedUnmatchedMentors.map(m => (
-                <button key={m.id} type="button" onClick={() => createMatch(m.id)} disabled={creating}
-                  className="w-full text-left rounded-lg border border-offWhite-300 p-3 hover:border-orange-400 hover:bg-orange-50 transition-colors">
-                  <p className="text-sm font-medium text-navy">{m.name}</p>
-                  <p className="text-xs text-muted-foreground">{m.sport ?? "—"} {m.mentor_profiles?.college ? `· ${m.mentor_profiles.college}` : ""}</p>
-                </button>
-              ))}
-              {approvedUnmatchedMentors.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">No approved available mentors</p>
+              {approvedMentors.map(m => {
+                const playerCount = getMentorMatches(m.id).length;
+                return (
+                  <button key={m.id} type="button" onClick={() => createMatch(m.id)} disabled={creating}
+                    className="w-full text-left rounded-lg border border-offWhite-300 p-3 hover:border-orange-400 hover:bg-orange-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-navy">{m.name}</p>
+                      {playerCount > 0 && (
+                        <span className="text-xs text-muted-foreground">{playerCount} player{playerCount !== 1 ? "s" : ""}</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{m.sport ?? "—"} {m.mentor_profiles?.college ? `· ${m.mentor_profiles.college}` : ""}</p>
+                  </button>
+                );
+              })}
+              {approvedMentors.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No approved mentors</p>
               )}
             </div>
             {createMsg && <p className="mt-3 text-sm text-red-500">{createMsg}</p>}
@@ -256,7 +346,7 @@ export default function AdminPage() {
                         <div className="flex gap-2 pt-1">
                           <button type="button" onClick={() => reviewArticle(article.id, "published")}
                             disabled={articleAction === article.id}
-                            className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                            className="flex items-center gap-1.5 rounded-md bg-sage-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-sage-700 transition-colors disabled:opacity-50">
                             <CheckCircle className="h-3.5 w-3.5" /> Publish
                           </button>
                           <button type="button" onClick={() => reviewArticle(article.id, "rejected")}
@@ -278,15 +368,31 @@ export default function AdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Players */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-4">Players ({players.length})</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-navy/40">Players ({filteredPlayers.length}/{players.length})</p>
+          </div>
+          {/* Player filters */}
+          <div className="flex gap-2 mb-4">
+            <select value={playerSportFilter} onChange={e => setPlayerSportFilter(e.target.value)}
+              className="flex-1 rounded-md border border-offWhite-300 bg-white px-2.5 py-1.5 text-xs text-navy focus:outline-none focus:ring-1 focus:ring-navy">
+              <option value="all">All sports</option>
+              {playerSports.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <select value={playerMatchFilter} onChange={e => setPlayerMatchFilter(e.target.value as MatchFilter)}
+              className="flex-1 rounded-md border border-offWhite-300 bg-white px-2.5 py-1.5 text-xs text-navy focus:outline-none focus:ring-1 focus:ring-navy">
+              <option value="all">All statuses</option>
+              <option value="matched">Matched</option>
+              <option value="unmatched">Waiting</option>
+            </select>
+          </div>
           <div className="space-y-3">
-            {players.map(p => {
-              const match = getMatchFor(p.id);
+            {filteredPlayers.map(p => {
+              const match = getPlayerMatch(p.id);
               const isExpanded = expandedPlayerId === p.id;
               const pp = p.player_profiles;
+              const email = emails[p.id];
               return (
                 <div key={p.id} className={`rounded-lg border transition-colors ${match ? "border-offWhite-300" : "border-orange-200"}`}>
-                  {/* Header row */}
                   <button type="button" onClick={() => togglePlayer(p.id)} className="w-full flex items-center justify-between p-4 text-left">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-navy/10 text-navy text-sm font-bold shrink-0">
@@ -306,9 +412,15 @@ export default function AdminPage() {
                     </div>
                   </button>
 
-                  {/* Expanded */}
                   {isExpanded && (
                     <div className="border-t border-offWhite-300 px-4 pb-4 pt-3 space-y-3">
+                      {/* Email */}
+                      {email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <a href={`mailto:${email}`} className="text-xs text-navy/70 hover:text-navy underline underline-offset-2 transition-colors truncate">{email}</a>
+                        </div>
+                      )}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         {pp?.age && <div><p className="text-xs text-muted-foreground">Age</p><p className="font-medium text-navy">{pp.age}</p></div>}
                         {pp?.level && <div><p className="text-xs text-muted-foreground">Level</p><p className="font-medium text-navy">{pp.level}</p></div>}
@@ -357,26 +469,49 @@ export default function AdminPage() {
                           </button>
                         )}
                       </div>
-                      <p className="text-[10px] text-muted-foreground">Joined {fmt(p.created_at)}</p>
+                      <div className="flex items-center justify-between pt-1">
+                        <p className="text-[10px] text-muted-foreground">Joined {fmt(p.created_at)}</p>
+                        <button type="button" onClick={() => setConfirmDeleteId(p.id)}
+                          className="flex items-center gap-1 rounded-md border border-red-200 px-2 py-1 text-xs text-red-500 hover:bg-red-50 transition-colors">
+                          <Trash2 className="h-3 w-3" /> Delete user
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               );
             })}
-            {players.length === 0 && <p className="text-sm text-muted-foreground">No players yet.</p>}
+            {filteredPlayers.length === 0 && <p className="text-sm text-muted-foreground">No players match filters.</p>}
           </div>
         </div>
 
         {/* Mentors */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-4">Mentors ({mentors.length})</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-navy/40">Mentors ({filteredMentors.length}/{mentors.length})</p>
+          </div>
+          {/* Mentor filters */}
+          <div className="flex gap-2 mb-4">
+            <select value={mentorSportFilter} onChange={e => setMentorSportFilter(e.target.value)}
+              className="flex-1 rounded-md border border-offWhite-300 bg-white px-2.5 py-1.5 text-xs text-navy focus:outline-none focus:ring-1 focus:ring-navy">
+              <option value="all">All sports</option>
+              {mentorSports.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <select value={mentorMatchFilter} onChange={e => setMentorMatchFilter(e.target.value as MatchFilter)}
+              className="flex-1 rounded-md border border-offWhite-300 bg-white px-2.5 py-1.5 text-xs text-navy focus:outline-none focus:ring-1 focus:ring-navy">
+              <option value="all">All statuses</option>
+              <option value="matched">Active (matched)</option>
+              <option value="unmatched">Available / Pending</option>
+            </select>
+          </div>
           <div className="space-y-3">
-            {mentors.map(m => {
-              const match = getMatchFor(m.id);
+            {filteredMentors.map(m => {
+              const mentorMatches = getMentorMatches(m.id);
               const isExpanded = expandedMentorId === m.id;
               const mp = m.mentor_profiles;
+              const email = emails[m.id];
               return (
-                <div key={m.id} className={`rounded-lg border transition-colors ${!mp?.approved ? "border-amber-200" : match ? "border-offWhite-300" : "border-emerald-200"}`}>
+                <div key={m.id} className={`rounded-lg border transition-colors ${!mp?.approved ? "border-gold-300" : mentorMatches.length > 0 ? "border-offWhite-300" : "border-sage-200"}`}>
                   <button type="button" onClick={() => toggleMentor(m.id)} className="w-full flex items-center justify-between p-4 text-left">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-orange-700 text-sm font-bold shrink-0">
@@ -389,10 +524,10 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
                       {!mp?.approved
-                        ? <Badge variant="outline" className="text-xs border-amber-300 text-amber-600">Pending</Badge>
-                        : match
-                          ? <Badge variant="default" className="text-xs">Active</Badge>
-                          : <Badge variant="outline" className="text-xs border-emerald-300 text-emerald-600">Available</Badge>
+                        ? <Badge variant="outline" className="text-xs border-gold-400 text-gold-600">Pending</Badge>
+                        : mentorMatches.length > 0
+                          ? <Badge variant="default" className="text-xs">{mentorMatches.length} player{mentorMatches.length !== 1 ? "s" : ""}</Badge>
+                          : <Badge variant="outline" className="text-xs border-sage-300 text-sage-600">Available</Badge>
                       }
                       {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                     </div>
@@ -400,6 +535,13 @@ export default function AdminPage() {
 
                   {isExpanded && (
                     <div className="border-t border-offWhite-300 px-4 pb-4 pt-3 space-y-3">
+                      {/* Email */}
+                      {email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <a href={`mailto:${email}`} className="text-xs text-navy/70 hover:text-navy underline underline-offset-2 transition-colors truncate">{email}</a>
+                        </div>
+                      )}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         {mp?.years_played && <div><p className="text-xs text-muted-foreground">Years played</p><p className="font-medium text-navy">{mp.years_played}</p></div>}
                         {mp?.availability && <div><p className="text-xs text-muted-foreground">Availability</p><p className="font-medium text-navy">{mp.availability}</p></div>}
@@ -416,25 +558,45 @@ export default function AdminPage() {
                           <p className="text-sm text-navy">{mp.why}</p>
                         </div>
                       )}
-                      <div className="pt-2 flex items-center gap-2">
+                      <div className="pt-2 space-y-2">
                         {!mp?.approved ? (
                           <button type="button" onClick={() => approveMentor(m.id)}
-                            className="flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 transition-colors">
+                            className="flex items-center gap-1.5 rounded-md bg-sage px-3 py-1.5 text-xs font-medium text-white hover:bg-sage-600 transition-colors">
                             <CheckCircle className="h-3.5 w-3.5" /> Approve Mentor
                           </button>
-                        ) : match ? (
-                          <p className="text-xs text-muted-foreground">Matched with <span className="font-medium text-navy">{match.player?.name}</span> since {fmt(match.created_at)}</p>
+                        ) : mentorMatches.length > 0 ? (
+                          <div className="space-y-1.5">
+                            <p className="text-xs text-muted-foreground font-medium">Current players</p>
+                            {mentorMatches.map(match => (
+                              <div key={match.id} className="flex items-center justify-between rounded-md bg-offWhite px-3 py-2">
+                                <div>
+                                  <p className="text-xs font-medium text-navy">{match.player?.name}</p>
+                                  <p className="text-[10px] text-muted-foreground">since {fmt(match.created_at)}</p>
+                                </div>
+                                <button type="button" onClick={() => endMatch(match.id)}
+                                  className="flex items-center gap-1 rounded-md border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50 transition-colors">
+                                  <X className="h-3 w-3" /> End
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                         ) : (
-                          <p className="text-xs text-emerald-600 font-medium">Available to be matched</p>
+                          <p className="text-xs text-sage-600 font-medium">Available to be matched</p>
                         )}
                       </div>
-                      <p className="text-[10px] text-muted-foreground">Joined {fmt(m.created_at)}</p>
+                      <div className="flex items-center justify-between pt-1">
+                        <p className="text-[10px] text-muted-foreground">Joined {fmt(m.created_at)}</p>
+                        <button type="button" onClick={() => setConfirmDeleteId(m.id)}
+                          className="flex items-center gap-1 rounded-md border border-red-200 px-2 py-1 text-xs text-red-500 hover:bg-red-50 transition-colors">
+                          <Trash2 className="h-3 w-3" /> Delete user
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               );
             })}
-            {mentors.length === 0 && <p className="text-sm text-muted-foreground">No mentors yet.</p>}
+            {filteredMentors.length === 0 && <p className="text-sm text-muted-foreground">No mentors match filters.</p>}
           </div>
         </div>
       </div>

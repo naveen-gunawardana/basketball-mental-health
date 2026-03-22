@@ -27,9 +27,9 @@ const formatIcons: Record<ResourceFormat, typeof BookOpen> = {
 const categoryColors: Record<string, string> = {
   Confidence: "bg-blue-100 text-blue-700",
   "Coach Communication": "bg-purple-100 text-purple-700",
-  "Playing Time": "bg-amber-100 text-amber-700",
+  "Playing Time": "bg-gold-100 text-gold-700",
   "Pressure & Anxiety": "bg-red-100 text-red-700",
-  "Goal Setting": "bg-emerald-100 text-emerald-700",
+  "Goal Setting": "bg-sage-100 text-sage-700",
   "Returning from Injury": "bg-cyan-100 text-cyan-700",
 };
 
@@ -117,7 +117,7 @@ export default function ResourcesPage() {
               key={sport}
               onClick={() => setSelectedSport(selectedSport === sport ? null : sport)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                selectedSport === sport ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground hover:bg-emerald-50"
+                selectedSport === sport ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"
               }`}
             >
               {sport}

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mentality Sports — Brand System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Primary */
+      --navy:          #14213D;
+      --navy-50:       #E8EFF8;
+      --navy-100:      #C8D8EE;
+      --navy-200:      #97B4DC;
+      --navy-300:      #6690C8;
+      --navy-400:      #3D6BAE;
+      --navy-500:      #1E4080;
+      --navy-600:      #162F5E;
+      --navy-700:      #122649;
+      --navy-800:      #0E1C38;
+      --navy-900:      #091327;
+
+      /* Secondary */
+      --orange:        #C4633A;
+      --orange-50:     #FBF0EB;
+      --orange-100:    #F6E0D6;
+      --orange-200:    #EDC2AD;
+      --orange-300:    #E4A384;
+      --orange-400:    #DB845B;
+      --orange-600:    #9E4F2E;
+      --orange-700:    #773B22;
+      --orange-800:    #4F2716;
+      --orange-900:    #28130B;
+
+      --sage:          #6B957F;
+      --sage-50:       #F1F5F3;
+      --sage-100:      #E3EBE7;
+      --sage-200:      #C7D7CF;
+      --sage-300:      #ABC3B7;
+      --sage-400:      #8FAF9F;
+      --sage-600:      #567766;
+      --sage-700:      #40594C;
+      --sage-800:      #2B3C33;
+      --sage-900:      #151E19;
+
+      --parchment:     #F6F3EC;
+      --parchment-50:  #FDFCF9;
+      --parchment-100: #FAF8F4;
+      --parchment-300: #EDE8DB;
+      --parchment-400: #E3DCCA;
+
+      --gold:          #C9973A;
+      --gold-light:    #F0DFB8;
+      --gold-dark:     #8F6A20;
+
+      /* Tertiary */
+      --sky-navy:  #97B4DC;
+      --peach:     #EDC2AD;
+      --mint-sage: #C7D7CF;
+      --charcoal:  #2C3140;
+      --warm-gray: #8E8E82;
+      --blush:     #F0EAE2;
+
+      --f-display: 'Outfit', system-ui, sans-serif;
+      --f-body:    'Inter', system-ui, sans-serif;
+      --f-mono:    'SFMono-Regular', 'Cascadia Mono', 'Consolas', monospace;
+    }
+
+    body {
+      background: var(--parchment);
+      font-family: var(--f-body);
+      color: var(--navy);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ── */
+    .page { max-width: 1120px; margin: 0 auto; padding: 80px 40px 120px; }
+    .section { margin-top: 80px; }
+    .section + .section { border-top: 1px solid #14213D12; padding-top: 80px; }
+    .section-label {
+      font-family: var(--f-body);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #14213D55;
+      margin-bottom: 28px;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .grid-10 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+    .flex { display: flex; }
+    .gap-8 { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .gap-16 { gap: 16px; }
+    .gap-24 { gap: 24px; }
+    .gap-32 { gap: 32px; }
+    .col { flex-direction: column; }
+    .wrap { flex-wrap: wrap; }
+    .mt-8  { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-20 { margin-top: 20px; }
+    .mt-24 { margin-top: 24px; }
+    .mt-32 { margin-top: 32px; }
+    .mt-48 { margin-top: 48px; }
+
+    /* ── Typography ── */
+    .label-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--orange);
+    }
+    .mono { font-family: var(--f-mono); }
+
+    /* ── Swatch atoms ── */
+    .swatch-xl {
+      height: 220px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 22px;
+    }
+    .swatch-md {
+      height: 140px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px;
+    }
+    .swatch-sm {
+      height: 96px;
+      border-radius: 12px;
+    }
+    .swatch-strip {
+      height: 52px;
+      border-radius: 8px;
+    }
+    .swatch-name { font-size: 17px; font-weight: 700; margin-top: 3px; }
+    .swatch-role { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; }
+    .swatch-hex  { font-family: var(--f-mono); font-size: 11px; margin-top: 3px; opacity: 0.45; }
+    .swatch-meta { margin-top: 10px; }
+    .swatch-meta p { font-size: 12px; font-weight: 600; color: var(--navy); }
+    .swatch-meta span { font-family: var(--f-mono); font-size: 10px; color: #14213D50; }
+    .scale-stop { font-family: var(--f-mono); font-size: 9px; color: #14213D45; margin-top: 4px; }
+
+    /* ── Combo cards ── */
+    .combo-card {
+      border-radius: 18px;
+      padding: 28px;
+    }
+    .combo-tag   { font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; opacity: 0.55; }
+    .combo-title { font-size: 20px; font-weight: 700; margin-top: 6px; line-height: 1.25; }
+    .combo-body  { font-size: 13px; line-height: 1.65; margin-top: 8px; opacity: 0.6; }
+    .combo-bars  { display: flex; gap: 6px; align-items: center; margin-top: 16px; }
+    .bar { height: 5px; border-radius: 3px; }
+
+    /* ── Type cards ── */
+    .type-card {
+      border-radius: 20px;
+      padding: 36px 40px;
+    }
+    .type-card + .type-card { margin-top: 16px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-block;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 22px;
+      font-family: var(--f-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: default;
+      line-height: 1;
+    }
+    .btn-tag {
+      display: inline-block;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--f-body);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ── Logo mark ── */
+    .logomark {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logomark svg { width: 22px; height: 22px; stroke: #fff; }
+    .logomark.lg { width: 80px; height: 80px; }
+    .logomark.lg svg { width: 36px; height: 36px; }
+    .logomark.sm { width: 32px; height: 32px; }
+    .logomark.sm svg { width: 15px; height: 15px; }
+    .logotype { font-family: var(--f-display); font-weight: 700; letter-spacing: -0.01em; }
+
+    @media (max-width: 700px) {
+      .grid-4, .grid-6, .grid-10 { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .page { padding: 48px 20px 80px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HEADER ══ -->
+  <div class="flex gap-24" style="align-items:flex-start; flex-wrap:wrap;">
+    <div style="flex:1; min-width:280px;">
+      <p class="label-tag">Brand System · 2026</p>
+      <h1 style="font-family:var(--f-display); font-size:56px; font-weight:800; color:var(--navy); line-height:1.05; margin-top:10px;">
+        Mentality Sports
+      </h1>
+      <p style="font-size:16px; color:#14213D70; line-height:1.7; margin-top:14px; max-width:480px;">
+        Mentorship, resources, and community for the mental side of sport. Connects athletes with mentors who've lived it — real relationships built on mental resilience and honest guidance.
+      </p>
+      <p style="font-size:13px; color:#14213D40; margin-top:20px; font-family:var(--f-mono);">
+        hello@mentalitysports.com
+      </p>
+    </div>
+    <div>
+      <div style="background:var(--navy); border-radius:24px; padding:32px 36px;">
+        <div class="flex gap-12" style="align-items:center; margin-bottom:20px;">
+          <div class="logomark lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+            </svg>
+          </div>
+          <div>
+            <p class="logotype" style="font-size:24px; color:#fff;">Mentality Sports</p>
+            <p style="font-size:12px; color:#ffffff50; margin-top:2px;">Athlete Mental Performance</p>
+          </div>
+        </div>
+        <div style="border-top:1px solid #ffffff12; padding-top:16px;">
+          <p style="font-size:12px; color:#ffffff40; line-height:1.6;">
+            Currently in pilot · Open to athletes,<br/>coaches &amp; mentors across all sports.
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-12 mt-12" style="align-items:center;">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+          </svg>
+        </div>
+        <p class="logotype" style="font-size:20px; color:var(--navy);">Mentality Sports</p>
+      </div>
+      <div class="flex gap-8 mt-8" style="align-items:center;">
+        <div class="logomark sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+          </svg>
+        </div>
+        <p class="logotype" style="font-size:14px; color:var(--navy);">Mentality Sports</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PRIMARY COLOR ══ -->
+  <div class="section">
+    <p class="section-label">Primary Color</p>
+    <div class="flex gap-24" style="align-items:stretch; flex-wrap:wrap;">
+
+      <div style="flex:0 0 280px;">
+        <div class="swatch-xl" style="background:var(--navy);">
+          <p class="swatch-role" style="color:#fff;">Primary</p>
+          <p class="swatch-name" style="color:#fff;">Navy</p>
+          <p class="swatch-hex" style="color:#fff;">#14213D</p>
+        </div>
+        <div class="swatch-meta mt-8">
+          <p>The anchor of everything.</p>
+          <span>Headers · Nav · Body text · CTA backgrounds · Dark surfaces</span>
+        </div>
+      </div>
+
+      <div style="flex:1; min-width:300px;">
+        <p style="font-size:11px; font-weight:600; color:#14213D50; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;">Navy Scale</p>
+        <div class="grid-10">
+          <div><div class="swatch-strip" style="background:var(--navy-50); border:1px solid #14213D14;"></div><p class="scale-stop">50</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-100);"></div><p class="scale-stop">100</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-200);"></div><p class="scale-stop">200</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-300);"></div><p class="scale-stop">300</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-400);"></div><p class="scale-stop">400</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-500);"></div><p class="scale-stop">500</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-600);"></div><p class="scale-stop">600</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-700);"></div><p class="scale-stop">700</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-800);"></div><p class="scale-stop">800</p></div>
+          <div><div class="swatch-strip" style="background:var(--navy-900);"></div><p class="scale-stop">900</p></div>
+        </div>
+        <div class="mt-24" style="background:var(--navy); border-radius:16px; padding:24px 28px;">
+          <p style="color:#ffffff60; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;">When to use Navy</p>
+          <ul style="color:#ffffffcc; font-size:13px; line-height:1.8; margin-top:10px; padding-left:16px;">
+            <li>Navigation bar background</li>
+            <li>Primary CTA buttons</li>
+            <li>Page &amp; section headings</li>
+            <li>Card text on light backgrounds</li>
+            <li>Footer background</li>
+            <li>Dark hero sections &amp; overlays</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECONDARY COLORS ══ -->
+  <div class="section">
+    <p class="section-label">Secondary Colors (4)</p>
+    <div class="grid-4">
+
+      <!-- Terracotta -->
+      <div>
+        <div class="swatch-md" style="background:var(--orange);">
+          <p class="swatch-role" style="color:#fff;">Secondary 1</p>
+          <p class="swatch-name" style="color:#fff;">Terracotta</p>
+          <p class="swatch-hex" style="color:#fff;">#C4633A</p>
+        </div>
+        <div class="swatch-meta mt-8">
+          <p>Energy / CTA</p>
+          <span>Buttons · Labels · Highlights · Notification dots</span>
+        </div>
+        <div class="grid-5 mt-12">
+          <div><div class="swatch-strip" style="background:var(--orange-50); border:1px solid #14213D10;"></div><p class="scale-stop">50</p></div>
+          <div><div class="swatch-strip" style="background:var(--orange-200);"></div><p class="scale-stop">200</p></div>
+          <div><div class="swatch-strip" style="background:var(--orange);"></div><p class="scale-stop">500</p></div>
+          <div><div class="swatch-strip" style="background:var(--orange-700);"></div><p class="scale-stop">700</p></div>
+          <div><div class="swatch-strip" style="background:var(--orange-900);"></div><p class="scale-stop">900</p></div>
+        </div>
+      </div>
+
+      <!-- Sage -->
+      <div>
+        <div class="swatch-md" style="background:var(--sage);">
+          <p class="swatch-role" style="color:#fff;">Secondary 2</p>
+          <p class="swatch-name" style="color:#fff;">Sage</p>
+          <p class="swatch-hex" style="color:#fff;">#6B957F</p>
+        </div>
+        <div class="swatch-meta mt-8">
+          <p>Wellness / Success</p>
+          <span>Wellness tags · Success states · Soft dividers</span>
+        </div>
+        <div class="grid-5 mt-12">
+          <div><div class="swatch-strip" style="background:var(--sage-50); border:1px solid #14213D10;"></div><p class="scale-stop">50</p></div>
+          <div><div class="swatch-strip" style="background:var(--sage-200);"></div><p class="scale-stop">200</p></div>
+          <div><div class="swatch-strip" style="background:var(--sage);"></div><p class="scale-stop">500</p></div>
+          <div><div class="swatch-strip" style="background:var(--sage-700);"></div><p class="scale-stop">700</p></div>
+          <div><div class="swatch-strip" style="background:var(--sage-900);"></div><p class="scale-stop">900</p></div>
+        </div>
+      </div>
+
+      <!-- Parchment -->
+      <div>
+        <div class="swatch-md" style="background:var(--parchment); border:1px solid #14213D12;">
+          <p class="swatch-role" style="color:var(--navy);">Secondary 3</p>
+          <p class="swatch-name" style="color:var(--navy);">Parchment</p>
+          <p class="swatch-hex" style="color:var(--navy);">#F6F3EC</p>
+        </div>
+        <div class="swatch-meta mt-8">
+          <p>Background / Canvas</p>
+          <span>Page backgrounds · Card fills · Warm neutral base</span>
+        </div>
+        <div class="grid-5 mt-12">
+          <div><div class="swatch-strip" style="background:var(--parchment-50); border:1px solid #14213D10;"></div><p class="scale-stop">50</p></div>
+          <div><div class="swatch-strip" style="background:var(--parchment-100); border:1px solid #14213D08;"></div><p class="scale-stop">100</p></div>
+          <div><div class="swatch-strip" style="background:var(--parchment); border:1px solid #14213D10;"></div><p class="scale-stop">200</p></div>
+          <div><div class="swatch-strip" style="background:var(--parchment-300);"></div><p class="scale-stop">300</p></div>
+          <div><div class="swatch-strip" style="background:var(--parchment-400);"></div><p class="scale-stop">400</p></div>
+        </div>
+      </div>
+
+      <!-- Gold -->
+      <div>
+        <div class="swatch-md" style="background:var(--gold);">
+          <p class="swatch-role" style="color:#fff;">Secondary 4</p>
+          <p class="swatch-name" style="color:#fff;">Gold</p>
+          <p class="swatch-hex" style="color:#fff;">#C9973A</p>
+        </div>
+        <div class="swatch-meta mt-8">
+          <p>Achievement / Badge</p>
+          <span>Milestone badges · "You earned it" moments · Stars</span>
+        </div>
+        <div class="grid-5 mt-12">
+          <div><div class="swatch-strip" style="background:var(--gold-light); border:1px solid #14213D10;"></div><p class="scale-stop">light</p></div>
+          <div><div class="swatch-strip" style="background:#E0B86A;"></div><p class="scale-stop">mid</p></div>
+          <div><div class="swatch-strip" style="background:var(--gold);"></div><p class="scale-stop">base</p></div>
+          <div><div class="swatch-strip" style="background:var(--gold-dark);"></div><p class="scale-stop">dark</p></div>
+          <div><div class="swatch-strip" style="background:#5A4010;"></div><p class="scale-stop">deep</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TERTIARY COLORS ══ -->
+  <div class="section">
+    <p class="section-label">Tertiary Colors (6)</p>
+    <div class="grid-6">
+
+      <div>
+        <div class="swatch-sm" style="background:var(--sky-navy); border:1px solid #14213D10;"></div>
+        <div class="swatch-meta mt-8">
+          <p>Sky Navy</p>
+          <span style="display:block;">#97B4DC</span>
+          <span>Soft backgrounds, borders, icon fills on dark</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="swatch-sm" style="background:var(--peach);"></div>
+        <div class="swatch-meta mt-8">
+          <p>Peach</p>
+          <span style="display:block;">#EDC2AD</span>
+          <span>Hover fills, very soft dividers, tinted panels</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="swatch-sm" style="background:var(--mint-sage); border:1px solid #14213D10;"></div>
+        <div class="swatch-meta mt-8">
+          <p>Mint Sage</p>
+          <span style="display:block;">#C7D7CF</span>
+          <span>Tags, chips, subtle wellness indicators</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="swatch-sm" style="background:var(--charcoal);"></div>
+        <div class="swatch-meta mt-8">
+          <p>Charcoal</p>
+          <span style="display:block;">#2C3140</span>
+          <span>Alt body text, dark card surfaces</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="swatch-sm" style="background:var(--warm-gray);"></div>
+        <div class="swatch-meta mt-8">
+          <p>Warm Gray</p>
+          <span style="display:block;">#8E8E82</span>
+          <span>Muted text, placeholders, disabled states</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="swatch-sm" style="background:var(--blush); border:1px solid #14213D10;"></div>
+        <div class="swatch-meta mt-8">
+          <p>Blush</p>
+          <span style="display:block;">#F0EAE2</span>
+          <span>Alternate card background, soft panel fills</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TEXT + BACKGROUND COMBOS ══ -->
+  <div class="section">
+    <p class="section-label">Text on Background Combinations</p>
+    <div class="grid-2">
+
+      <div class="combo-card" style="background:var(--navy);">
+        <p class="combo-tag" style="color:#fff;">Primary surfaces · Nav · Footer</p>
+        <p class="combo-title" style="color:#fff;">Navy + Parchment</p>
+        <p class="combo-body" style="color:#fff;">Body copy reads cleanly on navy. Use for navigation, footers, and primary dark sections where authority and trust matter.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:#F6F3EC; opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:#F6F3EC; opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:#F6F3EC; opacity:0.2;"></div>
+        </div>
+      </div>
+
+      <div class="combo-card" style="background:var(--parchment); border:1px solid #14213D12;">
+        <p class="combo-tag" style="color:var(--navy);">Default page · Cards · Content</p>
+        <p class="combo-title" style="color:var(--navy);">Parchment + Navy</p>
+        <p class="combo-body" style="color:var(--navy);">The everyday workhorse. Warm background with dark navy text — athletic without being sterile. Every page starts here.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:var(--navy); opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:var(--navy); opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:var(--navy); opacity:0.2;"></div>
+        </div>
+      </div>
+
+      <div class="combo-card" style="background:var(--orange);">
+        <p class="combo-tag" style="color:#fff;">CTA buttons · Alerts · Badges</p>
+        <p class="combo-title" style="color:#fff;">Terracotta + White</p>
+        <p class="combo-body" style="color:#fff;">High energy. Reserve for primary actions — "Get Started", "Find a Mentor", notification dots. Never use for large text blocks.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:#fff; opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:#fff; opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:#fff; opacity:0.2;"></div>
+        </div>
+      </div>
+
+      <div class="combo-card" style="background:var(--sage);">
+        <p class="combo-tag" style="color:#fff;">Wellness tags · Success · Progress</p>
+        <p class="combo-title" style="color:#fff;">Sage + White</p>
+        <p class="combo-body" style="color:#fff;">Calm and grounded. Use for mental health indicators, session complete states, wellness category labels.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:#fff; opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:#fff; opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:#fff; opacity:0.2;"></div>
+        </div>
+      </div>
+
+      <div class="combo-card" style="background:var(--gold);">
+        <p class="combo-tag" style="color:var(--navy);">Achievements · Milestones · Stars</p>
+        <p class="combo-title" style="color:var(--navy);">Gold + Navy</p>
+        <p class="combo-body" style="color:var(--navy);">For earned moments. Milestone badges, streak counts, rating stars. Feels like a trophy — use it sparingly so it lands.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:var(--navy); opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:var(--navy); opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:var(--navy); opacity:0.2;"></div>
+        </div>
+      </div>
+
+      <div class="combo-card" style="background:var(--navy-800);">
+        <p class="combo-tag" style="color:var(--sky-navy);">Hero dark · Dashboard · Stats</p>
+        <p class="combo-title" style="color:var(--sky-navy);">Dark Navy + Sky</p>
+        <p class="combo-body" style="color:var(--sky-navy);">Deep and focused. Use for dark hero sections, data-heavy dashboard panels, and stat displays on dark backgrounds.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:var(--sky-navy); opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:var(--sky-navy); opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:var(--sky-navy); opacity:0.2;"></div>
+        </div>
+      </div>
+
+      <div class="combo-card" style="background:var(--blush); border:1px solid #14213D10;">
+        <p class="combo-tag" style="color:var(--charcoal);">Soft cards · Profile panels · Forms</p>
+        <p class="combo-title" style="color:var(--charcoal);">Blush + Charcoal</p>
+        <p class="combo-body" style="color:var(--charcoal);">Warm and approachable. Use for secondary cards, form containers, and profile sections where parchment would blend too much.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:var(--charcoal); opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:var(--charcoal); opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:var(--charcoal); opacity:0.2;"></div>
+        </div>
+      </div>
+
+      <div class="combo-card" style="background:var(--charcoal);">
+        <p class="combo-tag" style="color:var(--mint-sage);">Dark cards · Mentor profiles · Night</p>
+        <p class="combo-title" style="color:var(--mint-sage);">Charcoal + Mint Sage</p>
+        <p class="combo-body" style="color:var(--mint-sage);">Refined and grounded. Use for dark card surfaces, mentor profile cards in dark context, or any secondary dark surface.</p>
+        <div class="combo-bars">
+          <div class="bar" style="width:52px; background:var(--mint-sage); opacity:0.9;"></div>
+          <div class="bar" style="width:36px; background:var(--mint-sage); opacity:0.4;"></div>
+          <div class="bar" style="width:24px; background:var(--mint-sage); opacity:0.2;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TYPOGRAPHY ══ -->
+  <div class="section">
+    <p class="section-label">Typography</p>
+
+    <!-- Outfit — Display -->
+    <div class="type-card" style="background:var(--navy);">
+      <p class="label-tag">Outfit — Display &amp; Headings &nbsp;·&nbsp; font-display</p>
+      <p style="font-family:var(--f-display); font-size:52px; font-weight:800; color:#fff; line-height:1.05; margin-top:12px;">
+        The mental game<br/>is the whole game.
+      </p>
+      <p style="font-family:var(--f-mono); font-size:12px; color:#ffffff45; margin-top:16px;">
+        Outfit · 800 weight · 52px · Display / hero
+      </p>
+      <div class="flex gap-12 mt-24 wrap">
+        <div style="background:#ffffff0D; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-display); font-weight:800; font-size:40px; color:#fff; line-height:1;">Display</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#ffffff40; margin-top:6px;">800 · 40px</p>
+        </div>
+        <div style="background:#ffffff0D; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-display); font-weight:700; font-size:30px; color:#fff; line-height:1;">Heading 1</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#ffffff40; margin-top:6px;">700 · 30px</p>
+        </div>
+        <div style="background:#ffffff0D; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-display); font-weight:700; font-size:22px; color:#fff; line-height:1;">Heading 2</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#ffffff40; margin-top:6px;">700 · 22px</p>
+        </div>
+        <div style="background:#ffffff0D; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-display); font-weight:600; font-size:18px; color:#fff; line-height:1;">Heading 3</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#ffffff40; margin-top:6px;">600 · 18px</p>
+        </div>
+        <div style="background:#ffffff0D; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-display); font-weight:500; font-size:14px; color:#fff; line-height:1;">Subheading</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#ffffff40; margin-top:6px;">500 · 14px</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inter — Body -->
+    <div class="type-card mt-16" style="background:var(--parchment); border:1px solid #14213D12;">
+      <p class="label-tag">Inter — Body &amp; UI &nbsp;·&nbsp; font-body</p>
+      <p style="font-family:var(--f-body); font-size:18px; font-weight:400; color:var(--navy); line-height:1.75; margin-top:12px; max-width:640px;">
+        We built this for athletes who know that what happens between the ears is just as important as what happens on the court. Mental performance is trainable — and we're here to help you train it. Connect with mentors who've been through the pressure, the slumps, the doubt.
+      </p>
+      <p style="font-family:var(--f-mono); font-size:12px; color:#14213D40; margin-top:16px;">
+        Inter · 400 weight · 18px · Body / long-form
+      </p>
+      <div class="flex gap-12 mt-24 wrap">
+        <div style="background:#14213D08; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-body); font-weight:700; font-size:16px; color:var(--navy);">Bold UI</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#14213D40; margin-top:6px;">700 · 16px</p>
+        </div>
+        <div style="background:#14213D08; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-body); font-weight:600; font-size:15px; color:var(--navy);">Semibold</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#14213D40; margin-top:6px;">600 · 15px</p>
+        </div>
+        <div style="background:#14213D08; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-body); font-weight:500; font-size:15px; color:var(--navy);">Medium</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#14213D40; margin-top:6px;">500 · 15px</p>
+        </div>
+        <div style="background:#14213D08; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-body); font-weight:400; font-size:14px; color:var(--navy);">Regular</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#14213D40; margin-top:6px;">400 · 14px</p>
+        </div>
+        <div style="background:#14213D08; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-body); font-weight:400; font-size:12px; color:var(--navy);">Caption</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#14213D40; margin-top:6px;">400 · 12px</p>
+        </div>
+        <div style="background:#14213D08; border-radius:12px; padding:16px 20px;">
+          <p style="font-family:var(--f-body); font-weight:700; font-size:10px; color:var(--orange); letter-spacing:0.13em; text-transform:uppercase;">Label Tag</p>
+          <p style="font-family:var(--f-mono); font-size:10px; color:#14213D40; margin-top:6px;">700 · 10px · caps</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mixed — real layout sample -->
+    <div class="type-card mt-16" style="background:var(--blush); border:1px solid #14213D10;">
+      <p class="label-tag">Outfit + Inter — Mixed Real Sample</p>
+      <div class="flex gap-32 mt-16 wrap">
+        <div style="flex:1; min-width:260px;">
+          <p style="font-family:var(--f-display); font-size:36px; font-weight:800; color:var(--navy); line-height:1.1;">
+            Build your<br/>mental edge.
+          </p>
+          <p style="font-family:var(--f-body); font-size:15px; font-weight:400; color:#14213D80; line-height:1.7; margin-top:14px; max-width:380px;">
+            Connect with mentors who've been through it — the pressure, the slumps, the doubt. Real talk, real growth, on your schedule.
+          </p>
+          <div class="flex gap-8 mt-20 wrap">
+            <span class="btn" style="background:var(--navy); color:var(--parchment);">Find a Mentor</span>
+            <span class="btn" style="background:var(--orange); color:#fff;">Get Started</span>
+            <span class="btn-tag" style="background:var(--sage); color:#fff;">Wellness</span>
+            <span class="btn-tag" style="background:var(--gold); color:var(--navy);">★ Milestone</span>
+          </div>
+        </div>
+        <div style="flex:1; min-width:220px;">
+          <div style="background:var(--navy); border-radius:16px; padding:20px 24px;">
+            <div class="flex gap-12" style="align-items:center; margin-bottom:16px;">
+              <div style="width:40px; height:40px; border-radius:50%; background:var(--orange); display:flex; align-items:center; justify-content:center;">
+                <span style="color:#fff; font-size:16px; font-weight:700; font-family:var(--f-display);">J</span>
+              </div>
+              <div>
+                <p style="font-family:var(--f-display); font-weight:700; font-size:15px; color:#fff;">Jordan M.</p>
+                <p style="font-family:var(--f-body); font-size:12px; color:#ffffff55;">NCAA D1 · 6 seasons</p>
+              </div>
+            </div>
+            <p style="font-family:var(--f-body); font-size:13px; color:#ffffffbb; line-height:1.6;">
+              "I know what it feels like when the game turns mental. That's where I can help."
+            </p>
+            <div class="flex gap-6 mt-12 wrap">
+              <span class="btn-tag" style="background:#ffffff12; color:var(--mint-sage);">Anxiety</span>
+              <span class="btn-tag" style="background:#ffffff12; color:var(--mint-sage);">Confidence</span>
+              <span class="btn-tag" style="background:#ffffff12; color:var(--mint-sage);">Leadership</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mono — Stats -->
+    <div class="type-card mt-16" style="background:var(--charcoal);">
+      <p style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--mint-sage);">Monospace — Stats &amp; Data</p>
+      <div class="flex gap-32 mt-20 wrap">
+        <div>
+          <p style="font-family:var(--f-mono); font-size:48px; font-weight:700; color:var(--parchment); line-height:1;">94</p>
+          <p style="font-family:var(--f-mono); font-size:11px; color:var(--warm-gray); margin-top:6px;">sessions logged</p>
+        </div>
+        <div>
+          <p style="font-family:var(--f-mono); font-size:48px; font-weight:700; color:var(--parchment); line-height:1;">3.2k</p>
+          <p style="font-family:var(--f-mono); font-size:11px; color:var(--warm-gray); margin-top:6px;">athletes</p>
+        </div>
+        <div>
+          <p style="font-family:var(--f-mono); font-size:48px; font-weight:700; color:var(--parchment); line-height:1;">4.8</p>
+          <p style="font-family:var(--f-mono); font-size:11px; color:var(--warm-gray); margin-top:6px;">avg rating</p>
+        </div>
+        <div>
+          <p style="font-family:var(--f-mono); font-size:48px; font-weight:700; color:var(--parchment); line-height:1;">12wk</p>
+          <p style="font-family:var(--f-mono); font-size:11px; color:var(--warm-gray); margin-top:6px;">avg streak</p>
+        </div>
+      </div>
+      <p style="font-family:var(--f-mono); font-size:12px; color:#8E8E8255; margin-top:28px;">
+        monospace · 700 · 48px · stat displays, session counts, ratings
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ BRAND RATIONALE ══ -->
+  <div class="section">
+    <p class="section-label">Brand Rationale</p>
+    <div class="grid-3">
+      <div style="background:var(--navy); border-radius:18px; padding:28px;">
+        <p style="font-family:var(--f-display); font-weight:700; font-size:18px; color:#fff;">Athletic Roots</p>
+        <p style="font-family:var(--f-body); font-size:13px; color:#ffffff70; line-height:1.65; margin-top:10px;">
+          Navy is the jersey. Orange is the ball. Parchment is the warmth of worn hardwood. Every color traces back to the court — grounded, not borrowed from a generic health app.
+        </p>
+      </div>
+      <div style="background:var(--sage); border-radius:18px; padding:28px;">
+        <p style="font-family:var(--f-display); font-weight:700; font-size:18px; color:#fff;">Mental Wellness</p>
+        <p style="font-family:var(--f-body); font-size:13px; color:#ffffff80; line-height:1.65; margin-top:10px;">
+          Sage brings calm without being clinical. It signals that this platform takes mental health seriously — without looking like a therapy app or a meditation product.
+        </p>
+      </div>
+      <div style="background:var(--gold); border-radius:18px; padding:28px;">
+        <p style="font-family:var(--f-display); font-weight:700; font-size:18px; color:var(--navy);">Achievement</p>
+        <p style="font-family:var(--f-body); font-size:13px; color:var(--navy); opacity:0.7; line-height:1.65; margin-top:10px;">
+          Gold is reserved. When an athlete earns something — a streak, a milestone, a mentor rating — that moment needs weight. Use gold sparingly so it always lands.
+        </p>
+      </div>
+    </div>
+
+    <div style="background:var(--parchment-300); border-radius:18px; padding:28px 32px; margin-top:16px; border:1px solid #14213D10;">
+      <p style="font-family:var(--f-display); font-weight:700; font-size:18px; color:var(--navy);">Font Pairing Logic</p>
+      <div class="flex gap-32 mt-12 wrap">
+        <div style="flex:1; min-width:200px;">
+          <p style="font-family:var(--f-display); font-weight:600; font-size:14px; color:var(--navy);">Outfit — Display</p>
+          <p style="font-size:13px; color:#14213D70; line-height:1.6; margin-top:6px;">Geometric and confident. Wide letter shapes that read large — built for headlines, hero copy, and names. It has personality without being loud.</p>
+        </div>
+        <div style="flex:1; min-width:200px;">
+          <p style="font-family:var(--f-body); font-weight:600; font-size:14px; color:var(--navy);">Inter — Body</p>
+          <p style="font-size:13px; color:#14213D70; line-height:1.6; margin-top:6px;">The workhorse. Neutral and highly legible at every size. Lets Outfit own the stage — Inter supports without competing. Feels modern and trustworthy.</p>
+        </div>
+        <div style="flex:1; min-width:200px;">
+          <p style="font-family:var(--f-mono); font-weight:600; font-size:14px; color:var(--navy);">Mono — Data</p>
+          <p style="font-size:13px; color:#14213D70; line-height:1.6; margin-top:6px;">For numbers and facts. Stats, session counts, timestamps, hex codes. The tabular rhythm signals precision — athletes and their data deserve accuracy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="margin-top:80px; padding-top:32px; border-top:1px solid #14213D14; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div class="flex gap-12" style="align-items:center;">
+      <div class="logomark sm">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+        </svg>
+      </div>
+      <p class="logotype" style="font-size:14px; color:var(--navy);">Mentality Sports</p>
+    </div>
+    <p style="font-family:var(--f-mono); font-size:10px; color:#14213D35;">Brand System · 2026 · Internal use only</p>
+  </div>
+
+</div>
+</body>
+</html>

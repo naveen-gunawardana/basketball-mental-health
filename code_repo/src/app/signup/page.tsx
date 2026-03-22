@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { UserPlus, Users, CheckCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 type Role = "player" | "mentor";
 
@@ -62,6 +63,7 @@ function SignupForm() {
   const [step, setStep] = useState(1);
   const [authError, setAuthError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Shared fields
   const [name, setName] = useState("");
@@ -160,6 +162,9 @@ function SignupForm() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 text-center">
+        <div className="flex justify-center mb-6">
+          <Logo href="/" size="md" variant="dark" />
+        </div>
         <h1 className="text-3xl font-bold text-navy mb-2">Get Involved</h1>
         <p className="text-muted-foreground">
           Tell us who you are and we&apos;ll match you with the right experience.
@@ -370,6 +375,21 @@ function SignupForm() {
                 />
               </div>
 
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-input accent-navy"
+                />
+                <span className="text-sm text-muted-foreground">
+                  I agree to the{" "}
+                  <a href="/terms" target="_blank" className="font-medium text-navy underline underline-offset-2 hover:text-orange-500 transition-colors">Terms of Service</a>
+                  {" "}and{" "}
+                  <a href="/privacy" target="_blank" className="font-medium text-navy underline underline-offset-2 hover:text-orange-500 transition-colors">Privacy Policy</a>
+                </span>
+              </label>
+
               {authError && (
                 <p className="text-sm text-red-500">{authError}</p>
               )}
@@ -377,7 +397,7 @@ function SignupForm() {
                 <Button type="button" variant="outline" onClick={() => setStep(2)}>
                   <ArrowLeft className="h-4 w-4 mr-2" /> Back
                 </Button>
-                <Button type="submit" variant="secondary" disabled={loading}>
+                <Button type="submit" variant="secondary" disabled={loading || !agreedToTerms}>
                   <CheckCircle className="h-4 w-4 mr-2" />
                   {loading ? "Submitting..." : "Submit Application"}
                 </Button>

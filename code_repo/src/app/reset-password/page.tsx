@@ -55,9 +55,9 @@ export default function ResetPasswordPage() {
       </div>
 
       {status === "done" ? (
-        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-5 text-center">
-          <p className="font-medium text-emerald-700">Password updated!</p>
-          <p className="text-sm text-emerald-600 mt-1">Redirecting you to your dashboard...</p>
+        <div className="rounded-lg bg-sage-50 border border-sage-200 p-5 text-center">
+          <p className="font-medium text-sage-700">Password updated!</p>
+          <p className="text-sm text-sage-600 mt-1">Redirecting you to your dashboard...</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">

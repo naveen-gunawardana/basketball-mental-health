@@ -14,9 +14,9 @@ const badgeVariants = cva(
         outline:
           "border-slate-300 text-slate-600",
         success:
-          "border-transparent bg-emerald-100 text-emerald-700",
+          "border-transparent bg-sage-100 text-sage-700",
         warning:
-          "border-transparent bg-amber-100 text-amber-700",
+          "border-transparent bg-gold-100 text-gold-700",
         destructive:
           "border-transparent bg-red-100 text-red-700",
       },

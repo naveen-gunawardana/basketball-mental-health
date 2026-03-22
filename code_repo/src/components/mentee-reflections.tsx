@@ -42,7 +42,7 @@ export function MenteeReflections({ playerId, playerName }: Props) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
-        <Globe className="h-4 w-4 text-emerald-600" />
+        <Globe className="h-4 w-4 text-sage-600" />
         <h3 className="text-sm font-semibold text-navy">
           {playerName.split(" ")[0]}&apos;s Shared Reflections
         </h3>

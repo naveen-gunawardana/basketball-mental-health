@@ -89,7 +89,9 @@ export function ScheduleCallModal({ matchId, currentUserId, otherPersonName, oth
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-navy mb-1.5">Time</label>
+            <label className="block text-sm font-medium text-navy mb-1.5">
+              Time <span className="text-muted-foreground font-normal text-xs">({Intl.DateTimeFormat().resolvedOptions().timeZone})</span>
+            </label>
             <input type="time" value={time} onChange={e => setTime(e.target.value)}
               aria-label="Time" title="Time"
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />

@@ -24,7 +24,7 @@ const whoWeServe = [
     label: "Mentors",
     accent: "bg-orange-500",
     description:
-      "You've been through the mental grind of sport — the pressure, the setbacks, the growth. That lived experience is exactly what a younger athlete needs. 15 minutes a week. We handle everything else.",
+      "You've been through the mental grind of sport — the pressure, the setbacks, the growth. That lived experience is exactly what a younger athlete needs. Schedule calls whenever it works for both of you. We handle everything else.",
     cta: "Apply to Mentor",
     href: "/signup?role=mentor",
   },
@@ -44,7 +44,7 @@ const howItWorks = [
   {
     step: "03",
     title: "Build the Relationship",
-    description: "Weekly check-ins with your mentor — honest conversation about the mental game, sport guidance, and whatever you need.",
+    description: "Schedule calls whenever it works for you — honest conversation about the mental game, sport guidance, and whatever you need.",
   },
   {
     step: "04",
@@ -84,23 +84,30 @@ export default function Home() {
         {/* Layer 3: subtle bottom fade into the stats bar */}
         <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-navy/70 to-transparent" />
 
+
         <div className="relative z-10 mx-auto max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-end">
             {/* Left — headline */}
             <div className="lg:col-span-7">
+              <p className="text-xs text-white/40 mb-5 tracking-wide">Athletes giving back to the next generation of competitors</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-orange-400/80 mb-4">Athlete to Athlete</p>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-white">
-                The mental side
+                1-on-1 mentorship
                 <br />
-                of sport.
+                for high school
                 <br />
-                <em className="not-italic text-orange-400">Finally supported.</em>
+                <em className="not-italic text-orange-400">athletes.</em>
               </h1>
             </div>
 
             {/* Right — two paths */}
             <div className="lg:col-span-5 lg:pb-2">
-              <p className="text-base md:text-lg text-white/65 leading-relaxed mb-8 max-w-sm">
-                Real 1-on-1 relationships between <span className="text-orange-400 font-semibold">athletes</span> and <span className="text-orange-400 font-semibold">mentors</span> who&apos;ve lived it — built on mental resilience, honest sport guidance, and the support no coach is trained to give.
+              <p className="text-sm font-semibold uppercase tracking-widest text-white/30 mb-2">What we do</p>
+              <p className="text-xl md:text-2xl font-semibold text-white leading-snug mb-4">
+                Elevating your confidence, mindset, and competitive edge.
+              </p>
+              <p className="text-sm text-white/55 leading-relaxed mb-8 max-w-sm">
+                Matched with a <span className="text-orange-400 font-semibold">mentor who&apos;s been exactly where you are</span> — you set the time, they show up. Backed by a real library of resources for the mental side of sport.
               </p>
               <p className="text-xs font-semibold uppercase tracking-widest text-white/35 mb-4">Choose your path</p>
               <div className="flex flex-col gap-3">
@@ -116,11 +123,11 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/signup?role=mentor"
-                  className="flex items-center justify-between rounded-sm border border-white/25 bg-white/8 px-6 py-4 font-semibold text-white hover:bg-white/15 transition-colors group"
+                  className="flex items-center justify-between rounded-sm bg-white px-6 py-4 font-semibold text-navy hover:bg-offWhite transition-colors group"
                 >
                   <div>
                     <div className="text-sm font-bold">I want to be a Mentor</div>
-                    <div className="text-xs text-white/55 font-normal mt-0.5">Give back to a student-athlete like you</div>
+                    <div className="text-xs text-navy/50 font-normal mt-0.5">Give back to a student-athlete like you</div>
                   </div>
                   <ArrowRight className="h-4 w-4 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
@@ -149,8 +156,8 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x-0 md:divide-x divide-white/10">
             {[
               { value: "All Sports", label: "Not just one sport" },
-              { value: "15 min", label: "Weekly mentor check-in" },
-              { value: "Free", label: "Always free to join" },
+              { value: "Your time", label: "Meet when it works for you" },
+              { value: "Giving back", label: "Athletes supporting athletes" },
               { value: "1-on-1", label: "Personally matched" },
             ].map((s) => (
               <div key={s.label} className="md:pl-8 first:pl-0">
@@ -272,8 +279,8 @@ export default function Home() {
                     desc: "Articles and guides on confidence, anxiety, identity, and the mental skills that translate to performance",
                   },
                   {
-                    title: "Always Free",
-                    desc: "Mentality Sports is a service — no cost, no upsells, no subscriptions. Just the relationship.",
+                    title: "Built to Give Back",
+                    desc: "Every mentor on Mentality Sports is a current or former athlete choosing to show up for the next generation. No cost, no catch.",
                   },
                 ].map((item) => (
                   <li key={item.title} className="flex items-start gap-4">

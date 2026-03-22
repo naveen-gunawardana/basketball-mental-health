@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { UserPlus, Menu, X, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { Logo } from "@/components/logo";
 
 const publicNavItems = [
   { href: "/", label: "Home" },
@@ -132,16 +133,12 @@ export function Navigation() {
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-offWhite-300 bg-offWhite-50/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-3">
-          <span className="text-base font-semibold tracking-tight text-navy">
-            Mentality Sports
-          </span>
-        </Link>
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-offWhite-300 shadow-sm">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Logo href="/" variant="dark" size="xs" />
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-0.5">
+        {/* Desktop — links + actions on right */}
+        <div className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -153,12 +150,13 @@ export function Navigation() {
                 href={item.href}
                 onClick={() => { if (item.href === "/dashboard") markRead(); }}
                 className={cn(
-                  "relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "text-navy bg-navy/8"
-                    : "text-navy/60 hover:text-navy hover:bg-navy/5"
+                  "relative px-3 py-1.5 text-sm font-medium transition-colors rounded-md",
+                  isActive ? "text-navy" : "text-navy/45 hover:text-navy/80"
                 )}
               >
+                {isActive && (
+                  <span className="absolute bottom-0 left-3 right-3 h-px bg-orange-400 rounded-full" />
+                )}
                 {item.label}
                 {showBadge && (
                   <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">
@@ -169,35 +167,40 @@ export function Navigation() {
             );
           })}
 
-          {user ? (
-            <div className="ml-3 flex items-center gap-2">
+          <div className="ml-3 flex items-center gap-3 pl-3 border-l border-current/10">
+            {user ? (
               <Link
                 href="/profile"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-navy text-white text-xs font-semibold hover:bg-navy/80 transition-colors overflow-hidden"
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold overflow-hidden transition-all ring-2",
+                    "ring-navy/20 hover:ring-navy/40 text-navy"
+                )}
                 title="Your profile"
               >
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
                 ) : (
-                  displayName.charAt(0).toUpperCase()
+                  <span className="w-full h-full flex items-center justify-center bg-navy/10">
+                    {displayName.charAt(0).toUpperCase()}
+                  </span>
                 )}
               </Link>
-            </div>
-          ) : (
-            <Link
-              href="/signup"
-              className="ml-3 inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-5 py-2 text-sm font-medium text-white hover:bg-orange-600 transition-colors"
-            >
-              <UserPlus className="h-3.5 w-3.5" />
-              Sign Up
-            </Link>
-          )}
+            ) : (
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-400 transition-colors"
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                Sign Up
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Mobile toggle */}
         <button
           type="button"
-          className="md:hidden p-2 rounded-md hover:bg-navy/5 text-navy"
+          className="md:hidden p-2 rounded-md transition-colors text-navy/60 hover:text-navy"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -206,7 +209,7 @@ export function Navigation() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-offWhite-300 bg-offWhite-50 px-4 py-3 space-y-0.5">
+        <div className="md:hidden border-t border-offWhite-300 bg-white px-4 py-3 space-y-0.5">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -219,9 +222,7 @@ export function Navigation() {
                 onClick={() => { setMobileOpen(false); if (item.href === "/dashboard") setUnreadCount(0); }}
                 className={cn(
                   "flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive
-                    ? "text-navy bg-navy/8"
-                    : "text-navy/60 hover:text-navy hover:bg-navy/5"
+                  isActive ? "text-navy bg-navy/8" : "text-navy/50 hover:text-navy hover:bg-navy/5"
                 )}
               >
                 {item.label}
@@ -233,12 +234,12 @@ export function Navigation() {
               </Link>
             );
           })}
-          <div className="pt-2">
+          <div className="pt-2 mt-2 border-t border-offWhite-300">
             {user ? (
               <Link
                 href="/profile"
                 onClick={() => setMobileOpen(false)}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-navy/20 px-4 py-2.5 text-sm font-medium text-navy hover:bg-navy/5"
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-navy/20 px-4 py-2.5 text-sm font-medium text-navy/70 hover:text-navy hover:border-navy/40 transition-colors"
               >
                 My Profile
               </Link>
@@ -246,7 +247,7 @@ export function Navigation() {
               <Link
                 href="/signup"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-orange-600"
+                className="flex items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition-colors"
               >
                 <UserPlus className="h-3.5 w-3.5" />
                 Sign Up

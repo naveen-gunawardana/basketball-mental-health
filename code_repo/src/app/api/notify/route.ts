@@ -3,9 +3,14 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import type { Database } from "@/lib/supabase/types";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Mentality Sports <hello@mentalitysports.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mentalitysports.com";
+
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return null;
+  return new Resend(key);
+}
 
 function getAdmin() {
   return createAdminClient<Database>(
@@ -22,6 +27,9 @@ async function getUserEmail(userId: string): Promise<string | null> {
 export async function POST(request: Request) {
   const payload = await request.json();
   const { type } = payload;
+  const resend = getResend();
+  // TODO: add RESEND_API_KEY to .env.local to enable email notifications
+  if (!resend) return NextResponse.json({ ok: true, skipped: "no api key" });
 
   try {
     if (type === "welcome") {

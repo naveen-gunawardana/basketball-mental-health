@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, BookOpen, ChevronRight, Brain, Heart, Zap, Clock, ChevronDown, ChevronUp, CalendarClock } from "lucide-react";
+import { Calendar, BookOpen, ChevronRight, Clock, ChevronDown, ChevronUp, CalendarClock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
 import { ReflectionJournal } from "@/components/reflection-journal";
@@ -14,28 +14,19 @@ import { ChatWindow } from "@/components/chat-window";
 import { useCallPresence } from "@/hooks/use-call-presence";
 import { ScheduleCallModal } from "@/components/schedule-call-modal";
 import { UpcomingCalls } from "@/components/upcoming-calls";
+import { WeeklyGoals } from "@/components/weekly-goals";
 
 interface Profile { name: string; sport: string | null; avatar_url: string | null }
 interface MentorInfo { id: string; name: string; sport: string | null; avatar_url: string | null }
 interface MatchData { id: string; meeting_url: string | null; mentor: MentorInfo }
 interface SessionRecord { id: string; date: string; topics: string[] | null; notes: string | null }
-interface WeeklyGoals {
-  effort_description: string | null; effort_score: number | null;
-  attitude_description: string | null; attitude_score: number | null;
-  focus_description: string | null; focus_score: number | null;
-}
 
-const recommendedResources = [
-  { slug: "pre-game-confidence-routine", title: "Pre-Game Confidence Routine", readTime: "5 min" },
-  { slug: "dealing-with-mistakes-during-games", title: "Dealing with Mistakes During Games", readTime: "6 min" },
-  { slug: "setting-weekly-mental-goals", title: "Setting Weekly Mental Goals", readTime: "5 min" },
-];
+interface RecommendedArticle { slug: string; title: string; read_time: string | null }
 
 export default function PlayerDashboard() {
   const [view, setView] = useState<"home" | "log">("home");
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
-  const [activeGoalTab, setActiveGoalTab] = useState<"effort" | "attitude" | "focus">("effort");
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -44,7 +35,7 @@ export default function PlayerDashboard() {
   const { startCall } = useCallPresence(matchId);
   const [userId, setUserId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
-  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals | null>(null);
+  const [recommendedArticles, setRecommendedArticles] = useState<RecommendedArticle[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -77,23 +68,24 @@ export default function PlayerDashboard() {
           .limit(20);
         setSessions(sessionData ?? []);
 
-        const { data: goalsData } = await supabase
-          .from("weekly_goals")
-          .select("effort_description, effort_score, attitude_description, attitude_score, focus_description, focus_score")
-          .eq("match_id", matchData.id)
-          .order("week_start", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        setWeeklyGoals(goalsData);
       }
+
+      const { data: articleData } = await supabase
+        .from("resources")
+        .select("slug, title, read_time")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(3);
+      setRecommendedArticles((articleData ?? []) as RecommendedArticle[]);
 
       setLoading(false);
     }
     load();
   }, []);
 
+
   if (loading) {
-    return <div className="mx-auto max-w-7xl px-4 py-20 text-center text-muted-foreground">Loading your dashboard...</div>;
+    return <div className="mx-auto max-w-7xl px-4 py-20 text-center text-muted-foreground">Entering the locker room...</div>;
   }
 
   if (!matchId) {
@@ -136,13 +128,13 @@ export default function PlayerDashboard() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-4">Browse resources while you wait</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-            {recommendedResources.map((res) => (
+            {recommendedArticles.map((res) => (
               <Link key={res.slug} href={`/advice/${res.slug}`}
                 className="flex items-start gap-3 rounded-lg border p-4 hover:bg-offWhite transition-colors">
                 <BookOpen className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-navy leading-snug">{res.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{res.readTime} read</p>
+                  {res.read_time && <p className="text-xs text-muted-foreground mt-1">{res.read_time} read</p>}
                 </div>
               </Link>
             ))}
@@ -198,38 +190,8 @@ export default function PlayerDashboard() {
         {/* Main column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Weekly goals */}
-          {weeklyGoals && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Weekly Mental Goals</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2 mb-4">
-                  {(["effort", "attitude", "focus"] as const).map((tab) => {
-                    const icons = { effort: Zap, attitude: Heart, focus: Brain };
-                    const Icon = icons[tab];
-                    return (
-                      <button key={tab} type="button" onClick={() => setActiveGoalTab(tab)}
-                        className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
-                          activeGoalTab === tab ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"
-                        }`}>
-                        <Icon className="h-3.5 w-3.5" />{tab}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="rounded-lg bg-offWhite p-4">
-                  <p className="text-sm font-medium text-navy">
-                    {weeklyGoals[`${activeGoalTab}_description` as keyof WeeklyGoals] ?? "No description set"}
-                  </p>
-                  {weeklyGoals[`${activeGoalTab}_score` as keyof WeeklyGoals] != null && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Score: <span className="font-semibold text-navy">{weeklyGoals[`${activeGoalTab}_score` as keyof WeeklyGoals]} / 5</span>
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          {matchId && userId && (
+            <WeeklyGoals matchId={matchId} userId={userId} />
           )}
 
           {/* Recent sessions — expandable */}
@@ -309,13 +271,13 @@ export default function PlayerDashboard() {
             <CardHeader><CardTitle className="text-lg">Recommended for You</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recommendedResources.map((res) => (
+                {recommendedArticles.map((res) => (
                   <Link key={res.slug} href={`/advice/${res.slug}`}
                     className="flex items-center gap-3 rounded-lg border p-3 hover:bg-offWhite transition-colors">
                     <BookOpen className="h-4 w-4 text-orange-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-navy truncate">{res.title}</p>
-                      <p className="text-xs text-muted-foreground">{res.readTime} read</p>
+                      {res.read_time && <p className="text-xs text-muted-foreground">{res.read_time} read</p>}
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                   </Link>

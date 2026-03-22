@@ -15,6 +15,7 @@ import { ChatWindow } from "@/components/chat-window";
 import { useCallPresence } from "@/hooks/use-call-presence";
 import { ScheduleCallModal } from "@/components/schedule-call-modal";
 import { UpcomingCalls } from "@/components/upcoming-calls";
+import { WeeklyGoals } from "@/components/weekly-goals";
 
 interface PlayerProfile { grade: string | null; school: string | null; level: string | null; challenges: string[] | null; goal: string | null }
 interface Mentee { id: string; name: string; sport: string | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
@@ -25,11 +26,7 @@ interface SessionRecord {
   match_id: string;
 }
 
-const shareResources = [
-  { title: "Pre-Game Confidence Routine", slug: "pre-game-confidence-routine" },
-  { title: "Dealing with Mistakes During Games", slug: "dealing-with-mistakes-during-games" },
-  { title: "How to Stay Motivated During a Plateau", slug: "how-to-stay-motivated-during-a-plateau" },
-];
+interface ShareArticle { slug: string; title: string }
 
 
 export default function MentorDashboard() {
@@ -47,6 +44,7 @@ export default function MentorDashboard() {
   const [approved, setApproved] = useState<boolean | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
+  const [shareArticles, setShareArticles] = useState<ShareArticle[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -56,7 +54,7 @@ export default function MentorDashboard() {
       setUserId(user.id);
 
       const { data: profile } = await supabase
-        .from("profiles").select("name, avatar_url").eq("id", user.id).single();
+        .from("profiles").select("name, sport, avatar_url").eq("id", user.id).single();
       setMentorName(profile?.name ?? "");
       setMentorAvatarUrl(profile?.avatar_url ?? null);
 
@@ -86,10 +84,19 @@ setMatches(typedMatches);
         setSessions(sessionData ?? []);
       }
 
+      const { data: articleData } = await supabase
+        .from("resources")
+        .select("slug, title")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(3);
+      setShareArticles((articleData ?? []) as ShareArticle[]);
+
       setLoading(false);
     }
     load();
   }, []);
+
 
   const activeMatch =
     matches.find(m => m.player?.id === activeMenteeId) ??
@@ -106,7 +113,7 @@ setMatches(typedMatches);
   }
 
   if (loading) {
-    return <div className="mx-auto max-w-7xl px-4 py-20 text-center text-muted-foreground">Loading your locker room...</div>;
+    return <div className="mx-auto max-w-7xl px-4 py-20 text-center text-muted-foreground">Entering the locker room...</div>;
   }
 
 
@@ -148,9 +155,9 @@ setMatches(typedMatches);
 
       {!approved ? (
         <div className="max-w-2xl space-y-8">
-          <div className="rounded-lg border-2 border-amber-200 bg-amber-50 p-6 flex items-start gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 shrink-0">
-              <Clock className="h-5 w-5 text-amber-500" />
+          <div className="rounded-lg border-2 border-gold-200 bg-gold-50 p-6 flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold-100 shrink-0">
+              <Clock className="h-5 w-5 text-gold-500" />
             </div>
             <div>
               <p className="font-semibold text-navy">Application under review</p>
@@ -181,11 +188,7 @@ setMatches(typedMatches);
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-4">Get a head start — read while you wait</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { slug: "pre-game-confidence-routine", title: "Pre-Game Confidence Routine" },
-                { slug: "dealing-with-mistakes-during-games", title: "Dealing with Mistakes During Games" },
-                { slug: "setting-weekly-mental-goals", title: "Setting Weekly Mental Goals" },
-              ].map((res) => (
+              {shareArticles.map((res) => (
                 <Link key={res.slug} href={`/advice/${res.slug}`}
                   className="flex items-start gap-3 rounded-lg border p-4 hover:bg-offWhite transition-colors">
                   <BookOpen className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
@@ -241,11 +244,7 @@ setMatches(typedMatches);
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-4">Read what your mentee might be going through</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { slug: "pre-game-confidence-routine", title: "Pre-Game Confidence Routine" },
-                { slug: "dealing-with-mistakes-during-games", title: "Dealing with Mistakes During Games" },
-                { slug: "setting-weekly-mental-goals", title: "Setting Weekly Mental Goals" },
-              ].map((res) => (
+              {shareArticles.map((res) => (
                 <Link key={res.slug} href={`/advice/${res.slug}`}
                   className="flex items-start gap-3 rounded-lg border p-4 hover:bg-offWhite transition-colors">
                   <BookOpen className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
@@ -325,7 +324,12 @@ setMatches(typedMatches);
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left: profile + sessions + reflections */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Session notes — expandable */}
+                {/* Weekly goals */}
+                {userId && (
+                  <WeeklyGoals matchId={activeMatch.id} userId={userId} />
+                )}
+
+              {/* Session notes — expandable */}
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-lg">Session Notes</CardTitle>
@@ -415,7 +419,7 @@ setMatches(typedMatches);
                   <CardHeader><CardTitle className="text-lg">Share with Mentee</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {shareResources.map((res) => (
+                      {shareArticles.map((res) => (
                         <Link key={res.slug} href={`/advice/${res.slug}`}
                           className="flex items-center gap-3 rounded-lg border p-3 hover:bg-offWhite transition-colors">
                           <BookOpen className="h-4 w-4 text-orange-500 shrink-0" />

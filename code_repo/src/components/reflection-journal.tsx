@@ -110,7 +110,7 @@ export function ReflectionJournal({ playerId }: Props) {
               onClick={() => setShareWithMentor(!shareWithMentor)}
               className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                 shareWithMentor
-                  ? "bg-emerald-100 text-emerald-700"
+                  ? "bg-sage-100 text-sage-700"
                   : "bg-muted text-muted-foreground"
               }`}
             >
@@ -159,7 +159,7 @@ export function ReflectionJournal({ playerId }: Props) {
                     onClick={() => toggleShare(r.id, r.shared_with_mentor)}
                     className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                       r.shared_with_mentor
-                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                        ? "bg-sage-100 text-sage-700 hover:bg-sage-200"
                         : "bg-muted text-muted-foreground hover:bg-navy/10"
                     }`}
                   >

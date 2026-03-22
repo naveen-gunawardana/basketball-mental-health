@@ -9,5 +9,12 @@
 - Email when a mentor's article is approved and goes live
 - Email when a mentor application is approved
 
-## In Progress / Planned
-<!-- Add more todos here -->
+## Resend API Key
+- Sign up at resend.com, create an API key, and add `RESEND_API_KEY=re_...` to `.env.local` (and Vercel env vars) to enable all email notifications
+
+## Vercel / Production Setup
+- Add `RESEND_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and `CRON_SECRET` to Vercel environment variables
+- Add `vercel.json` with cron config to call `/api/cron/call-reminders?secret=YOUR_SECRET` every hour (`0 * * * *`) for call reminder emails
+- Verify Supabase email confirmation is enabled (or disabled) intentionally — currently signup goes straight to dashboard without email verification
+- Set up a custom sender domain in Resend so emails come from `@mentalitysports.com` (required to move off Resend's sandbox/test limits)
+- Test all email flows end-to-end in production: welcome, match created, mentor approved, call scheduled, new message, article approved, call reminder

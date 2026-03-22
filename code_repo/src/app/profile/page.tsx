@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, Save, KeyRound, Mail, User } from "lucide-react";
+import { LogOut, Save, KeyRound, Mail, User, Camera } from "lucide-react";
+import { AvatarUpload } from "@/components/avatar-upload";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function ProfilePage() {
 
   const [resetStatus, setResetStatus] = useState("");
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [signOutLoading, setSignOutLoading] = useState(false);
 
   useEffect(() => {
@@ -33,8 +35,9 @@ export default function ProfilePage() {
       setEmail(user.email ?? "");
 
       const { data: profile } = await supabase
-        .from("profiles").select("name").eq("id", user.id).single();
+        .from("profiles").select("name, avatar_url").eq("id", user.id).single();
       setName(profile?.name ?? "");
+      setAvatarUrl(profile?.avatar_url ?? null);
       setLoading(false);
     }
     load();
@@ -80,7 +83,7 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return <div className="mx-auto max-w-lg px-4 py-20 text-center text-muted-foreground">Loading...</div>;
+    return <div className="mx-auto max-w-lg px-4 py-20 text-center text-muted-foreground">Loading your profile...</div>;
   }
 
   return (
@@ -91,6 +94,26 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-4">
+        {/* Profile Picture */}
+        {userId && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Camera className="h-4 w-4 text-navy/50" />Profile Picture
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center gap-5">
+              <AvatarUpload
+                userId={userId}
+                name={name}
+                avatarUrl={avatarUrl}
+                onUpload={(url) => setAvatarUrl(url)}
+              />
+              <p className="text-sm text-muted-foreground">Click your avatar to upload a new photo.</p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Name */}
         <Card>
           <CardHeader className="pb-3">
@@ -111,7 +134,7 @@ export default function ProfilePage() {
                 <Save className="h-3.5 w-3.5 mr-1.5" />
                 {nameStatus === "saving" ? "Saving..." : "Save Name"}
               </Button>
-              {nameStatus === "saved" && <p className="text-sm text-emerald-600">Saved.</p>}
+              {nameStatus === "saved" && <p className="text-sm text-sage-600">Saved.</p>}
               {nameStatus === "error" && <p className="text-sm text-red-500">Something went wrong.</p>}
             </div>
           </CardContent>
@@ -137,7 +160,7 @@ export default function ProfilePage() {
                 {emailStatus === "saving" ? "Saving..." : "Update Email"}
               </Button>
               {emailStatus && emailStatus !== "saving" && (
-                <p className={`text-sm ${emailStatus.startsWith("error") ? "text-red-500" : "text-emerald-600"}`}>
+                <p className={`text-sm ${emailStatus.startsWith("error") ? "text-red-500" : "text-sage-600"}`}>
                   {emailStatus.startsWith("error:") ? emailStatus.slice(6) : emailStatus}
                 </p>
               )}
@@ -161,7 +184,7 @@ export default function ProfilePage() {
                 <KeyRound className="h-3.5 w-3.5 mr-1.5" />
                 {resetStatus === "sending" ? "Sending..." : "Send Reset Link"}
               </Button>
-              {resetStatus === "sent" && <p className="text-sm text-emerald-600">Check your email.</p>}
+              {resetStatus === "sent" && <p className="text-sm text-sage-600">Check your email.</p>}
               {resetStatus === "error" && <p className="text-sm text-red-500">Something went wrong.</p>}
             </div>
           </CardContent>

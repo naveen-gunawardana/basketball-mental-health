@@ -24,7 +24,7 @@ function formatScheduledAt(iso: string) {
   return (
     d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }) +
     " at " +
-    d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+    d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })
   );
 }
 
@@ -67,10 +67,10 @@ export function UpcomingCalls({ matchId, currentUserId, onJoin, refreshKey }: Pr
       {calls.map(call => {
         const isJoinable = call.id === soonestCallId;
         return (
-          <div key={call.id} className={`rounded-lg border p-3 ${isJoinable ? "border-teal-300 bg-teal-50" : "border-offWhite-300 bg-white"}`}>
+          <div key={call.id} className={`rounded-lg border p-3 ${isJoinable ? "border-sage-300 bg-sage-50" : "border-offWhite-300 bg-white"}`}>
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-start gap-2 min-w-0">
-                <CalendarClock className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isJoinable ? "text-teal-600" : "text-navy/40"}`} />
+                <CalendarClock className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isJoinable ? "text-sage-600" : "text-navy/40"}`} />
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-navy">{formatScheduledAt(call.scheduled_at)}</p>
                   {call.note && <p className="text-xs text-muted-foreground mt-0.5 truncate">{call.note}</p>}
@@ -85,7 +85,7 @@ export function UpcomingCalls({ matchId, currentUserId, onJoin, refreshKey }: Pr
               </button>
             </div>
             {isJoinable && (
-              <Button size="sm" onClick={onJoin} className="w-full mt-2 bg-teal-600 hover:bg-teal-700 text-white h-7 text-xs">
+              <Button size="sm" onClick={onJoin} className="w-full mt-2 bg-sage-600 hover:bg-sage-700 text-white h-7 text-xs">
                 <Video className="h-3 w-3 mr-1.5" />Join now
               </Button>
             )}
