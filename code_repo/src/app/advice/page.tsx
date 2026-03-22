@@ -45,7 +45,7 @@ export default function AdvicePage() {
       .eq("status", "published")
       .order("published_at", { ascending: false })
       .then(({ data }) => {
-        setArticles((data ?? []) as Article[]);
+        setArticles((data ?? []) as unknown as Article[]);
         setLoading(false);
       });
   }, []);
