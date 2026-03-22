@@ -21,7 +21,7 @@ interface PlayerProfile { grade: string | null; school: string | null; level: st
 interface Mentee { id: string; name: string; sport: string | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
 interface Match { id: string; meeting_url: string | null; player: Mentee }
 interface SessionRecord {
-  id: string; date: string; topics: string[] | null;
+  id: string; date: string | null; topics: string[] | null;
   notes: string | null; flagged: boolean | null; flag_reason: string | null;
   match_id: string;
 }
@@ -355,7 +355,7 @@ setMatches(typedMatches);
                                   </div>
                                   <div>
                                     <p className="text-sm font-medium text-navy">
-                                      {new Date(session.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                      {session.date ? new Date(session.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                                     </p>
                                     {session.topics && session.topics.length > 0 && (
                                       <p className="text-xs text-muted-foreground mt-0.5">
