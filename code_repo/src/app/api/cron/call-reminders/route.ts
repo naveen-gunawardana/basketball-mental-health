@@ -2,12 +2,10 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import type { Database } from "@/lib/supabase/types";
+import { EMAIL_FROM as FROM, BASE_URL } from "@/lib/email";
 
-const FROM = "Mentality Sports <hello@mentalitysports.com>";
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mentalitysports.com";
-
-// This route should be called by a cron job every hour.
-// It sends a reminder email for any calls scheduled 55–65 minutes from now.
+// This route is called by a daily cron job.
+// It sends a reminder email for any calls scheduled in the next 24 hours.
 // Set CRON_SECRET in env and pass it as ?secret=... to protect the endpoint.
 
 export async function GET(request: Request) {
@@ -28,8 +26,8 @@ export async function GET(request: Request) {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
   const now = Date.now();
-  const windowStart = new Date(now + 55 * 60 * 1000).toISOString();
-  const windowEnd = new Date(now + 65 * 60 * 1000).toISOString();
+  const windowStart = new Date(now).toISOString();
+  const windowEnd = new Date(now + 24 * 60 * 60 * 1000).toISOString();
 
   const { data: calls, error } = await admin
     .from("scheduled_calls")
@@ -90,9 +88,9 @@ export async function GET(request: Request) {
         resend.emails.send({
           from: FROM,
           to,
-          subject: `Reminder: call with ${otherName} in 1 hour`,
+          subject: `Reminder: call with ${otherName} on ${formatted}`,
           html: `<p>Hi ${name},</p>
-<p>Just a reminder — you have a call with <strong>${otherName}</strong> today at <strong>${formatted}</strong>.</p>
+<p>Just a reminder — you have a call with <strong>${otherName}</strong> on <strong>${formatted}</strong>.</p>
 ${noteHtml}
 <p>${dashboardLink} to join when it's time.</p>
 <p>— The Mentality Sports Team</p>`,
