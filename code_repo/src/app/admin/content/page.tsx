@@ -51,7 +51,7 @@ export default function AdminContentPage() {
       .from("resources")
       .select("id, title, slug, category, sport, media_type, excerpt, content, status, submitted_by, submitted_by_name, published_at, created_at")
       .order("created_at", { ascending: false });
-    setArticles((data ?? []) as Article[]);
+    setArticles((data ?? []) as unknown as Article[]);
     setLoading(false);
   }
 
