@@ -2,9 +2,7 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import type { Database } from "@/lib/supabase/types";
-
-const FROM = "Mentality Sports <hello@mentalitysports.com>";
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mentalitysports.com";
+import { EMAIL_FROM as FROM, BASE_URL } from "@/lib/email";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;

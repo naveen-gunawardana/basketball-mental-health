@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import type { Database } from "@/lib/supabase/types";
+import { EMAIL_FROM, BASE_URL } from "@/lib/email";
 
 export async function POST(request: Request) {
   // Verify caller is an admin
@@ -46,14 +47,13 @@ export async function POST(request: Request) {
       const email = authUser?.user?.email;
       if (email) {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mentalitysports.com";
         await resend.emails.send({
-          from: "Mentality Sports <hello@mentalitysports.com>",
+          from: EMAIL_FROM,
           to: email,
           subject: "Your Mentality Sports application has been approved",
           html: `<p>Hi ${mentorName},</p>
 <p>Your application to become a mentor on Mentality Sports has been approved!</p>
-<p>We're now working on finding the right athlete for you. Once matched, you'll get another email and your mentee will appear in your <a href="${baseUrl}/dashboard">Locker Room</a>.</p>
+<p>We're now working on finding the right athlete for you. Once matched, you'll get another email and your mentee will appear in your <a href="${BASE_URL}/dashboard">Locker Room</a>.</p>
 <p>Thanks for giving back to the next generation of athletes.</p>
 <p>— The Mentality Sports Team</p>`,
         });
