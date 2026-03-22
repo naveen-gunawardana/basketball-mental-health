@@ -13,10 +13,13 @@ export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Supabase automatically exchanges the token from the URL hash on load
     const supabase = createClient();
+    // Handle both PKCE flow (session already set by /auth/callback) and legacy hash flow
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setReady(true);
+    });
     supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setReady(true);
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
     });
   }, []);
 
