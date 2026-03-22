@@ -127,5 +127,5 @@ export const mentors: Mentor[] = [
   },
 ];
 
-export const allSports = [...new Set(mentors.map((m) => m.sport))];
-export const allLevels = [...new Set(mentors.map((m) => m.level))];
+export const allSports = Array.from(new Set(mentors.map((m) => m.sport)));
+export const allLevels = Array.from(new Set(mentors.map((m) => m.level)));

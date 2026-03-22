@@ -49,7 +49,7 @@ export function UpcomingCalls({ matchId, currentUserId, onJoin, refreshKey }: Pr
 
   async function cancelCall(id: string) {
     const supabase = createClient();
-    await supabase.from("scheduled_calls").update({ status: "cancelled" }).eq("id", id);
+    await supabase.from("scheduled_calls").update({ status: "cancelled" } as never).eq("id", id);
     setCalls(prev => prev.filter(c => c.id !== id));
   }
 
