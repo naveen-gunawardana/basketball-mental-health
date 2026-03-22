@@ -21,7 +21,7 @@ interface Person {
   mentor_profiles: MentorProfile | null;
 }
 interface Match { id: string; status: string; created_at: string; meeting_url: string | null; player: Person; mentor: Person }
-interface FlaggedSession { id: string; date: string; flag_reason: string | null; match_id: string; player_name: string; mentor_name: string }
+interface FlaggedSession { id: string; date: string | null; flag_reason: string | null; match_id: string; player_name: string; mentor_name: string }
 interface PendingArticle { id: string; title: string; category: string | null; excerpt: string | null; content: string; submitted_by_name: string | null; created_at: string }
 
 type MatchFilter = "all" | "matched" | "unmatched";
@@ -66,7 +66,7 @@ export default function AdminPage() {
     setMatches(typedMatches);
 
     const flaggedSessions = (sessions ?? []).filter((s: { flagged: boolean }) => s.flagged);
-    setFlagged(flaggedSessions.map((s: { id: string; date: string; flag_reason: string | null; match_id: string }) => {
+    setFlagged(flaggedSessions.map((s: { id: string; date: string | null; flag_reason: string | null; match_id: string }) => {
       const match = typedMatches.find(m => m.id === s.match_id);
       return { id: s.id, date: s.date, flag_reason: s.flag_reason, match_id: s.match_id,
         player_name: match?.player?.name ?? "Unknown", mentor_name: match?.mentor?.name ?? "Unknown" };
@@ -180,7 +180,7 @@ export default function AdminPage() {
 
   function togglePlayer(id: string) { setExpandedPlayerId(prev => prev === id ? null : id); }
   function toggleMentor(id: string) { setExpandedMentorId(prev => prev === id ? null : id); }
-  function fmt(iso: string) { return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
+  function fmt(iso: string | null) { return iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"; }
   function jitsiUrl(matchId: string) { return `https://meet.jit.si/mentality-${matchId.replace(/-/g, "").slice(0, 20)}`; }
   function copyLink(matchId: string) {
     navigator.clipboard.writeText(jitsiUrl(matchId));

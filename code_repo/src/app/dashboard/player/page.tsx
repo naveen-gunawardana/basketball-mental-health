@@ -19,7 +19,7 @@ import { WeeklyGoals } from "@/components/weekly-goals";
 interface Profile { name: string; sport: string | null; avatar_url: string | null }
 interface MentorInfo { id: string; name: string; sport: string | null; avatar_url: string | null }
 interface MatchData { id: string; meeting_url: string | null; mentor: MentorInfo }
-interface SessionRecord { id: string; date: string; topics: string[] | null; notes: string | null }
+interface SessionRecord { id: string; date: string | null; topics: string[] | null; notes: string | null }
 
 interface RecommendedArticle { slug: string; title: string; read_time: string | null }
 
@@ -219,7 +219,7 @@ export default function PlayerDashboard() {
                             </div>
                             <div>
                               <p className="text-sm font-medium text-navy">
-                                {new Date(session.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                {session.date ? new Date(session.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                               </p>
                               {session.topics && session.topics.length > 0 && (
                                 <p className="text-xs text-muted-foreground mt-0.5">
