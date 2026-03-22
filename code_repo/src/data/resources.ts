@@ -5,6 +5,7 @@ export const resources: Resource[] = [
     slug: "how-to-talk-to-your-coach-about-playing-time",
     title: "How to Talk to Your Coach About Playing Time",
     category: "Coach Communication",
+    sport: "All Sports",
     format: "script",
     readTime: "6 min",
     summary:
@@ -80,6 +81,7 @@ export const resources: Resource[] = [
     slug: "pre-game-confidence-routine",
     title: "Pre-Game Confidence Routine",
     category: "Confidence",
+    sport: "Basketball",
     format: "worksheet",
     readTime: "5 min",
     summary:
@@ -136,6 +138,7 @@ export const resources: Resource[] = [
   {
     slug: "what-to-do-when-youre-benched",
     title: "What to Do When You're Benched",
+    sport: "All Sports",
     category: "Playing Time",
     format: "article",
     readTime: "7 min",
@@ -191,6 +194,7 @@ export const resources: Resource[] = [
     ],
   },
   {
+    sport: "Basketball",
     slug: "translating-practice-confidence-to-games",
     title: "Translating Practice Confidence to Games",
     category: "Confidence",
@@ -248,6 +252,7 @@ export const resources: Resource[] = [
     ],
   },
   {
+    sport: "All Sports",
     slug: "setting-weekly-mental-goals",
     title: "Setting Weekly Mental Goals",
     category: "Goal Setting",
@@ -299,6 +304,7 @@ export const resources: Resource[] = [
     ],
   },
   {
+    sport: "Basketball",
     slug: "dealing-with-mistakes-during-games",
     title: "Dealing with Mistakes During Games",
     category: "Pressure & Anxiety",
@@ -350,6 +356,7 @@ export const resources: Resource[] = [
     ],
   },
   {
+    sport: "All Sports",
     slug: "understanding-your-role-on-the-team",
     title: "Understanding Your Role on the Team",
     category: "Coach Communication",
@@ -402,6 +409,7 @@ export const resources: Resource[] = [
   },
   {
     slug: "how-to-stay-motivated-during-a-plateau",
+    sport: "Basketball",
     title: "How to Stay Motivated During a Plateau",
     category: "Goal Setting",
     format: "article",
@@ -461,6 +469,7 @@ export const resources: Resource[] = [
     slug: "coming-back-stronger-after-injury",
     title: "Coming Back Stronger After Injury",
     category: "Returning from Injury",
+    sport: "All Sports",
     format: "article",
     readTime: "7 min",
     summary:
@@ -517,6 +526,7 @@ export const resources: Resource[] = [
   {
     slug: "managing-pre-game-anxiety",
     title: "Managing Pre-Game Anxiety",
+    sport: "All Sports",
     category: "Pressure & Anxiety",
     format: "article",
     readTime: "5 min",
@@ -574,6 +584,19 @@ export const allCategories = [
   "Pressure & Anxiety",
   "Goal Setting",
   "Returning from Injury",
+] as const;
+
+export const allSports = [
+  "All Sports",
+  "Basketball",
+  "Soccer",
+  "Football",
+  "Baseball",
+  "Volleyball",
+  "Track & Field",
+  "Swimming",
+  "Tennis",
+  "Wrestling",
 ] as const;
 
 export function getResourceBySlug(slug: string): Resource | undefined {

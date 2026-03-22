@@ -49,7 +49,7 @@ const howItWorks = [
   {
     step: "04",
     title: "Use the Resources",
-    description: "Tap into a library of articles and videos on mental skills, resilience, and performing under pressure — anytime.",
+    description: "Tap into a library of articles on mental skills, resilience, and performing under pressure — anytime.",
   },
 ];
 
@@ -97,24 +97,32 @@ export default function Home() {
               </h1>
             </div>
 
-            {/* Right — description + CTAs */}
+            {/* Right — two paths */}
             <div className="lg:col-span-5 lg:pb-2">
               <p className="text-base md:text-lg text-white/65 leading-relaxed mb-8 max-w-sm">
-                Real relationships between <span className="text-orange-400 font-semibold">athletes</span> and <span className="text-orange-400 font-semibold">mentors</span> who&apos;ve lived it — built on mental resilience, honest sport guidance, and the kind of support no coach or trainer is trained to give.
+                Real 1-on-1 relationships between <span className="text-orange-400 font-semibold">athletes</span> and <span className="text-orange-400 font-semibold">mentors</span> who&apos;ve lived it — built on mental resilience, honest sport guidance, and the support no coach is trained to give.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/35 mb-4">Choose your path</p>
+              <div className="flex flex-col gap-3">
                 <Link
-                  href="/signup"
-                  className="inline-flex items-center justify-center gap-2 rounded-sm bg-orange-500 px-7 py-3.5 text-sm font-semibold text-white hover:bg-orange-400 transition-colors"
+                  href="/signup?role=player"
+                  className="flex items-center justify-between rounded-sm bg-orange-500 px-6 py-4 font-semibold text-white hover:bg-orange-400 transition-colors group"
                 >
-                  Get Involved
-                  <ArrowRight className="h-4 w-4" />
+                  <div>
+                    <div className="text-sm font-bold">I&apos;m an Athlete</div>
+                    <div className="text-xs text-white/70 font-normal mt-0.5">Find a mentor who gets the mental game</div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
                 <Link
-                  href="/resources"
-                  className="inline-flex items-center justify-center gap-2 rounded-sm border border-white/25 px-7 py-3.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+                  href="/signup?role=mentor"
+                  className="flex items-center justify-between rounded-sm border border-white/25 bg-white/8 px-6 py-4 font-semibold text-white hover:bg-white/15 transition-colors group"
                 >
-                  Browse Resources
+                  <div>
+                    <div className="text-sm font-bold">I want to be a Mentor</div>
+                    <div className="text-xs text-white/55 font-normal mt-0.5">Give back to a student-athlete like you</div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
             </div>
@@ -142,7 +150,7 @@ export default function Home() {
             {[
               { value: "All Sports", label: "Not just one sport" },
               { value: "15 min", label: "Weekly mentor check-in" },
-              { value: "Free", label: "During the pilot" },
+              { value: "Free", label: "Always free to join" },
               { value: "1-on-1", label: "Personally matched" },
             ].map((s) => (
               <div key={s.label} className="md:pl-8 first:pl-0">
@@ -260,12 +268,12 @@ export default function Home() {
                     desc: "Your mentor helps you work through the mental side and offers real guidance on navigating the demands of competing",
                   },
                   {
-                    title: "Resource Library",
-                    desc: "Articles, videos, and guides on confidence, anxiety, identity, and the mental skills that translate to performance",
+                    title: "Advice Library",
+                    desc: "Articles and guides on confidence, anxiety, identity, and the mental skills that translate to performance",
                   },
                   {
-                    title: "Free During Pilot",
-                    desc: "No cost to join while we grow the program and prove the model",
+                    title: "Always Free",
+                    desc: "Mentality Sports is a service — no cost, no upsells, no subscriptions. Just the relationship.",
                   },
                 ].map((item) => (
                   <li key={item.title} className="flex items-start gap-4">
@@ -309,18 +317,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── RESOURCES PREVIEW ────────────────────────────────────────────────── */}
+      {/* ─── PLATFORM FEATURES ────────────────────────────────────────────────── */}
+      <section className="section-padding bg-navy text-white">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-orange-400 mb-3">The platform</p>
+            <h2 className="text-3xl md:text-4xl font-bold">Everything in one place.</h2>
+            <p className="text-white/45 mt-2 text-sm max-w-md">
+              Your locker room — where the mental work actually happens.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/8 rounded-sm overflow-hidden border border-white/8">
+            {[
+              { label: "1-on-1 Mentorship", desc: "Personally matched with a mentor who has navigated what you're facing — in sport and in life." },
+              { label: "Private Messaging", desc: "Direct line to your mentor. Ask questions, share wins, talk through what's on your mind." },
+              { label: "Reflection Journal", desc: "Log your mental state, your wins, your struggles. Your mentor can see what you choose to share." },
+              { label: "Session Tracking", desc: "Every check-in documented — topics covered, notes, follow-ups. Nothing gets lost." },
+              { label: "Weekly Mental Goals", desc: "Set and track weekly goals around effort, attitude, and focus with your mentor." },
+              { label: "Advice Library", desc: "Articles on confidence, anxiety, motivation, identity, and every mental challenge in sport." },
+            ].map((f) => (
+              <div key={f.label} className="bg-navy p-7 hover:bg-white/5 transition-colors">
+                <div className="w-5 h-0.5 bg-orange-400 mb-4" />
+                <p className="font-semibold text-sm mb-2">{f.label}</p>
+                <p className="text-xs text-white/40 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ADVICE PREVIEW ───────────────────────────────────────────────────── */}
       <section className="section-padding bg-white">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="label-tag mb-3">From the library</p>
               <h2 className="text-3xl md:text-4xl font-bold text-navy">
-                Mental skills, built through resources.
+                Mental skills, built through advice.
               </h2>
             </div>
             <Link
-              href="/resources"
+              href="/advice"
               className="hidden md:inline-flex items-center gap-1.5 text-sm font-semibold text-navy hover:text-orange-500 transition-colors"
             >
               View all <ArrowRight className="h-4 w-4" />
@@ -373,10 +410,112 @@ export default function Home() {
           </div>
           <div className="mt-6 text-center md:hidden">
             <Link
-              href="/resources"
+              href="/advice"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-navy hover:text-orange-500 transition-colors"
             >
-              View all resources <ArrowRight className="h-4 w-4" />
+              View all advice <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── MENTOR HIGHLIGHTS ────────────────────────────────────────────────── */}
+      <section className="section-padding bg-offWhite">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
+            <div>
+              <p className="label-tag mb-3">The mentors</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-navy">
+                Real athletes.<br />Real experience.
+              </h2>
+              <p className="text-navy/50 mt-3 text-sm max-w-sm leading-relaxed">
+                Every mentor on Mentality Sports is a current or former athlete who&apos;s been through the mental grind of competing. No scripts. No textbooks. Just lived experience.
+              </p>
+            </div>
+            <Link
+              href="/signup?role=player"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-sm bg-orange-500 px-6 py-3 text-sm font-semibold text-white hover:bg-orange-600 transition-colors"
+            >
+              Apply to be matched <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              {
+                initials: "JM",
+                name: "Jordan M.",
+                background: "D1 Basketball · 4 years",
+                tags: ["Confidence", "Pressure moments"],
+                quote: "I spent two years riding the bench before I earned my starting spot. I know what that mental grind feels like — and how to get through it.",
+              },
+              {
+                initials: "AT",
+                name: "Alexis T.",
+                background: "D3 Soccer · 4 years",
+                tags: ["Anxiety", "Identity & worth"],
+                quote: "I dealt with serious performance anxiety all through college. Nobody talked about it. I want to be the mentor I needed back then.",
+              },
+              {
+                initials: "MR",
+                name: "Marcus R.",
+                background: "HS & Club Football · 6 years",
+                tags: ["Injury recovery", "Motivation"],
+                quote: "Tore my ACL junior year. The mental side of that recovery was harder than the physical. I&apos;ve been there.",
+              },
+              {
+                initials: "SP",
+                name: "Simone P.",
+                background: "D1 Track & Field · 4 years",
+                tags: ["Goal setting", "Burnout"],
+                quote: "When sport becomes your whole identity, losing or slowing down hits different. I help athletes separate who they are from what they do.",
+              },
+              {
+                initials: "DK",
+                name: "Devon K.",
+                background: "D2 Basketball · 4 years",
+                tags: ["Coach communication", "Role & playing time"],
+                quote: "Transferred twice. Dealt with every version of the coach relationship problem. I can help you navigate those conversations.",
+              },
+              {
+                initials: "NW",
+                name: "Nia W.",
+                background: "Club & Varsity Volleyball · 5 years",
+                tags: ["Team dynamics", "Resilience"],
+                quote: "Sport taught me resilience the hard way. I&apos;m here to help athletes build that strength before the hard moments come.",
+              },
+            ].map((mentor) => (
+              <div
+                key={mentor.name}
+                className="bg-white rounded-sm border border-offWhite-300 p-6 flex flex-col gap-4 hover:border-offWhite-400 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white text-sm font-bold shrink-0">
+                    {mentor.initials}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-navy text-sm">{mentor.name}</p>
+                    <p className="text-xs text-muted-foreground">{mentor.background}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-navy/65 leading-relaxed flex-1 italic">&ldquo;{mentor.quote}&rdquo;</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {mentor.tags.map((tag) => (
+                    <span key={tag} className="rounded-sm bg-offWhite px-2.5 py-1 text-xs font-medium text-navy/60 border border-offWhite-300">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              href="/signup?role=player"
+              className="inline-flex items-center gap-1.5 rounded-sm bg-navy px-8 py-3.5 text-sm font-semibold text-white hover:bg-navy/80 transition-colors"
+            >
+              Apply to be matched with a mentor <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -406,7 +545,7 @@ export default function Home() {
                 href="/signup?role=mentor"
                 className="flex items-center justify-between rounded-sm bg-white/10 px-6 py-4 font-semibold hover:bg-white/15 transition-colors border border-white/10 text-sm"
               >
-                I want to Mentor <ArrowRight className="h-4 w-4" />
+                I want to be a Mentor <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>

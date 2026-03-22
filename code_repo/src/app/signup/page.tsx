@@ -1,20 +1,14 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  UserPlus,
-  Users,
-  Flag,
-  CheckCircle,
-  ArrowRight,
-  ArrowLeft,
-} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { UserPlus, Users, CheckCircle, ArrowRight, ArrowLeft } from "lucide-react";
 
-type Role = "player" | "mentor" | "coach";
+type Role = "player" | "mentor";
 
 const sports = [
   "Basketball", "Football", "Soccer", "Volleyball", "Baseball", "Softball",
@@ -50,19 +44,6 @@ const mentorSkills = [
   "Academic-athletic balance",
 ];
 
-const coachChallenges = [
-  "Recognizing mental health struggles in athletes",
-  "Having difficult conversations with athletes",
-  "Supporting athletes through injury",
-  "Managing team culture and conflict",
-  "Balancing performance pressure with wellbeing",
-  "Helping athletes build confidence",
-  "Supporting athletes through slumps",
-  "Communicating with parents",
-  "Burnout — mine or my athletes'",
-  "Mental health resources for my team",
-];
-
 export default function SignupPage() {
   return (
     <Suspense fallback={<div className="mx-auto max-w-3xl px-4 py-10 text-center text-muted-foreground">Loading...</div>}>
@@ -73,16 +54,19 @@ export default function SignupPage() {
 
 function SignupForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const rawRole = searchParams.get("role");
-  const initialRole: Role = rawRole === "mentor" ? "mentor" : rawRole === "coach" ? "coach" : "player";
+  const initialRole: Role = rawRole === "mentor" ? "mentor" : "player";
 
   const [role, setRole] = useState<Role>(initialRole);
   const [step, setStep] = useState(1);
-  const [submitted, setSubmitted] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Shared fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   // Player fields
   const [playerSport, setPlayerSport] = useState("");
@@ -101,55 +85,77 @@ function SignupForm() {
   const [mentorWhy, setMentorWhy] = useState("");
   const [mentorAvailability, setMentorAvailability] = useState("");
 
-  // Coach fields
-  const [coachSport, setCoachSport] = useState("");
-  const [coachAgeGroup, setCoachAgeGroup] = useState("");
-  const [coachOrg, setCoachOrg] = useState("");
-  const [coachChallengesSelected, setCoachChallengesSelected] = useState<string[]>([]);
-  const [coachLookingFor, setCoachLookingFor] = useState("");
-
   function toggleItem(list: string[], item: string, setList: (v: string[]) => void) {
     setList(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setAuthError("");
+    setLoading(true);
+
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          role,
+          sport: role === "player" ? playerSport : mentorSport,
+        },
+      },
+    });
+
+    if (error) {
+      setAuthError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data.user) {
+      await supabase.from("profiles").insert({
+        id: data.user.id,
+        name,
+        role,
+        sport: role === "player" ? playerSport || null : mentorSport || null,
+      });
+
+      if (role === "player") {
+        await supabase.from("player_profiles").insert({
+          id: data.user.id,
+          age: playerAge ? parseInt(playerAge) : null,
+          school: playerSchool || null,
+          grade: playerGrade || null,
+          level: playerLevel || null,
+          challenges: playerChallenges.length > 0 ? playerChallenges : null,
+          goal: playerGoal || null,
+          availability: mentorAvailability || null,
+        });
+      } else {
+        await supabase.from("mentor_profiles").insert({
+          id: data.user.id,
+          college: mentorCollege || null,
+          years_played: mentorYearsPlayed ? parseInt(mentorYearsPlayed) : null,
+          skills: mentorSkillsSelected.length > 0 ? mentorSkillsSelected : null,
+          why: mentorWhy || null,
+          availability: mentorAvailability || null,
+        });
+      }
+
+      // Send welcome email (fire-and-forget — don't block redirect on failure)
+      fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "welcome", email, name, role }),
+      }).catch(() => {});
+    }
+
+    setLoading(false);
+    router.push("/dashboard");
+    router.refresh();
   }
 
-  const roleLabels: Record<Role, string> = {
-    player: "athlete",
-    mentor: "mentor",
-    coach: "coach",
-  };
-
-  if (submitted) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6 lg:px-8 text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-          <CheckCircle className="h-8 w-8 text-emerald-600" />
-        </div>
-        <h1 className="text-2xl font-bold text-navy mb-2">
-          You&apos;re in — thanks for signing up!
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {role === "player"
-            ? "We've received your application and will match you with a mentor soon. Check your email for next steps."
-            : role === "coach"
-            ? "We've received your information and will be in touch with resources and next steps."
-            : "We'll review your application and reach out with next steps. Thank you for giving back!"}
-        </p>
-        <div className="flex justify-center gap-4">
-          <Button variant="secondary" asChild>
-            <a href="/resources">Explore Resources</a>
-          </Button>
-          <Button variant="outline" asChild>
-            <a href="/">Back to Home</a>
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
@@ -161,26 +167,24 @@ function SignupForm() {
       </div>
 
       {/* Role selector */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        {(["player", "mentor", "coach"] as Role[]).map((r) => {
-          const Icon = r === "player" ? UserPlus : r === "mentor" ? Users : Flag;
-          const label = r === "player" ? "I'm an Athlete" : r === "mentor" ? "I'm a Mentor" : "I'm a Coach";
-          const sub = r === "player" ? "Looking for mentorship" : r === "mentor" ? "Former athlete giving back" : "Supporting my athletes";
-          return (
-            <button
-              key={r}
-              type="button"
-              onClick={() => { setRole(r); setStep(1); }}
-              className={`rounded-xl border-2 p-4 text-center transition-all ${
-                role === r ? "border-orange-500 bg-orange-50" : "border-muted hover:border-orange-200"
-              }`}
-            >
-              <Icon className={`h-6 w-6 mx-auto mb-2 ${role === r ? "text-orange-500" : "text-muted-foreground"}`} />
-              <p className={`font-semibold text-sm ${role === r ? "text-navy" : "text-muted-foreground"}`}>{label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>
-            </button>
-          );
-        })}
+      <div className="grid grid-cols-2 gap-3 mb-8 max-w-md mx-auto">
+        {([
+          { r: "player" as Role, Icon: UserPlus, label: "I'm an Athlete", sub: "Looking for mentorship" },
+          { r: "mentor" as Role, Icon: Users,   label: "I'm a Mentor",   sub: "Current or former athlete giving back" },
+        ]).map(({ r, Icon, label, sub }) => (
+          <button
+            key={r}
+            type="button"
+            onClick={() => { setRole(r); setStep(1); }}
+            className={`rounded-xl border-2 p-4 text-center transition-all ${
+              role === r ? "border-orange-500 bg-orange-50" : "border-muted hover:border-orange-200"
+            }`}
+          >
+            <Icon className={`h-6 w-6 mx-auto mb-2 ${role === r ? "text-orange-500" : "text-muted-foreground"}`} />
+            <p className={`font-semibold text-sm ${role === r ? "text-navy" : "text-muted-foreground"}`}>{label}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>
+          </button>
+        ))}
       </div>
 
       {/* Progress steps */}
@@ -193,8 +197,6 @@ function SignupForm() {
             <span className="text-xs text-muted-foreground hidden sm:block">
               {role === "player"
                 ? ["Basic Info", "Your Sport", "Mental Goals"][s - 1]
-                : role === "coach"
-                ? ["Basic Info", "Your Coaching", "What You Need"][s - 1]
                 : ["Basic Info", "Your Sport", "Mentoring Focus"][s - 1]}
             </span>
             {s < 3 && <div className={`flex-1 h-0.5 ${step > s ? "bg-navy" : "bg-muted"}`} />}
@@ -202,17 +204,25 @@ function SignupForm() {
         ))}
       </div>
 
+      <p className="text-center text-sm text-muted-foreground mb-6">
+        Already have an account?{" "}
+        <a href="/signin" className="font-medium text-navy hover:text-orange-500 transition-colors underline underline-offset-2">
+          Sign in
+        </a>
+      </p>
+
       <form onSubmit={handleSubmit}>
-        {/* STEP 1 — shared basic info */}
+        {/* STEP 1 — basic info */}
         {step === 1 && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">About You</CardTitle>
-              <CardDescription>Signing up as {roleLabels[role === "player" ? "player" : role === "coach" ? "coach" : "mentor"]}</CardDescription>
+              <CardDescription>Signing up as {role === "player" ? "an athlete" : "a mentor"}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Input label="Full Name" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} required />
               <Input label="Email" type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
               {role === "player" && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -232,9 +242,6 @@ function SignupForm() {
                   <Input label="School" placeholder="Your school name" value={playerSchool} onChange={(e) => setPlayerSchool(e.target.value)} />
                 </>
               )}
-              {role === "coach" && (
-                <Input label="Organization / School" placeholder="Team or school you coach for" value={coachOrg} onChange={(e) => setCoachOrg(e.target.value)} />
-              )}
               {role === "mentor" && (
                 <Input label="College / University" placeholder="Where you played" value={mentorCollege} onChange={(e) => setMentorCollege(e.target.value)} />
               )}
@@ -251,23 +258,18 @@ function SignupForm() {
         {step === 2 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">
-                {role === "player" ? "Your Sport" : role === "coach" ? "Your Coaching" : "Your Sport"}
-              </CardTitle>
+              <CardTitle className="text-lg">Your Sport</CardTitle>
               <CardDescription>
-                {role === "player" ? "Tell us about your athletic background" : role === "coach" ? "Tell us about who you coach" : "Tell us about your playing background"}
+                {role === "player" ? "Tell us about your athletic background" : "Tell us about your playing background"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Sport selector */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">
-                  {role === "coach" ? "Sport(s) you coach" : "Your sport"}
-                </label>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Your sport</label>
                 <div className="flex flex-wrap gap-2">
                   {sports.map((s) => {
-                    const selected = role === "coach" ? coachSport === s : role === "mentor" ? mentorSport === s : playerSport === s;
-                    const setter = role === "coach" ? setCoachSport : role === "mentor" ? setMentorSport : setPlayerSport;
+                    const selected = role === "mentor" ? mentorSport === s : playerSport === s;
+                    const setter = role === "mentor" ? setMentorSport : setPlayerSport;
                     return (
                       <button key={s} type="button" onClick={() => setter(s)}
                         className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${selected ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
@@ -292,20 +294,6 @@ function SignupForm() {
                 </div>
               )}
 
-              {role === "coach" && (
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground">Age group you coach</label>
-                  <div className="flex flex-wrap gap-2">
-                    {["Youth (under 12)", "Middle School", "High School", "College", "Adult / Rec"].map((ag) => (
-                      <button key={ag} type="button" onClick={() => setCoachAgeGroup(ag)}
-                        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${coachAgeGroup === ag ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
-                        {ag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {role === "mentor" && (
                 <Input label="Years of organized sport" type="number" placeholder="e.g., 8" value={mentorYearsPlayed} onChange={(e) => setMentorYearsPlayed(e.target.value)} />
               )}
@@ -313,15 +301,12 @@ function SignupForm() {
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Availability for weekly check-ins</label>
                 <div className="flex flex-wrap gap-2">
-                  {["Weekday afternoons", "Weekday evenings", "Weekend mornings", "Weekend afternoons", "Flexible"].map((time) => {
-                    const selected = mentorAvailability === time;
-                    return (
-                      <button key={time} type="button" onClick={() => setMentorAvailability(time)}
-                        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${selected ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
-                        {time}
-                      </button>
-                    );
-                  })}
+                  {["Weekday afternoons", "Weekday evenings", "Weekend mornings", "Weekend afternoons", "Flexible"].map((time) => (
+                    <button key={time} type="button" onClick={() => setMentorAvailability(time)}
+                      className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${mentorAvailability === time ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
+                      {time}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -342,21 +327,21 @@ function SignupForm() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
-                {role === "player" ? "Mental Challenges" : role === "coach" ? "What You Need" : "Mentoring Focus"}
+                {role === "player" ? "Mental Challenges" : "Mentoring Focus"}
               </CardTitle>
               <CardDescription>
                 {role === "player"
                   ? "What are you dealing with? Select all that apply."
-                  : role === "coach"
-                  ? "What challenges do you face supporting your athletes mentally?"
                   : "What areas are you best equipped to help with?"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {(role === "player" ? mentalChallenges : role === "coach" ? coachChallenges : mentorSkills).map((item) => {
-                  const list = role === "player" ? playerChallenges : role === "coach" ? coachChallengesSelected : mentorSkillsSelected;
-                  const setter = role === "player" ? (v: string[]) => setPlayerChallenges(v) : role === "coach" ? (v: string[]) => setCoachChallengesSelected(v) : (v: string[]) => setMentorSkillsSelected(v);
+                {(role === "player" ? mentalChallenges : mentorSkills).map((item) => {
+                  const list = role === "player" ? playerChallenges : mentorSkillsSelected;
+                  const setter = role === "player"
+                    ? (v: string[]) => setPlayerChallenges(v)
+                    : (v: string[]) => setMentorSkillsSelected(v);
                   return (
                     <button key={item} type="button" onClick={() => toggleItem(list, item, setter)}
                       className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${list.includes(item) ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
@@ -370,31 +355,31 @@ function SignupForm() {
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
                   {role === "player"
                     ? "What's your #1 goal for the mentorship program?"
-                    : role === "coach"
-                    ? "What are you most hoping to get out of this?"
                     : "Why do you want to be a mentor?"}
                 </label>
                 <textarea
-                  value={role === "player" ? playerGoal : role === "coach" ? coachLookingFor : mentorWhy}
-                  onChange={(e) => role === "player" ? setPlayerGoal(e.target.value) : role === "coach" ? setCoachLookingFor(e.target.value) : setMentorWhy(e.target.value)}
+                  value={role === "player" ? playerGoal : mentorWhy}
+                  onChange={(e) => role === "player" ? setPlayerGoal(e.target.value) : setMentorWhy(e.target.value)}
                   rows={3}
                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder={
                     role === "player"
                       ? "Example: I want to play with the same confidence in games that I have in practice..."
-                      : role === "coach"
-                      ? "Example: I want better tools to help my athletes through mental slumps..."
                       : "Tell us about your motivation to help athletes..."
                   }
                 />
               </div>
 
+              {authError && (
+                <p className="text-sm text-red-500">{authError}</p>
+              )}
               <div className="flex justify-between">
                 <Button type="button" variant="outline" onClick={() => setStep(2)}>
                   <ArrowLeft className="h-4 w-4 mr-2" /> Back
                 </Button>
-                <Button type="submit" variant="secondary">
-                  <CheckCircle className="h-4 w-4 mr-2" /> Submit Application
+                <Button type="submit" variant="secondary" disabled={loading}>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {loading ? "Submitting..." : "Submit Application"}
                 </Button>
               </div>
             </CardContent>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { resources, allCategories } from "@/data/resources";
+import { resources, allCategories, allSports } from "@/data/resources";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ export default function ResourcesPage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
+  const [selectedSport, setSelectedSport] = useState<string | null>(null);
 
   const filtered = resources.filter((r) => {
     const matchesSearch =
@@ -46,7 +47,12 @@ export default function ResourcesPage() {
     const matchesCategory =
       !selectedCategory || r.category === selectedCategory;
     const matchesFormat = !selectedFormat || r.format === selectedFormat;
-    return matchesSearch && matchesCategory && matchesFormat;
+    const matchesSport =
+      !selectedSport ||
+      selectedSport === "All Sports" ||
+      r.sport === selectedSport ||
+      r.sport === "All Sports";
+    return matchesSearch && matchesCategory && matchesFormat && matchesSport;
   });
 
   return (
@@ -73,30 +79,26 @@ export default function ResourcesPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground mr-2">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mr-2 shrink-0">
             <Filter className="h-4 w-4" />
-            Category:
+            Issue:
           </div>
           <button
+            type="button"
             onClick={() => setSelectedCategory(null)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              !selectedCategory
-                ? "bg-navy text-white"
-                : "bg-muted text-muted-foreground hover:bg-navy-50"
+              !selectedCategory ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"
             }`}
           >
             All
           </button>
           {allCategories.map((cat) => (
             <button
+              type="button"
               key={cat}
-              onClick={() =>
-                setSelectedCategory(selectedCategory === cat ? null : cat)
-              }
+              onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                selectedCategory === cat
-                  ? "bg-navy text-white"
-                  : "bg-muted text-muted-foreground hover:bg-navy-50"
+                selectedCategory === cat ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"
               }`}
             >
               {cat}
@@ -105,20 +107,36 @@ export default function ResourcesPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground mr-2">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mr-2 shrink-0">
+            <Filter className="h-4 w-4" />
+            Sport:
+          </div>
+          {allSports.map((sport) => (
+            <button
+              type="button"
+              key={sport}
+              onClick={() => setSelectedSport(selectedSport === sport ? null : sport)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                selectedSport === sport ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground hover:bg-emerald-50"
+              }`}
+            >
+              {sport}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mr-2 shrink-0">
             <Filter className="h-4 w-4" />
             Format:
           </div>
           {(["article", "video", "worksheet", "script"] as const).map((fmt) => (
             <button
+              type="button"
               key={fmt}
-              onClick={() =>
-                setSelectedFormat(selectedFormat === fmt ? null : fmt)
-              }
+              onClick={() => setSelectedFormat(selectedFormat === fmt ? null : fmt)}
               className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors ${
-                selectedFormat === fmt
-                  ? "bg-orange-500 text-white"
-                  : "bg-muted text-muted-foreground hover:bg-orange-50"
+                selectedFormat === fmt ? "bg-orange-500 text-white" : "bg-muted text-muted-foreground hover:bg-orange-50"
               }`}
             >
               {fmt}
@@ -188,6 +206,7 @@ export default function ResourcesPage() {
               setSearch("");
               setSelectedCategory(null);
               setSelectedFormat(null);
+              setSelectedSport(null);
             }}
           >
             Clear filters

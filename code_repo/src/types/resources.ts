@@ -18,6 +18,7 @@ export interface Resource {
   slug: string;
   title: string;
   category: ResourceCategory;
+  sport?: string;
   format: ResourceFormat;
   readTime: string;
   summary: string;

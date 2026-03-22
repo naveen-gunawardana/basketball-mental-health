@@ -16,9 +16,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Athlete Mental Health | Mentorship & Resources for Athletes",
+  title: "Mentality Sports | Athlete Mentorship & Mental Performance",
   description:
-    "Connecting athletes with mentors, resources, and community to support mental health, confidence, and performance across all sports.",
+    "Mentality Sports connects athletes with mentors who've lived it — real relationships built on mental resilience, honest sport guidance, and the support no coach is trained to give.",
 };
 
 export default function RootLayout({
@@ -41,7 +41,7 @@ export default function RootLayout({
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
                   </div>
-                  <span className="font-semibold tracking-tight">[Platform Name]</span>
+                  <span className="font-semibold tracking-tight">Mentality Sports</span>
                 </div>
                 <p className="text-sm text-white/40 leading-relaxed">
                   Mentorship, resources, and community for the mental side of sport. Open to athletes and coaches across all sports.
@@ -50,8 +50,7 @@ export default function RootLayout({
               <div>
                 <h4 className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">Explore</h4>
                 <ul className="space-y-2.5 text-sm">
-                  <li><a href="/resources" className="text-white/50 hover:text-white transition-colors">Resource Library</a></li>
-                  <li><a href="/mentors" className="text-white/50 hover:text-white transition-colors">Our Mentors</a></li>
+                  <li><a href="/advice" className="text-white/50 hover:text-white transition-colors">Advice Library</a></li>
                   <li><a href="/signup" className="text-white/50 hover:text-white transition-colors">Get Involved</a></li>
                 </ul>
               </div>
@@ -65,8 +64,13 @@ export default function RootLayout({
                 </a>
               </div>
             </div>
-            <div className="mt-10 pt-8 border-t border-white/8 text-xs text-white/25 text-center">
-              &copy; {new Date().getFullYear()} [Platform Name]. All rights reserved.
+            <div className="mt-10 pt-8 border-t border-white/8 text-xs text-white/25 text-center space-y-2">
+              <div className="flex justify-center gap-4">
+                <a href="/terms" className="hover:text-white/50 transition-colors">Terms of Service</a>
+                <a href="/privacy" className="hover:text-white/50 transition-colors">Privacy Policy</a>
+                <a href="mailto:hello@mentalitysports.com" className="hover:text-white/50 transition-colors">Contact</a>
+              </div>
+              <div>&copy; {new Date().getFullYear()} Mentality Sports. All rights reserved.</div>
             </div>
           </div>
         </footer>

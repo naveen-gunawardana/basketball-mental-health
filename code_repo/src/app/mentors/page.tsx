@@ -195,10 +195,10 @@ export default function MentorsPage() {
                 Apply to Mentor <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/resources"
+                href="/advice"
                 className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-6 py-4 font-semibold hover:bg-white/15 transition-colors border border-white/10 text-center"
               >
-                Explore Resources
+                Explore Advice
               </Link>
             </div>
           </div>
