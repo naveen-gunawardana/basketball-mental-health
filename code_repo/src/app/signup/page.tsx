@@ -116,36 +116,35 @@ function SignupForm() {
     }
 
     if (data.user) {
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        name,
-        role,
-        sport: role === "player" ? playerSport || null : mentorSport || null,
+      // Use server-side API with service role to bypass RLS (user has no session yet)
+      await fetch("/api/create-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: data.user.id,
+          name,
+          role,
+          sport: role === "player" ? playerSport || null : mentorSport || null,
+          playerProfile: role === "player" ? {
+            age: playerAge ? parseInt(playerAge) : null,
+            school: playerSchool || null,
+            grade: playerGrade || null,
+            level: playerLevel || null,
+            challenges: playerChallenges.length > 0 ? playerChallenges : null,
+            goal: playerGoal || null,
+            availability: mentorAvailability || null,
+          } : null,
+          mentorProfile: role === "mentor" ? {
+            college: mentorCollege || null,
+            years_played: mentorYearsPlayed ? parseInt(mentorYearsPlayed) : null,
+            skills: mentorSkillsSelected.length > 0 ? mentorSkillsSelected : null,
+            why: mentorWhy || null,
+            availability: mentorAvailability || null,
+          } : null,
+        }),
       });
 
-      if (role === "player") {
-        await supabase.from("player_profiles").insert({
-          id: data.user.id,
-          age: playerAge ? parseInt(playerAge) : null,
-          school: playerSchool || null,
-          grade: playerGrade || null,
-          level: playerLevel || null,
-          challenges: playerChallenges.length > 0 ? playerChallenges : null,
-          goal: playerGoal || null,
-          availability: mentorAvailability || null,
-        });
-      } else {
-        await supabase.from("mentor_profiles").insert({
-          id: data.user.id,
-          college: mentorCollege || null,
-          years_played: mentorYearsPlayed ? parseInt(mentorYearsPlayed) : null,
-          skills: mentorSkillsSelected.length > 0 ? mentorSkillsSelected : null,
-          why: mentorWhy || null,
-          availability: mentorAvailability || null,
-        });
-      }
-
-      // Send welcome email (fire-and-forget — don't block redirect on failure)
+      // Send welcome email (fire-and-forget)
       fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -154,8 +153,13 @@ function SignupForm() {
     }
 
     setLoading(false);
-    router.push("/dashboard");
-    router.refresh();
+    // If no session, email confirmation is required
+    if (!data.session) {
+      router.push("/verify-email");
+    } else {
+      router.push("/dashboard");
+      router.refresh();
+    }
   }
 
 

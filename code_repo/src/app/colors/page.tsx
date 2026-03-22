@@ -1,4 +1,6 @@
 "use client";
+import { notFound } from "next/navigation";
+
 
 // ─── Color tokens ──────────────────────────────────────────────────────────
 const PRIMARY = { hex: "#14213D", name: "Navy", role: "Primary" };
@@ -32,6 +34,7 @@ const COMBOS = [
 ];
 
 export default function ColorsPage() {
+  if (process.env.NODE_ENV !== "development") notFound();
   return (
     <div style={{ backgroundColor: "#F6F3EC", minHeight: "100vh", padding: "64px 40px", fontFamily: "system-ui, sans-serif" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", flexDirection: "column", gap: 72 }}>

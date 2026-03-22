@@ -9,6 +9,10 @@ export default async function DashboardPage() {
     redirect("/signin");
   }
 
+  if (!user.email_confirmed_at) {
+    redirect("/verify-email");
+  }
+
   // Ensure profile row exists — if not, send them back to complete signup
   const { data: profile } = await supabase
     .from("profiles")

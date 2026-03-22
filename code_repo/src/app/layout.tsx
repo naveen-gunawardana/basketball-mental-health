@@ -20,10 +20,30 @@ export const metadata: Metadata = {
   title: "Mentality Sports | Athlete Mentorship & Mental Performance",
   description:
     "Mentality Sports connects athletes with mentors who've lived it — real relationships built on mental resilience, honest sport guidance, and the support no coach is trained to give.",
+  metadataBase: new URL("https://mentalitysports.com"),
+  openGraph: {
+    title: "Mentality Sports | Athlete Mentorship & Mental Performance",
+    description:
+      "Mentality Sports connects athletes with mentors who've lived it — real relationships built on mental resilience, honest sport guidance, and the support no coach is trained to give.",
+    url: "https://mentalitysports.com",
+    siteName: "Mentality Sports",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mentality Sports | Athlete Mentorship & Mental Performance",
+    description:
+      "Mentality Sports connects athletes with mentors who've lived it — real relationships built on mental resilience, honest sport guidance, and the support no coach is trained to give.",
+    images: ["/opengraph-image"],
+  },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: "/apple-touch-icon.png",
   },
