@@ -158,7 +158,23 @@ export default function AdminPage() {
     const supabase = createClient();
     const { error } = await supabase.from("matches").insert({ player_id: matchingPlayer.id, mentor_id: mentorId, status: "active" });
     if (error) { setCreateMsg(`Error: ${error.message}`); }
-    else { setMatchingPlayer(null); setCreateMsg(""); await load(); }
+    else {
+      const mentor = mentors.find(m => m.id === mentorId);
+      await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "match_created",
+          playerEmail: emails[matchingPlayer.id],
+          playerName: matchingPlayer.name,
+          mentorEmail: emails[mentorId],
+          mentorName: mentor?.name ?? "Your mentor",
+        }),
+      });
+      setMatchingPlayer(null);
+      setCreateMsg("");
+      await load();
+    }
     setCreating(false);
   }
 
