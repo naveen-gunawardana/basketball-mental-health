@@ -28,10 +28,6 @@ function formatScheduledAt(iso: string) {
   );
 }
 
-function isCallSoon(iso: string) {
-  const diff = new Date(iso).getTime() - Date.now();
-  return diff <= 15 * 60 * 1000 && diff >= -60 * 60 * 1000;
-}
 
 export function UpcomingCalls({ matchId, currentUserId, onJoin, refreshKey }: Props) {
   const [calls, setCalls] = useState<ScheduledCall[]>([]);

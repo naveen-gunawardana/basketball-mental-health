@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { UserPlus, Menu, X, MessageCircle } from "lucide-react";
+import { UserPlus, Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Logo } from "@/components/logo";
@@ -24,7 +24,6 @@ const authedNavItems = [
 
 export function Navigation() {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -121,13 +120,6 @@ export function Navigation() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
-
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
-  }
 
   const navItems = user ? authedNavItems : publicNavItems;
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";

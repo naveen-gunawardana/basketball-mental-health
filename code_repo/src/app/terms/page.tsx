@@ -17,12 +17,12 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-navy mb-2">1. Acceptance of Terms</h2>
-          <p>By creating an account or using Mentality Sports ("the Platform"), you agree to these Terms of Service. If you do not agree, do not use the Platform.</p>
+          <p>By creating an account or using Mentality Sports (&ldquo;the Platform&rdquo;), you agree to these Terms of Service. If you do not agree, do not use the Platform.</p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-navy mb-2">2. Who We Are</h2>
-          <p>Mentality Sports is a mentorship platform that connects athletes ("players") with current or former athletes ("mentors") for the purpose of mental performance support and personal development through sport.</p>
+          <p>Mentality Sports is a mentorship platform that connects athletes (&ldquo;players&rdquo;) with current or former athletes (&ldquo;mentors&rdquo;) for the purpose of mental performance support and personal development through sport.</p>
         </section>
 
         <section>
@@ -47,7 +47,7 @@ export default function TermsPage() {
             <li>Harass, bully, or threaten any other user</li>
             <li>Share false or misleading information</li>
             <li>Use the Platform for any commercial solicitation</li>
-            <li>Attempt to access other users' accounts or data</li>
+            <li>Attempt to access other users&apos; accounts or data</li>
             <li>Share explicit, harmful, or illegal content</li>
           </ul>
           <p className="mt-2">Violation of these rules may result in immediate account termination.</p>
@@ -70,7 +70,7 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-navy mb-2">10. Disclaimers</h2>
-          <p>The Platform is provided "as is." We make no warranties about the availability, accuracy, or fitness for a particular purpose of the Platform or its content. We are not liable for any damages arising from your use of the Platform.</p>
+          <p>The Platform is provided &ldquo;as is.&rdquo; We make no warranties about the availability, accuracy, or fitness for a particular purpose of the Platform or its content. We are not liable for any damages arising from your use of the Platform.</p>
         </section>
 
         <section>

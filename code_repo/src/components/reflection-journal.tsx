@@ -142,7 +142,7 @@ export function ReflectionJournal({ playerId }: Props) {
         <p className="text-sm text-muted-foreground">Loading...</p>
       ) : reflections.length === 0 ? (
         <div className="rounded-lg border border-dashed border-offWhite-400 p-8 text-center">
-          <p className="text-sm text-muted-foreground">Nothing yet. Hit Write whenever something's on your mind.</p>
+          <p className="text-sm text-muted-foreground">Nothing yet. Hit Write whenever something&apos;s on your mind.</p>
         </div>
       ) : (
         <div className="space-y-3">

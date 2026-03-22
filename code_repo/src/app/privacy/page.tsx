@@ -17,7 +17,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="text-lg font-semibold text-navy mb-2">1. Overview</h2>
-          <p>Mentality Sports ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard information when you use our platform. By using Mentality Sports, you agree to the practices described here.</p>
+          <p>Mentality Sports (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard information when you use our platform. By using Mentality Sports, you agree to the practices described here.</p>
         </section>
 
         <section>

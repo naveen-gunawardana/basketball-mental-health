@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   title: "Mentality Sports | Athlete Mentorship & Mental Performance",
   description:
     "Mentality Sports connects athletes with mentors who've lived it — real relationships built on mental resilience, honest sport guidance, and the support no coach is trained to give.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

@@ -9,12 +9,12 @@ interface Props {
   matchId: string;
   currentUserId: string;
   otherPersonName: string;
-  otherPersonId: string;
+  otherPersonId: string; // passed by parent, used for future features
   onClose: () => void;
   onScheduled: () => void;
 }
 
-export function ScheduleCallModal({ matchId, currentUserId, otherPersonName, otherPersonId, onClose, onScheduled }: Props) {
+export function ScheduleCallModal({ matchId, currentUserId, otherPersonName, onClose, onScheduled }: Props) {
   const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("15:00");
