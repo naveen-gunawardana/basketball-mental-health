@@ -10,7 +10,7 @@ interface Message {
   match_id: string;
   sender_id: string;
   content: string;
-  created_at: string;
+  created_at: string | null;
 }
 
 interface ChatWindowProps {

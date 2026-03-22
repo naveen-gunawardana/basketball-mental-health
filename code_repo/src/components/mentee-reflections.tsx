@@ -7,7 +7,7 @@ import { Globe } from "lucide-react";
 interface Reflection {
   id: string;
   content: string;
-  created_at: string;
+  created_at: string | null;
   player_id: string;
 }
 
@@ -35,8 +35,8 @@ export function MenteeReflections({ playerId, playerName }: Props) {
     load();
   }, [playerId]);
 
-  function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+  function formatDate(iso: string | null) {
+    return iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
   }
 
   return (

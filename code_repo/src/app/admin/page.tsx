@@ -16,13 +16,13 @@ interface MentorProfile {
   why: string | null; availability: string | null; approved: boolean;
 }
 interface Person {
-  id: string; name: string; role: string; sport: string | null; created_at: string;
+  id: string; name: string; role: string; sport: string | null; created_at: string | null;
   player_profiles: PlayerProfile | null;
   mentor_profiles: MentorProfile | null;
 }
-interface Match { id: string; status: string; created_at: string; meeting_url: string | null; player: Person; mentor: Person }
+interface Match { id: string; status: string; created_at: string | null; meeting_url: string | null; player: Person; mentor: Person }
 interface FlaggedSession { id: string; date: string | null; flag_reason: string | null; match_id: string; player_name: string; mentor_name: string }
-interface PendingArticle { id: string; title: string; category: string | null; excerpt: string | null; content: string; submitted_by_name: string | null; created_at: string }
+interface PendingArticle { id: string; title: string; category: string | null; excerpt: string | null; content: string; submitted_by_name: string | null; created_at: string | null }
 
 type MatchFilter = "all" | "matched" | "unmatched";
 

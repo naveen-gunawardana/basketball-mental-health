@@ -8,7 +8,7 @@ interface Reflection {
   id: string;
   content: string;
   shared_with_mentor: boolean;
-  created_at: string;
+  created_at: string | null;
 }
 
 interface Props {
@@ -70,8 +70,8 @@ export function ReflectionJournal({ playerId }: Props) {
     setDeletingId(null);
   }
 
-  function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+  function formatDate(iso: string | null) {
+    return iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
   }
 
   return (
