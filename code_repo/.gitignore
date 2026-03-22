@@ -37,3 +37,5 @@ next-env.d.ts
 
 # Windows reserved device name (created accidentally)
 nul
+
+.vercel

@@ -9,14 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Logo } from "@/components/logo";
 
-const publicNavItems = [
-  { href: "/", label: "Home" },
-  { href: "/advice", label: "Advice" },
-  { href: "/mentors", label: "Mentors" },
-  { href: "/dashboard", label: "Locker Room" },
-];
-
-const authedNavItems = [
+const navItems = [
   { href: "/", label: "Home" },
   { href: "/advice", label: "Advice" },
   { href: "/dashboard", label: "Locker Room" },
@@ -121,7 +114,6 @@ export function Navigation() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  const navItems = user ? authedNavItems : publicNavItems;
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";
 
   return (
