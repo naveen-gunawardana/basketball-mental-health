@@ -4,6 +4,19 @@
 - [ ] Post-match onboarding flow — when a player/mentor gets matched, walk them through the dashboard UI (intro tour, highlight key features like chat, goal setting, scheduling calls)
 
 ## Still Pending
+
+### Advice / Content
+- [ ] Add remaining YouTube videos to advice library — need to manually confirm video IDs from YouTube URLs. Videos to find:
+  - Kevin Love panic attack interview (ESPN)
+  - Noah Lyles post-Tokyo mental health interview (NBC Olympics)
+  - Caeleb Dressel — Graham Bensinger interview
+  - Naomi Osaka — GMA/TODAY 2021 interview
+  - Jarren Duran (Red Sox) — suicide attempt interview
+  - Jordan Burroughs visualization (Olympic Channel)
+  - Morgan's Message — lacrosse/Duke story
+  - Once IDs are confirmed, paste into this chat and they can be added instantly via migration
+
+
 - [ ] Upgrade Vercel to Pro plan (required for hourly cron jobs — currently daily)
 - [ ] Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel environment variables ← REQUIRED for signup + emails to work in prod
 - [ ] Add `CRON_SECRET=mentality-cron-2026` to Vercel environment variables

@@ -39,7 +39,20 @@ function renderMarkdown(text: string) {
         </p>
       );
     } else if (line.trim() === "") {
-      // skip blank lines (spacing handled by margins)
+      // skip blank lines
+    } else if (/^\[youtube:[a-zA-Z0-9_-]+\]$/.test(line.trim())) {
+      const videoId = line.trim().slice(9, -1);
+      elements.push(
+        <div key={i} className="my-8 rounded-xl overflow-hidden aspect-video w-full shadow-sm border border-offWhite-300">
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            title="YouTube video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full"
+          />
+        </div>
+      );
     } else {
       // Regular paragraph — handle inline **bold**
       const parts = line.split(/(\*\*[^*]+\*\*)/g);

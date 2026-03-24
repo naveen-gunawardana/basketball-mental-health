@@ -6,9 +6,12 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, MessageCircle, Video, CheckCircle } from "lucide-react";
 
 const heroImages = [
-  "/header_images/markus-spiske-oPDQGXW7i40-unsplash.jpg",
-  "/header_images/nik-shuliahin-BWRyS1-KKrs-unsplash.jpg",
   "/header_images/logan-weaver-lgnwvr-pZRX3qGeets-unsplash.jpg",
+  "/header_images/alliance-football-club-wBJuXJU3aw4-unsplash.jpg",
+  "/header_images/tim-mossholder-2BPbc98se38-unsplash.jpg",
+  "/header_images/nik-shuliahin-BWRyS1-KKrs-unsplash.jpg",
+  "/header_images/vince-fleming-aZVpxRydiJk-unsplash.jpg",
+  "/header_images/tim-mossholder-MVAyAV0yu-A-unsplash.jpg",
 ];
 
 const whoWeServe = [
