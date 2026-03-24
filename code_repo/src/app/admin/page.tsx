@@ -293,7 +293,7 @@ export default function AdminPage() {
                         <span className="text-xs text-muted-foreground">{playerCount} player{playerCount !== 1 ? "s" : ""}</span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{m.mentor_profiles?.playing_level ? ` · ${m.mentor_profiles.playing_level}` : ""}{m.mentor_profiles?.location ? ` · ${m.mentor_profiles.location}` : ""}</p>
+                    <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{m.mentor_profiles?.institution ? ` · ${m.mentor_profiles.institution}` : ""}{m.mentor_profiles?.playing_level ? ` · ${m.mentor_profiles.playing_level}` : ""}</p>
                   </button>
                 );
               })}
@@ -419,7 +419,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-navy">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">{p.sport ?? "—"}{pp?.grade ? ` · ${pp.grade}` : ""}{pp?.level ? ` · ${pp.level}` : ""}{pp?.location ? ` · ${pp.location}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{p.sport ?? "—"}{pp?.grade ? ` · ${pp.grade}` : ""}{pp?.school ? ` · ${pp.school}` : ""}{pp?.location ? ` · ${pp.location}` : ""}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -551,7 +551,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-navy">{m.name}</p>
-                        <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{mp?.playing_level ? ` · ${mp.playing_level}` : ""}{mp?.location ? ` · ${mp.location}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{mp?.institution ? ` · ${mp.institution}` : ""}{mp?.playing_level ? ` · ${mp.playing_level}` : ""}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">

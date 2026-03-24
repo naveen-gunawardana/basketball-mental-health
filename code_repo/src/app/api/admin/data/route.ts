@@ -23,8 +23,8 @@ export async function GET() {
   const [profilesRes, matchesRes, sessionsRes, articlesRes] = await Promise.all([
     admin.from("profiles").select(`
       id, name, role, sport, created_at,
-      player_profiles(age, school, grade, level, challenges, goal, availability),
-      mentor_profiles(college, years_played, skills, why, availability, approved)
+      player_profiles(age, school, grade, level, location, challenges, goal, availability, parent_name, parent_email, parent_phone),
+      mentor_profiles(institution, playing_level, location, years_played, skills, why, bio, mentee_age_pref, availability, approved)
     `).order("created_at", { ascending: false }),
     admin.from("matches").select("id, status, created_at, meeting_url, player:player_id(id, name, role, sport, created_at), mentor:mentor_id(id, name, role, sport, created_at)").order("created_at", { ascending: false }),
     admin.from("sessions").select("id, flagged, flag_reason, match_id, date"),
