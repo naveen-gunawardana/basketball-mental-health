@@ -1,5 +1,8 @@
 # TODO
 
+## Backlog / Future
+- [ ] Post-match onboarding flow — when a player/mentor gets matched, walk them through the dashboard UI (intro tour, highlight key features like chat, goal setting, scheduling calls)
+
 ## Still Pending
 - [ ] Upgrade Vercel to Pro plan (required for hourly cron jobs — currently daily)
 - [ ] Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel environment variables ← REQUIRED for signup + emails to work in prod
