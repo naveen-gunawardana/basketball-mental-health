@@ -102,8 +102,12 @@ export type Database = {
         Row: {
           approved: boolean
           availability: string | null
-          college: string | null
+          bio: string | null
           id: string
+          institution: string | null
+          location: string | null
+          mentee_age_pref: string | null
+          playing_level: string | null
           skills: string[] | null
           why: string | null
           years_played: number | null
@@ -111,8 +115,12 @@ export type Database = {
         Insert: {
           approved?: boolean
           availability?: string | null
-          college?: string | null
+          bio?: string | null
           id: string
+          institution?: string | null
+          location?: string | null
+          mentee_age_pref?: string | null
+          playing_level?: string | null
           skills?: string[] | null
           why?: string | null
           years_played?: number | null
@@ -120,8 +128,12 @@ export type Database = {
         Update: {
           approved?: boolean
           availability?: string | null
-          college?: string | null
+          bio?: string | null
           id?: string
+          institution?: string | null
+          location?: string | null
+          mentee_age_pref?: string | null
+          playing_level?: string | null
           skills?: string[] | null
           why?: string | null
           years_played?: number | null
@@ -145,6 +157,10 @@ export type Database = {
           grade: string | null
           id: string
           level: string | null
+          location: string | null
+          parent_email: string | null
+          parent_name: string | null
+          parent_phone: string | null
           school: string | null
         }
         Insert: {
@@ -155,6 +171,10 @@ export type Database = {
           grade?: string | null
           id: string
           level?: string | null
+          location?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
           school?: string | null
         }
         Update: {
@@ -165,6 +185,10 @@ export type Database = {
           grade?: string | null
           id?: string
           level?: string | null
+          location?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
           school?: string | null
         }
         Relationships: [

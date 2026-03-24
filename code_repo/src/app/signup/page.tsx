@@ -17,6 +17,24 @@ const sports = [
   "Cross Country", "Golf", "Gymnastics", "Other",
 ];
 
+const US_STATES = [
+  "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA",
+  "KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
+  "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT",
+  "VA","WA","WV","WI","WY","DC",
+];
+
+const playerGrades = ["6th", "7th", "8th", "9th", "10th", "11th", "12th", "College"];
+
+const playerLevels = [
+  "Middle school recreational",
+  "Middle school team / club",
+  "High school JV",
+  "High school Varsity",
+  "Club / AAU",
+  "College",
+];
+
 const mentalChallenges = [
   "Practice-to-game confidence gap",
   "Fear of making mistakes",
@@ -26,10 +44,12 @@ const mentalChallenges = [
   "Dealing with bench / less playing time",
   "Staying motivated",
   "Handling pressure moments",
-  "Team dynamics",
+  "Team dynamics / fitting in",
   "Injury recovery",
-  "Balancing athletics and academics",
+  "Balancing athletics and school",
   "Self-talk / inner critic",
+  "Burnout",
+  "Identity — my worth beyond sport",
 ];
 
 const mentorSkills = [
@@ -43,7 +63,26 @@ const mentorSkills = [
   "Team dynamics",
   "Injury recovery support",
   "Academic-athletic balance",
+  "Motivation & burnout",
+  "Identity & self-worth",
 ];
+
+const mentorPlayingLevels = [
+  "High School",
+  "College (D3)",
+  "College (D2)",
+  "College (D1)",
+  "Semi-Professional",
+  "Professional",
+];
+
+const menteeAgePrefs = [
+  "Middle school (6th–8th)",
+  "High school (9th–12th)",
+  "Any age",
+];
+
+const MIDDLE_SCHOOL_GRADES = new Set(["6th", "7th", "8th"]);
 
 export default function SignupPage() {
   return (
@@ -76,16 +115,28 @@ function SignupForm() {
   const [playerSchool, setPlayerSchool] = useState("");
   const [playerGrade, setPlayerGrade] = useState("");
   const [playerLevel, setPlayerLevel] = useState("");
+  const [playerLocation, setPlayerLocation] = useState("");
   const [playerChallenges, setPlayerChallenges] = useState<string[]>([]);
   const [playerGoal, setPlayerGoal] = useState("");
+  const [parentName, setParentName] = useState("");
+  const [parentEmail, setParentEmail] = useState("");
+  const [parentPhone, setParentPhone] = useState("");
+
+  // Shared availability (used for both roles)
+  const [availability, setAvailability] = useState("");
 
   // Mentor fields
   const [mentorSport, setMentorSport] = useState("");
-  const [mentorCollege, setMentorCollege] = useState("");
+  const [mentorPlayingLevel, setMentorPlayingLevel] = useState("");
+  const [mentorInstitution, setMentorInstitution] = useState("");
+  const [mentorLocation, setMentorLocation] = useState("");
   const [mentorYearsPlayed, setMentorYearsPlayed] = useState("");
   const [mentorSkillsSelected, setMentorSkillsSelected] = useState<string[]>([]);
   const [mentorWhy, setMentorWhy] = useState("");
-  const [mentorAvailability, setMentorAvailability] = useState("");
+  const [mentorBio, setMentorBio] = useState("");
+  const [menteeAgePref, setMenteeAgePref] = useState("");
+
+  const requiresParent = MIDDLE_SCHOOL_GRADES.has(playerGrade);
 
   function toggleItem(list: string[], item: string, setList: (v: string[]) => void) {
     setList(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
@@ -116,7 +167,6 @@ function SignupForm() {
     }
 
     if (data.user) {
-      // Use server-side API with service role to bypass RLS (user has no session yet)
       await fetch("/api/create-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -130,21 +180,28 @@ function SignupForm() {
             school: playerSchool || null,
             grade: playerGrade || null,
             level: playerLevel || null,
+            location: playerLocation || null,
             challenges: playerChallenges.length > 0 ? playerChallenges : null,
             goal: playerGoal || null,
-            availability: mentorAvailability || null,
+            availability: availability || null,
+            parent_name: parentName || null,
+            parent_email: parentEmail || null,
+            parent_phone: parentPhone || null,
           } : null,
           mentorProfile: role === "mentor" ? {
-            college: mentorCollege || null,
+            playing_level: mentorPlayingLevel || null,
+            institution: mentorInstitution || null,
+            location: mentorLocation || null,
             years_played: mentorYearsPlayed ? parseInt(mentorYearsPlayed) : null,
             skills: mentorSkillsSelected.length > 0 ? mentorSkillsSelected : null,
             why: mentorWhy || null,
-            availability: mentorAvailability || null,
+            bio: mentorBio || null,
+            mentee_age_pref: menteeAgePref || null,
+            availability: availability || null,
           } : null,
         }),
       });
 
-      // Send welcome email (fire-and-forget)
       fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -153,7 +210,6 @@ function SignupForm() {
     }
 
     setLoading(false);
-    // If no session, email confirmation is required
     if (!data.session) {
       router.push("/verify-email");
     } else {
@@ -161,7 +217,6 @@ function SignupForm() {
       router.refresh();
     }
   }
-
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
@@ -205,8 +260,8 @@ function SignupForm() {
             </div>
             <span className="text-xs text-muted-foreground hidden sm:block">
               {role === "player"
-                ? ["Basic Info", "Your Sport", "Mental Goals"][s - 1]
-                : ["Basic Info", "Your Sport", "Mentoring Focus"][s - 1]}
+                ? ["About You", "Your Sport", "Mental Goals"][s - 1]
+                : ["About You", "Your Background", "Mentoring Focus"][s - 1]}
             </span>
             {s < 3 && <div className={`flex-1 h-0.5 ${step > s ? "bg-navy" : "bg-muted"}`} />}
           </div>
@@ -221,7 +276,7 @@ function SignupForm() {
       </p>
 
       <form onSubmit={handleSubmit}>
-        {/* STEP 1 — basic info */}
+        {/* ── STEP 1 ── */}
         {step === 1 && (
           <Card>
             <CardHeader>
@@ -232,28 +287,112 @@ function SignupForm() {
               <Input label="Full Name" placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} required />
               <Input label="Email" type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
               <Input label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+
               {role === "player" && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
-                    <Input label="Age" type="number" placeholder="16" value={playerAge} onChange={(e) => setPlayerAge(e.target.value)} />
+                    <Input label="Age" type="number" placeholder="e.g. 14" value={playerAge} onChange={(e) => setPlayerAge(e.target.value)} />
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-foreground">Grade</label>
-                      <div className="flex gap-2">
-                        {["9th", "10th", "11th", "12th"].map((g) => (
-                          <button key={g} type="button" onClick={() => setPlayerGrade(g)}
-                            className={`flex-1 rounded-md border px-2 py-2 text-sm font-medium transition-colors ${playerGrade === g ? "bg-navy text-white border-navy" : "bg-white text-muted-foreground hover:bg-muted"}`}>
-                            {g}
-                          </button>
-                        ))}
-                      </div>
+                      <label className="mb-1.5 block text-sm font-medium text-foreground">State</label>
+                      <select
+                        value={playerLocation}
+                        onChange={(e) => setPlayerLocation(e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <option value="">Select state</option>
+                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
                     </div>
                   </div>
-                  <Input label="School" placeholder="Your school name" value={playerSchool} onChange={(e) => setPlayerSchool(e.target.value)} />
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">Grade</label>
+                    <div className="flex flex-wrap gap-2">
+                      {playerGrades.map((g) => (
+                        <button key={g} type="button" onClick={() => setPlayerGrade(g)}
+                          className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${playerGrade === g ? "bg-navy text-white border-navy" : "bg-white text-muted-foreground hover:bg-muted"}`}>
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Input label="School / Team" placeholder="Your school or team name" value={playerSchool} onChange={(e) => setPlayerSchool(e.target.value)} />
+
+                  {/* Parent/Guardian — required for 6th–8th grade */}
+                  {playerGrade && (
+                    <div className={`rounded-lg border p-4 space-y-3 ${requiresParent ? "border-orange-200 bg-orange-50/40" : "border-offWhite-300 bg-offWhite/40"}`}>
+                      <div>
+                        <p className="text-sm font-semibold text-navy">
+                          Parent / Guardian Contact
+                          {requiresParent && <span className="ml-1.5 text-xs text-orange-600 font-medium">(required for your grade)</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {requiresParent
+                            ? "We require a parent or guardian contact for athletes in middle school."
+                            : "Optional — helpful for keeping parents in the loop."}
+                        </p>
+                      </div>
+                      <Input
+                        label="Parent / Guardian Name"
+                        placeholder="Full name"
+                        value={parentName}
+                        onChange={(e) => setParentName(e.target.value)}
+                        required={requiresParent}
+                      />
+                      <Input
+                        label="Parent / Guardian Email"
+                        type="email"
+                        placeholder="parent@email.com"
+                        value={parentEmail}
+                        onChange={(e) => setParentEmail(e.target.value)}
+                        required={requiresParent}
+                      />
+                      <Input
+                        label="Parent / Guardian Phone"
+                        type="tel"
+                        placeholder="(555) 000-0000"
+                        value={parentPhone}
+                        onChange={(e) => setParentPhone(e.target.value)}
+                      />
+                    </div>
+                  )}
                 </>
               )}
+
               {role === "mentor" && (
-                <Input label="College / University" placeholder="Where you played" value={mentorCollege} onChange={(e) => setMentorCollege(e.target.value)} />
+                <>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">Highest / current playing level</label>
+                    <div className="flex flex-wrap gap-2">
+                      {mentorPlayingLevels.map((lvl) => (
+                        <button key={lvl} type="button" onClick={() => setMentorPlayingLevel(lvl)}
+                          className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${mentorPlayingLevel === lvl ? "bg-navy text-white border-navy" : "bg-white text-muted-foreground hover:bg-muted"}`}>
+                          {lvl}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <Input
+                    label="School / Team / Program"
+                    placeholder="e.g. State University, hometown club, etc."
+                    value={mentorInstitution}
+                    onChange={(e) => setMentorInstitution(e.target.value)}
+                  />
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">State</label>
+                    <select
+                      value={mentorLocation}
+                      onChange={(e) => setMentorLocation(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="">Select state</option>
+                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                </>
               )}
+
               <div className="flex justify-end">
                 <Button type="button" variant="secondary" onClick={() => setStep(2)}>
                   Next <ArrowRight className="h-4 w-4 ml-2" />
@@ -263,11 +402,13 @@ function SignupForm() {
           </Card>
         )}
 
-        {/* STEP 2 — sport / background */}
+        {/* ── STEP 2 ── */}
         {step === 2 && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Your Sport</CardTitle>
+              <CardTitle className="text-lg">
+                {role === "player" ? "Your Sport" : "Your Background"}
+              </CardTitle>
               <CardDescription>
                 {role === "player" ? "Tell us about your athletic background" : "Tell us about your playing background"}
               </CardDescription>
@@ -293,7 +434,7 @@ function SignupForm() {
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-foreground">Level of competition</label>
                   <div className="flex flex-wrap gap-2">
-                    {["Recreational", "School / Club", "Competitive / AAU", "Varsity"].map((l) => (
+                    {playerLevels.map((l) => (
                       <button key={l} type="button" onClick={() => setPlayerLevel(l)}
                         className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${playerLevel === l ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
                         {l}
@@ -304,15 +445,44 @@ function SignupForm() {
               )}
 
               {role === "mentor" && (
-                <Input label="Years of organized sport" type="number" placeholder="e.g., 8" value={mentorYearsPlayed} onChange={(e) => setMentorYearsPlayed(e.target.value)} />
+                <>
+                  <Input
+                    label="Years of organized sport"
+                    type="number"
+                    placeholder="e.g. 8"
+                    value={mentorYearsPlayed}
+                    onChange={(e) => setMentorYearsPlayed(e.target.value)}
+                  />
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">Who are you most comfortable mentoring?</label>
+                    <div className="flex flex-wrap gap-2">
+                      {menteeAgePrefs.map((pref) => (
+                        <button key={pref} type="button" onClick={() => setMenteeAgePref(pref)}
+                          className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${menteeAgePref === pref ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
+                          {pref}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">Short bio</label>
+                    <textarea
+                      value={mentorBio}
+                      onChange={(e) => setMentorBio(e.target.value)}
+                      rows={3}
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      placeholder="A few sentences about yourself as an athlete — what you've been through, what drives you to give back..."
+                    />
+                  </div>
+                </>
               )}
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Availability for weekly check-ins</label>
                 <div className="flex flex-wrap gap-2">
                   {["Weekday afternoons", "Weekday evenings", "Weekend mornings", "Weekend afternoons", "Flexible"].map((time) => (
-                    <button key={time} type="button" onClick={() => setMentorAvailability(time)}
-                      className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${mentorAvailability === time ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
+                    <button key={time} type="button" onClick={() => setAvailability(time)}
+                      className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${availability === time ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
                       {time}
                     </button>
                   ))}
@@ -331,7 +501,7 @@ function SignupForm() {
           </Card>
         )}
 
-        {/* STEP 3 — goals / challenges */}
+        {/* ── STEP 3 ── */}
         {step === 3 && (
           <Card>
             <CardHeader>
@@ -363,18 +533,18 @@ function SignupForm() {
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
                   {role === "player"
-                    ? "What's your #1 goal for the mentorship program?"
+                    ? "What's your #1 goal for this mentorship?"
                     : "Why do you want to be a mentor?"}
                 </label>
                 <textarea
                   value={role === "player" ? playerGoal : mentorWhy}
                   onChange={(e) => role === "player" ? setPlayerGoal(e.target.value) : setMentorWhy(e.target.value)}
-                  rows={3}
+                  rows={4}
                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   placeholder={
                     role === "player"
-                      ? "Example: I want to play with the same confidence in games that I have in practice..."
-                      : "Tell us about your motivation to help athletes..."
+                      ? "Example: I want to play with the same confidence in games that I have in practice. I get really anxious before big games and I need help managing that..."
+                      : "Tell us about your motivation to help athletes and what you hope to give them..."
                   }
                 />
               </div>

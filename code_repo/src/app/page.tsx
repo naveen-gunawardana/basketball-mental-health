@@ -24,7 +24,7 @@ const whoWeServe = [
     label: "Mentors",
     accent: "bg-orange-500",
     description:
-      "You've been through the mental grind of sport — the pressure, the setbacks, the growth. That lived experience is exactly what a younger athlete needs. Schedule calls whenever it works for both of you. We handle everything else.",
+      "You've been through the mental grind of sport — the pressure, the setbacks, the growth. That lived experience is exactly what a developing athlete needs. Schedule calls whenever it works for both of you. We handle everything else.",
     cta: "Apply to Mentor",
     href: "/signup?role=mentor",
   },
@@ -94,9 +94,9 @@ export default function Home() {
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-white">
                 1-on-1 mentorship
                 <br />
-                for high school
+                for the mental side
                 <br />
-                <em className="not-italic text-orange-400">athletes.</em>
+                <em className="not-italic text-orange-400">of sport.</em>
               </h1>
             </div>
 
@@ -127,7 +127,7 @@ export default function Home() {
                 >
                   <div>
                     <div className="text-sm font-bold">I want to be a Mentor</div>
-                    <div className="text-xs text-navy/50 font-normal mt-0.5">Give back to a student-athlete like you</div>
+                    <div className="text-xs text-navy/50 font-normal mt-0.5">Give back to the next generation of athletes</div>
                   </div>
                   <ArrowRight className="h-4 w-4 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
@@ -452,44 +452,44 @@ export default function Home() {
               {
                 initials: "JM",
                 name: "Jordan M.",
-                background: "D1 Basketball · 4 years",
+                background: "College Basketball · 4 years",
                 tags: ["Confidence", "Pressure moments"],
                 quote: "I spent two years riding the bench before I earned my starting spot. I know what that mental grind feels like — and how to get through it.",
               },
               {
                 initials: "AT",
                 name: "Alexis T.",
-                background: "D3 Soccer · 4 years",
+                background: "College Soccer · 4 years",
                 tags: ["Anxiety", "Identity & worth"],
-                quote: "I dealt with serious performance anxiety all through college. Nobody talked about it. I want to be the mentor I needed back then.",
+                quote: "I dealt with serious performance anxiety all the way through my playing career. Nobody talked about it. I want to be the mentor I needed back then.",
               },
               {
                 initials: "MR",
                 name: "Marcus R.",
-                background: "HS & Club Football · 6 years",
+                background: "Football · 6 years",
                 tags: ["Injury recovery", "Motivation"],
-                quote: "Tore my ACL junior year. The mental side of that recovery was harder than the physical. I&apos;ve been there.",
+                quote: "Tore my ACL in high school. The mental side of that recovery was harder than the physical. I've been there.",
               },
               {
                 initials: "SP",
                 name: "Simone P.",
-                background: "D1 Track & Field · 4 years",
+                background: "Track & Field · 5 years",
                 tags: ["Goal setting", "Burnout"],
                 quote: "When sport becomes your whole identity, losing or slowing down hits different. I help athletes separate who they are from what they do.",
               },
               {
                 initials: "DK",
                 name: "Devon K.",
-                background: "D2 Basketball · 4 years",
+                background: "College Basketball · 4 years",
                 tags: ["Coach communication", "Role & playing time"],
                 quote: "Transferred twice. Dealt with every version of the coach relationship problem. I can help you navigate those conversations.",
               },
               {
                 initials: "NW",
                 name: "Nia W.",
-                background: "Club & Varsity Volleyball · 5 years",
+                background: "Volleyball · 5 years",
                 tags: ["Team dynamics", "Resilience"],
-                quote: "Sport taught me resilience the hard way. I&apos;m here to help athletes build that strength before the hard moments come.",
+                quote: "Sport taught me resilience the hard way. I'm here to help athletes build that strength before the hard moments come.",
               },
             ].map((mentor) => (
               <div
@@ -517,12 +517,18 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-10 text-center">
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/signup?role=player"
               className="inline-flex items-center gap-1.5 rounded-sm bg-navy px-8 py-3.5 text-sm font-semibold text-white hover:bg-navy/80 transition-colors"
             >
-              Apply to be matched with a mentor <ArrowRight className="h-4 w-4" />
+              Apply to be matched <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/signup?role=mentor"
+              className="inline-flex items-center gap-1.5 rounded-sm border border-navy px-8 py-3.5 text-sm font-semibold text-navy hover:bg-navy/5 transition-colors"
+            >
+              Apply to be a Mentor <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -538,7 +544,7 @@ export default function Home() {
               </p>
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to get involved?</h2>
               <p className="text-white/55 leading-relaxed text-sm max-w-sm">
-                Whether you&apos;re an athlete looking for a real relationship with someone who gets the mental side, or a current or former player ready to give back — this is where it starts.
+                Whether you&apos;re an athlete looking for a real relationship with someone who gets the mental side of competing, or a current or former player ready to give back — this is where it starts.
               </p>
             </div>
             <div className="space-y-3">

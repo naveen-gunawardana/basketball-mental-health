@@ -9,11 +9,14 @@ import { Badge } from "@/components/ui/badge";
 
 interface PlayerProfile {
   age: number | null; school: string | null; grade: string | null;
-  level: string | null; challenges: string[] | null; goal: string | null; availability: string | null;
+  level: string | null; location: string | null; challenges: string[] | null;
+  goal: string | null; availability: string | null;
+  parent_name: string | null; parent_email: string | null; parent_phone: string | null;
 }
 interface MentorProfile {
-  college: string | null; years_played: number | null; skills: string[] | null;
-  why: string | null; availability: string | null; approved: boolean;
+  institution: string | null; playing_level: string | null; location: string | null;
+  years_played: number | null; skills: string[] | null; why: string | null;
+  bio: string | null; mentee_age_pref: string | null; availability: string | null; approved: boolean;
 }
 interface Person {
   id: string; name: string; role: string; sport: string | null; created_at: string | null;
@@ -290,7 +293,7 @@ export default function AdminPage() {
                         <span className="text-xs text-muted-foreground">{playerCount} player{playerCount !== 1 ? "s" : ""}</span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{m.sport ?? "—"} {m.mentor_profiles?.college ? `· ${m.mentor_profiles.college}` : ""}</p>
+                    <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{m.mentor_profiles?.playing_level ? ` · ${m.mentor_profiles.playing_level}` : ""}{m.mentor_profiles?.location ? ` · ${m.mentor_profiles.location}` : ""}</p>
                   </button>
                 );
               })}
@@ -416,7 +419,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-navy">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">{p.sport ?? "—"}{pp?.grade ? ` · ${pp.grade}` : ""}{pp?.school ? ` · ${pp.school}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{p.sport ?? "—"}{pp?.grade ? ` · ${pp.grade}` : ""}{pp?.level ? ` · ${pp.level}` : ""}{pp?.location ? ` · ${pp.location}` : ""}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -439,9 +442,22 @@ export default function AdminPage() {
                       )}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         {pp?.age && <div><p className="text-xs text-muted-foreground">Age</p><p className="font-medium text-navy">{pp.age}</p></div>}
+                        {pp?.grade && <div><p className="text-xs text-muted-foreground">Grade</p><p className="font-medium text-navy">{pp.grade}</p></div>}
                         {pp?.level && <div><p className="text-xs text-muted-foreground">Level</p><p className="font-medium text-navy">{pp.level}</p></div>}
+                        {pp?.location && <div><p className="text-xs text-muted-foreground">State</p><p className="font-medium text-navy">{pp.location}</p></div>}
+                        {pp?.school && <div className="col-span-2"><p className="text-xs text-muted-foreground">School / Team</p><p className="font-medium text-navy">{pp.school}</p></div>}
                         {pp?.availability && <div className="col-span-2"><p className="text-xs text-muted-foreground">Availability</p><p className="font-medium text-navy">{pp.availability}</p></div>}
                       </div>
+                      {(pp?.parent_name || pp?.parent_email || pp?.parent_phone) && (
+                        <div className="rounded-md border border-orange-100 bg-orange-50/40 px-3 py-2.5 space-y-1">
+                          <p className="text-xs font-semibold text-orange-700">Parent / Guardian</p>
+                          {pp.parent_name && <p className="text-xs text-navy">{pp.parent_name}</p>}
+                          {pp.parent_email && (
+                            <a href={`mailto:${pp.parent_email}`} className="block text-xs text-navy/70 underline underline-offset-2 hover:text-navy transition-colors">{pp.parent_email}</a>
+                          )}
+                          {pp.parent_phone && <p className="text-xs text-navy/70">{pp.parent_phone}</p>}
+                        </div>
+                      )}
                       {pp?.challenges && pp.challenges.length > 0 && (
                         <div>
                           <p className="text-xs text-muted-foreground mb-1.5">Challenges</p>
@@ -535,7 +551,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-navy">{m.name}</p>
-                        <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{mp?.college ? ` · ${mp.college}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{mp?.playing_level ? ` · ${mp.playing_level}` : ""}{mp?.location ? ` · ${mp.location}` : ""}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -559,9 +575,19 @@ export default function AdminPage() {
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-3 text-sm">
+                        {mp?.playing_level && <div><p className="text-xs text-muted-foreground">Playing level</p><p className="font-medium text-navy">{mp.playing_level}</p></div>}
                         {mp?.years_played && <div><p className="text-xs text-muted-foreground">Years played</p><p className="font-medium text-navy">{mp.years_played}</p></div>}
-                        {mp?.availability && <div><p className="text-xs text-muted-foreground">Availability</p><p className="font-medium text-navy">{mp.availability}</p></div>}
+                        {mp?.location && <div><p className="text-xs text-muted-foreground">State</p><p className="font-medium text-navy">{mp.location}</p></div>}
+                        {mp?.mentee_age_pref && <div><p className="text-xs text-muted-foreground">Prefers mentoring</p><p className="font-medium text-navy">{mp.mentee_age_pref}</p></div>}
+                        {mp?.institution && <div className="col-span-2"><p className="text-xs text-muted-foreground">School / Team</p><p className="font-medium text-navy">{mp.institution}</p></div>}
+                        {mp?.availability && <div className="col-span-2"><p className="text-xs text-muted-foreground">Availability</p><p className="font-medium text-navy">{mp.availability}</p></div>}
                       </div>
+                      {mp?.bio && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Bio</p>
+                          <p className="text-sm text-navy">{mp.bio}</p>
+                        </div>
+                      )}
                       {mp?.skills && mp.skills.length > 0 && (
                         <div>
                           <p className="text-xs text-muted-foreground mb-1.5">Can help with</p>
