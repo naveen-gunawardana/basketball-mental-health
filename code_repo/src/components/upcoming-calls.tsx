@@ -38,7 +38,6 @@ export function UpcomingCalls({ matchId, currentUserId, onJoin, refreshKey }: Pr
       .from("scheduled_calls")
       .select("id, scheduled_at, note, proposed_by")
       .eq("match_id", matchId)
-      .eq("status", "upcoming")
       .gte("scheduled_at", new Date(Date.now() - 60 * 60 * 1000).toISOString())
       .order("scheduled_at", { ascending: true })
       .limit(5);
@@ -49,7 +48,7 @@ export function UpcomingCalls({ matchId, currentUserId, onJoin, refreshKey }: Pr
 
   async function cancelCall(id: string) {
     const supabase = createClient();
-    await supabase.from("scheduled_calls").update({ status: "cancelled" } as never).eq("id", id);
+    await supabase.from("scheduled_calls").delete().eq("id", id);
     setCalls(prev => prev.filter(c => c.id !== id));
   }
 

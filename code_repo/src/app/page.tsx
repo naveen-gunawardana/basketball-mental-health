@@ -74,18 +74,18 @@ export default function Home() {
         {heroImages.map((src, i) => (
           <div
             key={src}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${i === heroIdx ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out ${i === heroIdx ? "opacity-100" : "opacity-0"}`}
           >
             <Image src={src} alt="" fill className="object-cover object-center" priority={i === 0} />
           </div>
         ))}
 
         {/* Layer 1: uniform dark tint so images don't overpower */}
-        <div className="absolute inset-0 bg-navy/60" />
+        <div className="absolute inset-0 bg-navy/60 pointer-events-none" />
         {/* Layer 2: diagonal gradient — left (text zone) much darker, fades to transparent bottom-right */}
-        <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/50 to-transparent pointer-events-none" />
         {/* Layer 3: subtle bottom fade into the stats bar */}
-        <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-navy/70 to-transparent" />
+        <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-navy/70 to-transparent pointer-events-none" />
 
 
         <div className="relative z-10 mx-auto max-w-7xl">

@@ -18,9 +18,10 @@ interface ChatWindowProps {
   currentUserId: string;
   otherPersonName: string;
   otherPersonAvatarUrl?: string | null;
+  fullHeight?: boolean;
 }
 
-export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPersonAvatarUrl }: ChatWindowProps) {
+export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPersonAvatarUrl, fullHeight }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -102,7 +103,7 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
   }
 
   return (
-    <div className="flex flex-col h-[420px]">
+    <div className={`flex flex-col ${fullHeight ? "h-full" : "h-[420px]"}`}>
       {/* Messages */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto space-y-3 pr-1 pb-2">
         {messages.length === 0 && (

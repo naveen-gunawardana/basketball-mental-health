@@ -117,7 +117,7 @@ export function Navigation() {
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-offWhite-300 shadow-sm">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-offWhite-300 shadow-sm transform-gpu">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo href="/" variant="dark" size="xs" />
 
