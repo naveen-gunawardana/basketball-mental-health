@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronDown, ChevronUp, PenLine, CalendarClock, Clock } from "lucide-react";
+import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronDown, ChevronUp, ChevronRight, PenLine, CalendarClock, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
 import { MenteeReflections } from "@/components/mentee-reflections";
@@ -27,7 +27,7 @@ interface SessionRecord {
   notes: string | null; flagged: boolean | null; flag_reason: string | null;
   match_id: string;
 }
-interface ShareArticle { slug: string; title: string }
+interface ShareArticle { slug: string; title: string; read_time: string | null }
 
 const TABS: { key: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "home",     label: "Home",     Icon: Home },
@@ -93,7 +93,7 @@ export default function MentorDashboard() {
 
       const { data: articleData } = await supabase
         .from("resources")
-        .select("slug, title")
+        .select("slug, title, read_time")
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .limit(3);
@@ -213,7 +213,7 @@ export default function MentorDashboard() {
   return (
     <div className="mx-auto max-w-4xl px-4 pb-24 pt-6 sm:px-6 lg:px-8 md:pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-5">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           {userId && (
             <AvatarUpload userId={userId} name={mentorName} avatarUrl={mentorAvatarUrl} />
@@ -377,10 +377,17 @@ export default function MentorDashboard() {
                       <Link key={res.slug} href={`/advice/${res.slug}`}
                         className="flex items-center gap-3 rounded-lg border p-3 hover:bg-offWhite transition-colors">
                         <BookOpen className="h-4 w-4 text-orange-500 shrink-0" />
-                        <span className="text-sm font-medium text-navy flex-1">{res.title}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-navy truncate">{res.title}</p>
+                          {res.read_time && <p className="text-xs text-muted-foreground">{res.read_time} read</p>}
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                       </Link>
                     ))}
                   </div>
+                  <Button asChild variant="ghost" className="w-full mt-3">
+                    <Link href="/advice">View all advice</Link>
+                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -429,7 +436,8 @@ export default function MentorDashboard() {
                 <div className="rounded-lg border-2 border-dashed border-offWhite-300 p-10 text-center">
                   <Calendar className="h-8 w-8 text-navy/20 mx-auto mb-2" />
                   <p className="text-sm font-medium text-navy mb-1">No sessions logged yet</p>
-                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white mt-3"
+                  <p className="text-xs text-muted-foreground mb-4">Log your first session after your check-in.</p>
+                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white"
                     onClick={() => { setSelectedMatchId(activeMatch.id); setLogOpen(true); }}>
                     Log first session
                   </Button>
