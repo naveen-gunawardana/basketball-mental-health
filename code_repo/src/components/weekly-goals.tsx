@@ -215,7 +215,7 @@ export function WeeklyGoals({ matchId }: { matchId: string; userId: string }) {
           /* ── READ MODE ── */
           <div className="space-y-4">
             <div className="flex gap-2">
-              {TABS.map(({ key, label, Icon, color }) => (
+              {TABS.map(({ key, label, Icon }) => (
                 <button key={key} type="button" onClick={() => setActiveTab(key)}
                   className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                     activeTab === key ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"
@@ -232,7 +232,6 @@ export function WeeklyGoals({ matchId }: { matchId: string; userId: string }) {
               </p>
               {(() => {
                 const score = goals[`${activeTab}_score` as keyof GoalRow] as number | null;
-                const tab = TABS.find(t => t.key === activeTab)!;
                 return score ? (
                   <div className="mt-3">
                     <ScoreBar score={score} color={
