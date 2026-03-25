@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -158,9 +158,13 @@ export default function AdminPage() {
     if (!matchingPlayer) return;
     setCreating(true);
     setCreateMsg("");
-    const supabase = createClient();
-    const { error } = await supabase.from("matches").insert({ player_id: matchingPlayer.id, mentor_id: mentorId, status: "active" });
-    if (error) { setCreateMsg(`Error: ${error.message}`); }
+    const res = await fetch("/api/admin/create-match", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerId: matchingPlayer.id, mentorId }),
+    });
+    const json = await res.json();
+    if (!res.ok) { setCreateMsg(`Error: ${json.error}`); }
     else {
       const mentor = mentors.find(m => m.id === mentorId);
       await fetch("/api/notify", {
@@ -182,8 +186,11 @@ export default function AdminPage() {
   }
 
   async function endMatch(matchId: string) {
-    const supabase = createClient();
-    await supabase.from("matches").update({ status: "inactive" }).eq("id", matchId);
+    await fetch("/api/admin/create-match", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId }),
+    });
     await load();
   }
 
@@ -220,10 +227,16 @@ export default function AdminPage() {
             <p className="text-xs text-muted-foreground">Mentality Sports — internal only</p>
           </div>
         </div>
-        <Link href="/admin/content"
-          className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
-          <BookOpen className="h-3.5 w-3.5" /> Manage Content
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/admin/analytics"
+            className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
+            <Activity className="h-3.5 w-3.5" /> Analytics
+          </Link>
+          <Link href="/admin/content"
+            className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
+            <BookOpen className="h-3.5 w-3.5" /> Manage Content
+          </Link>
+        </div>
         <div className="flex gap-4 text-center">
           {[
             { label: "Players", value: players.length },

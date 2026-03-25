@@ -3,6 +3,7 @@ import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { Logo } from "@/components/logo";
+import { Analytics } from "@vercel/analytics/next";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -60,6 +61,7 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} ${inter.variable} antialiased`}
       >
+        <Analytics />
         <Navigation />
         <main className="min-h-[calc(100vh-4rem)]">{children}</main>
         <footer className="border-t border-navy-700 bg-navy text-white">
