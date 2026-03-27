@@ -76,7 +76,7 @@ export default function Home() {
             key={src}
             className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ease-in-out ${i === heroIdx ? "opacity-100" : "opacity-0"}`}
           >
-            <Image src={src} alt="" fill className="object-cover object-center" priority={i === 0} />
+            <Image src={src} alt="" fill className="object-cover object-center pointer-events-none" priority={i === 0} />
           </div>
         ))}
 
