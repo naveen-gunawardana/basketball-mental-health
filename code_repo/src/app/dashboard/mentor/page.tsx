@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronDown, ChevronUp, ChevronRight, PenLine, CalendarClock, Clock } from "lucide-react";
+import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronDown, ChevronUp, ChevronRight, PenLine, CalendarClock, Clock, Award } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
 import { MenteeReflections } from "@/components/mentee-reflections";
@@ -431,6 +431,26 @@ export default function MentorDashboard() {
                   <Calendar className="h-3.5 w-3.5 mr-1.5" />Log Session
                 </Button>
               </div>
+
+              {/* Service hours summary */}
+              {activeSessions.length > 0 && (() => {
+                const totalMins = activeSessions.reduce((sum, s) => sum + 45, 0);
+                const totalHrs = (totalMins / 60).toFixed(1);
+                return (
+                  <div className="flex items-center justify-between rounded-lg border border-offWhite-300 bg-offWhite px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <Award className="h-4 w-4 text-navy/40 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-navy">{activeSessions.length} sessions — {totalHrs} hrs of mentorship</p>
+                        <p className="text-xs text-muted-foreground">Need to verify hours for your athletic program?</p>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" asChild className="shrink-0">
+                      <Link href="/dashboard/mentor/hours-report">View Report</Link>
+                    </Button>
+                  </div>
+                );
+              })()}
 
               {activeSessions.length === 0 ? (
                 <div className="rounded-lg border-2 border-dashed border-offWhite-300 p-10 text-center">

@@ -5,8 +5,9 @@
 
 ## Still Pending
 
-### Advice / Content
-- [ ] Add remaining YouTube videos to advice library — need to manually confirm video IDs from YouTube URLs. Videos to find:
+- [ ] Upgrade Vercel to Pro plan (required for hourly cron jobs — currently daily)
+- [ ] Add `CRON_SECRET=mentality-cron-2026` to Vercel environment variables
+- [ ] Add remaining YouTube videos to advice library — find video IDs for:
   - Kevin Love panic attack interview (ESPN)
   - Noah Lyles post-Tokyo mental health interview (NBC Olympics)
   - Caeleb Dressel — Graham Bensinger interview
@@ -14,16 +15,11 @@
   - Jarren Duran (Red Sox) — suicide attempt interview
   - Jordan Burroughs visualization (Olympic Channel)
   - Morgan's Message — lacrosse/Duke story
-  - Once IDs are confirmed, paste into this chat and they can be added instantly via migration
-
-
-- [ ] Upgrade Vercel to Pro plan (required for hourly cron jobs — currently daily)
-- [ ] Add `SUPABASE_SERVICE_ROLE_KEY` to Vercel environment variables ← REQUIRED for signup + emails to work in prod
-- [ ] Add `CRON_SECRET=mentality-cron-2026` to Vercel environment variables
-- [ ] Test all email flows end-to-end: welcome, match created, mentor approved, call scheduled, new message, article approved, call reminder
-- [ ] Reconnect Vercel GitHub integration for auto-deploys (Settings → Git)
 
 ## Done
+- [x] SUPABASE_SERVICE_ROLE_KEY added to Vercel env vars
+- [x] All email flows tested end-to-end
+- [x] Vercel GitHub integration reconnected for auto-deploys
 - [x] RESEND_API_KEY added to .env.local and Vercel env vars
 - [x] Resend sender domain set up for @mentalitysports.com
 - [x] Wire match_created email in admin page
