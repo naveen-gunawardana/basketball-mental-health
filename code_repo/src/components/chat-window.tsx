@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Send } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface Message {
   id: string;
@@ -29,7 +28,6 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
   const supabase = createClient();
 
   useEffect(() => {
-    // Load existing messages
     supabase
       .from("messages")
       .select("*")
@@ -40,20 +38,13 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
         if (data) setMessages(data);
       });
 
-    // Subscribe to new messages in real time
     const channel = supabase
       .channel(`messages:${matchId}`)
       .on(
         "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `match_id=eq.${matchId}`,
-        },
+        { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           setMessages((prev) => {
-            // Avoid duplicates if our own insert already came back optimistically
             if (prev.some((m) => m.id === payload.new.id)) return prev;
             return [...prev, payload.new as Message];
           });
@@ -61,12 +52,10 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId]);
 
-  // Scroll chat container to bottom on new messages — never touches page scroll
   useEffect(() => {
     const el = scrollContainerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -85,10 +74,8 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
     });
 
     if (error) {
-      // Restore input if failed
       setInput(content);
     } else {
-      // Notify recipient if they've been inactive (fire-and-forget)
       fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,13 +89,31 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
     return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   }
 
+  const firstName = otherPersonName.split(" ")[0];
+
   return (
-    <div className={`flex flex-col ${fullHeight ? "flex-1 min-h-0" : "h-[420px]"}`}>
+    <div className={`flex flex-col ${fullHeight ? "flex-1 min-h-0" : "h-[520px]"}`}>
+      {/* Compact person header */}
+      <div className="flex items-center gap-3 py-3 border-b border-slate-100 shrink-0">
+        {otherPersonAvatarUrl ? (
+          <img
+            src={otherPersonAvatarUrl}
+            alt={otherPersonName}
+            className="h-8 w-8 rounded-full object-cover shrink-0"
+          />
+        ) : (
+          <div className="h-8 w-8 rounded-full bg-navy/10 flex items-center justify-center text-navy text-xs font-bold shrink-0">
+            {initials(otherPersonName)}
+          </div>
+        )}
+        <p className="text-sm font-semibold text-navy">{otherPersonName}</p>
+      </div>
+
       {/* Messages */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto space-y-3 pr-1 pb-2">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto py-4 space-y-2.5 min-h-0">
         {messages.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center pt-8">
-            No messages yet — say hi!
+          <p className="text-sm text-slate-400 text-center pt-10">
+            No messages yet — say hi to {firstName}!
           </p>
         )}
         {messages.map((msg) => {
@@ -116,19 +121,17 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
           return (
             <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
               {!isMe && (
-                <div className="shrink-0">
+                <div className="shrink-0 mb-0.5">
                   {otherPersonAvatarUrl ? (
                     <img
                       src={otherPersonAvatarUrl}
                       alt={otherPersonName}
-                      className="h-7 w-7 rounded-full object-cover"
+                      className="h-6 w-6 rounded-full object-cover"
                     />
                   ) : (
-                    <Avatar className="h-7 w-7">
-                      <AvatarFallback className="text-[10px] bg-navy/10 text-navy">
-                        {initials(otherPersonName)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-600">
+                      {initials(otherPersonName)}
+                    </div>
                   )}
                 </div>
               )}
@@ -136,7 +139,7 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
                 className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
                   isMe
                     ? "bg-navy text-white rounded-br-sm"
-                    : "bg-offWhite text-navy rounded-bl-sm"
+                    : "bg-slate-100 text-navy rounded-bl-sm"
                 }`}
               >
                 {msg.content}
@@ -147,7 +150,7 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 border-t border-offWhite-300 pt-3 mt-1">
+      <div className="flex items-center gap-2 border-t border-slate-100 pt-3 pb-1 shrink-0">
         <input
           type="text"
           value={input}
@@ -158,14 +161,14 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
               send();
             }
           }}
-          placeholder={`Message ${otherPersonName.split(" ")[0]}...`}
-          className="flex-1 rounded-full border border-offWhite-300 bg-offWhite px-4 py-2 text-sm outline-none focus:border-navy/30 focus:ring-0 placeholder:text-muted-foreground"
+          placeholder={`Message ${firstName}...`}
+          className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-navy/40 focus:bg-white transition-colors placeholder:text-slate-400"
         />
         <button
           type="button"
           onClick={send}
           disabled={!input.trim() || sending}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-white transition-colors hover:bg-navy/80 disabled:opacity-40"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-white transition-colors hover:bg-navy/80 disabled:opacity-40"
         >
           <Send className="h-4 w-4" />
         </button>

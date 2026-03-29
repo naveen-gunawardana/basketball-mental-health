@@ -396,17 +396,16 @@ export default function PlayerDashboard() {
 
       {/* ── CHAT TAB ── */}
       {activeTab === "chat" && matchId && userId && mentor && (
-        <div className="flex flex-col overflow-hidden
-                        fixed inset-x-0 top-14 bottom-[60px] z-20 bg-white px-4 sm:px-6
-                        md:relative md:inset-auto md:bottom-auto md:z-auto md:bg-transparent md:px-0
-                        md:h-[calc(100dvh-220px)]">
-          <ChatWindow
-            matchId={matchId}
-            currentUserId={userId}
-            otherPersonName={mentor.name}
-            otherPersonAvatarUrl={mentor.avatar_url}
-            fullHeight
-          />
+        <div className="fixed inset-x-0 top-14 bottom-[60px] md:bottom-0 z-20 bg-white flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+            <ChatWindow
+              matchId={matchId}
+              currentUserId={userId}
+              otherPersonName={mentor.name}
+              otherPersonAvatarUrl={mentor.avatar_url}
+              fullHeight
+            />
+          </div>
         </div>
       )}
 
