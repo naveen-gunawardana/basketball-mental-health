@@ -183,7 +183,7 @@ export default function PlayerDashboard() {
   }
 
   return (
-    <div className={`mx-auto max-w-4xl px-4 pt-6 sm:px-6 lg:px-8 ${activeTab === "chat" ? "flex flex-col h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)]" : "pb-24 md:pb-10"}`}>
+    <div className={`mx-auto max-w-4xl px-4 pt-6 sm:px-6 lg:px-8 ${activeTab === "chat" ? "flex flex-col h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] pb-4" : "pb-24 md:pb-10"}`}>
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         {userId && (
