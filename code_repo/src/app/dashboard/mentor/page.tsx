@@ -548,7 +548,7 @@ export default function MentorDashboard() {
 
               {/* Service hours summary */}
               {activeSessions.length > 0 && (() => {
-                const totalMins = activeSessions.reduce((sum, s) => sum + 45, 0);
+                const totalMins = activeSessions.reduce((sum) => sum + 45, 0);
                 const totalHrs = (totalMins / 60).toFixed(1);
                 return (
                   <div className="flex items-center justify-between rounded-lg border border-offWhite-300 bg-offWhite px-4 py-3">
