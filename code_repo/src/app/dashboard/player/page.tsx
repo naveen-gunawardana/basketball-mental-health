@@ -183,7 +183,7 @@ export default function PlayerDashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pb-24 pt-6 sm:px-6 lg:px-8 md:pb-10">
+    <div className={`mx-auto max-w-4xl px-4 pt-6 sm:px-6 lg:px-8 ${activeTab === "chat" ? "flex flex-col h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)]" : "pb-24 md:pb-10"}`}>
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         {userId && (
@@ -396,16 +396,14 @@ export default function PlayerDashboard() {
 
       {/* ── CHAT TAB ── */}
       {activeTab === "chat" && matchId && userId && mentor && (
-        <div className="fixed inset-x-0 top-14 bottom-[60px] md:bottom-0 z-20 bg-white flex flex-col">
-          <div className="flex-1 flex flex-col min-h-0 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-            <ChatWindow
-              matchId={matchId}
-              currentUserId={userId}
-              otherPersonName={mentor.name}
-              otherPersonAvatarUrl={mentor.avatar_url}
-              fullHeight
-            />
-          </div>
+        <div className="flex-1 flex flex-col min-h-0">
+          <ChatWindow
+            matchId={matchId}
+            currentUserId={userId}
+            otherPersonName={mentor.name}
+            otherPersonAvatarUrl={mentor.avatar_url}
+            fullHeight
+          />
         </div>
       )}
 
