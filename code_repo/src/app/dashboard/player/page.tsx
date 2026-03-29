@@ -396,29 +396,17 @@ export default function PlayerDashboard() {
 
       {/* ── CHAT TAB ── */}
       {activeTab === "chat" && matchId && userId && mentor && (
-        <div className="flex flex-col" style={{ height: "calc(100vh - 220px)", minHeight: 400 }}>
-          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-offWhite-300">
-            {mentor.avatar_url ? (
-              <img src={mentor.avatar_url} alt={mentor.name} className="h-9 w-9 rounded-full object-cover" />
-            ) : (
-              <div className="h-9 w-9 rounded-full bg-navy flex items-center justify-center text-white text-sm font-bold">
-                {mentor.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <p className="font-semibold text-navy text-sm">{mentor.name}</p>
-              {mentor.sport && <p className="text-xs text-muted-foreground">{mentor.sport}</p>}
-            </div>
-          </div>
-          <div className="flex-1 min-h-0">
-            <ChatWindow
-              matchId={matchId}
-              currentUserId={userId}
-              otherPersonName={mentor.name}
-              otherPersonAvatarUrl={mentor.avatar_url}
-              fullHeight
-            />
-          </div>
+        <div className="flex flex-col overflow-hidden
+                        fixed inset-x-0 top-14 bottom-[60px] z-20 bg-white px-4 sm:px-6
+                        md:relative md:inset-auto md:bottom-auto md:z-auto md:bg-transparent md:px-0
+                        md:h-[calc(100dvh-220px)]">
+          <ChatWindow
+            matchId={matchId}
+            currentUserId={userId}
+            otherPersonName={mentor.name}
+            otherPersonAvatarUrl={mentor.avatar_url}
+            fullHeight
+          />
         </div>
       )}
 

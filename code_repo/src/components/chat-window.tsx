@@ -103,7 +103,7 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
   }
 
   return (
-    <div className={`flex flex-col ${fullHeight ? "h-full" : "h-[420px]"}`}>
+    <div className={`flex flex-col ${fullHeight ? "flex-1 min-h-0" : "h-[420px]"}`}>
       {/* Messages */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto space-y-3 pr-1 pb-2">
         {messages.length === 0 && (
