@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Home, MessageCircle, Calendar, BookOpen, ChevronDown, ChevronUp, CalendarClock, ChevronRight } from "lucide-react";
+import { Home, MessageCircle, Calendar, BookOpen, ChevronDown, ChevronUp, CalendarClock, ChevronRight, AlertTriangle, Lightbulb, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
 import { ReflectionJournal } from "@/components/reflection-journal";
@@ -20,8 +20,8 @@ type Tab = "home" | "chat" | "sessions" | "journal";
 
 interface Profile { name: string; sport: string | null; avatar_url: string | null }
 interface MentorInfo { id: string; name: string; sport: string | null; avatar_url: string | null }
-interface MatchData { id: string; meeting_url: string | null; mentor: MentorInfo }
-interface SessionRecord { id: string; date: string | null; topics: string[] | null; notes: string | null }
+interface MatchData { id: string; meeting_url: string | null; created_at: string; mentor: MentorInfo }
+interface SessionRecord { id: string; date: string | null; topics: string[] | null; notes: string | null; flagged: boolean | null; flag_reason: string | null }
 interface RecommendedArticle { slug: string; title: string; read_time: string | null }
 
 const TABS: { key: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
@@ -41,6 +41,7 @@ export default function PlayerDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [mentor, setMentor] = useState<MentorInfo | null>(null);
   const [matchId, setMatchId] = useState<string | null>(null);
+  const [matchCreatedAt, setMatchCreatedAt] = useState<string | null>(null);
   const { startCall, showPostCallBanner, dismissPostCallBanner } = useCallPresence(matchId);
   const [userId, setUserId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
@@ -59,7 +60,7 @@ export default function PlayerDashboard() {
 
       const { data: matchData } = await supabase
         .from("matches")
-        .select("id, meeting_url, mentor:mentor_id(id, name, sport, avatar_url)")
+        .select("id, meeting_url, created_at, mentor:mentor_id(id, name, sport, avatar_url)")
         .eq("player_id", user.id)
         .eq("status", "active")
         .maybeSingle();
@@ -67,11 +68,12 @@ export default function PlayerDashboard() {
       if (matchData) {
         const md = matchData as unknown as MatchData;
         setMatchId(md.id);
+        setMatchCreatedAt(md.created_at);
         setMentor(md.mentor);
 
         const { data: sessionData } = await supabase
           .from("sessions")
-          .select("id, date, topics, notes")
+          .select("id, date, topics, notes, flagged, flag_reason")
           .eq("match_id", matchData.id)
           .order("date", { ascending: false })
           .limit(20);
@@ -96,7 +98,7 @@ export default function PlayerDashboard() {
     const supabase = createClient();
     const { data } = await supabase
       .from("sessions")
-      .select("id, date, topics, notes")
+      .select("id, date, topics, notes, flagged, flag_reason")
       .eq("match_id", matchId)
       .order("date", { ascending: false })
       .limit(20);
@@ -238,8 +240,54 @@ export default function PlayerDashboard() {
       </div>
 
       {/* ── HOME TAB ── */}
-      {activeTab === "home" && (
+      {activeTab === "home" && (() => {
+        const matchAgeInDays = matchCreatedAt
+          ? Math.floor((Date.now() - new Date(matchCreatedAt).getTime()) / (1000 * 60 * 60 * 24))
+          : null;
+        const milestone =
+          sessions.length === 1
+            ? { title: "First session complete!", text: "You showed up. That's the hardest part — keep going." }
+            : sessions.length === 5
+            ? { title: "5 sessions in", text: "Five conversations that are already shaping your mental game." }
+            : matchAgeInDays !== null && matchAgeInDays >= 28 && matchAgeInDays <= 42
+            ? { title: "One month in", text: "Your consistency is what makes this work. Keep at it." }
+            : null;
+        const flaggedSessions = sessions.filter(s => s.flagged);
+        return (
         <div className="space-y-5">
+          {/* Milestone banner */}
+          {milestone && (
+            <div className="flex items-center gap-3 rounded-lg border border-gold-200 bg-gold-50 px-4 py-3">
+              <Trophy className="h-4 w-4 text-gold-500 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-navy">{milestone.title}</p>
+                <p className="text-xs text-muted-foreground">{milestone.text}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Session prep — mirrors what mentor sees for flagged sessions */}
+          {flaggedSessions.length > 0 && (
+            <Card className="border-amber-200 bg-amber-50/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />Before your next call
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {flaggedSessions.map(s => (
+                    <div key={s.id} className="flex items-start gap-2 text-sm">
+                      <span className="text-amber-500 shrink-0 mt-0.5">•</span>
+                      <span className="text-navy">{s.flag_reason ?? "Your mentor noted something to follow up on."}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">Your mentor flagged this for your next conversation.</p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Upcoming calls */}
           {matchId && userId && (
             <Card>
@@ -258,6 +306,36 @@ export default function PlayerDashboard() {
                 <Button size="sm" variant="outline" className="mt-3 w-full" onClick={() => setShowScheduleModal(true)}>
                   <CalendarClock className="h-3.5 w-3.5 mr-1.5" />Schedule a Call
                 </Button>
+                <p className="text-xs text-muted-foreground mt-2 text-center">Most pairs meet 2x/month for 30 mins.</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* First session guide — shown until first session is logged */}
+          {sessions.length === 0 && (
+            <Card className="border-orange-200 bg-orange-50/40">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-orange-500" />Your first call — what to expect
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">Your mentor is here to listen, not judge. It&apos;s a conversation, not a performance.</p>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-2">Things you can talk about</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      "What's been hardest for you mentally this season",
+                      "What your goals are — beyond just winning",
+                      "What kind of support you're actually looking for",
+                    ].map(q => (
+                      <li key={q} className="flex items-start gap-2 text-sm text-navy">
+                        <span className="text-orange-400 shrink-0 mt-0.5">•</span>{q}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="text-xs text-muted-foreground">It&apos;s okay if it feels a little awkward — that&apos;s normal. Just show up and be honest.</p>
               </CardContent>
             </Card>
           )}
@@ -313,7 +391,8 @@ export default function PlayerDashboard() {
             </CardContent>
           </Card>
         </div>
-      )}
+        );
+      })()}
 
       {/* ── CHAT TAB ── */}
       {activeTab === "chat" && matchId && userId && mentor && (

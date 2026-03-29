@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronDown, ChevronUp, ChevronRight, PenLine, CalendarClock, Clock, Award } from "lucide-react";
+import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronDown, ChevronUp, ChevronRight, PenLine, CalendarClock, Clock, Award, Lightbulb, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
 import { MenteeReflections } from "@/components/mentee-reflections";
@@ -21,13 +21,32 @@ type Tab = "home" | "chat" | "sessions" | "mentee";
 
 interface PlayerProfile { grade: string | null; school: string | null; level: string | null; challenges: string[] | null; goal: string | null }
 interface Mentee { id: string; name: string; sport: string | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
-interface Match { id: string; meeting_url: string | null; player: Mentee }
+interface Match { id: string; meeting_url: string | null; created_at: string; player: Mentee }
 interface SessionRecord {
   id: string; date: string | null; topics: string[] | null;
   notes: string | null; flagged: boolean | null; flag_reason: string | null;
   match_id: string;
 }
 interface ShareArticle { slug: string; title: string; read_time: string | null }
+
+const CONVERSATION_STARTERS: [string, string][] = [
+  ["confidence",    "Tell me about a time you played your best — what was going through your mind?"],
+  ["anxiety",       "Walk me through what your head is like in the hour before a game."],
+  ["pre-game",      "Walk me through what your head is like in the hour before a game."],
+  ["team dynamics", "How would you describe the team chemistry right now?"],
+  ["pressure",      "What kind of pressure feels hardest to manage — internal expectations or external?"],
+  ["goal setting",  "If we focus on one mental area this season, what would make the biggest difference?"],
+  ["focus",         "When do you feel most locked in? What's different about those moments?"],
+  ["losses",        "How do you handle a tough loss in the 24 hours after a game?"],
+  ["resilience",    "Tell me about a setback you had to bounce back from — on or off the field."],
+  ["motivation",    "What keeps you going on the days you don't want to show up?"],
+  ["self-talk",     "What does your internal voice sound like in a high-pressure moment?"],
+  ["leadership",    "How do you see your role in setting the tone for your team?"],
+  ["academic",      "How are you managing the mental load of school and sport together?"],
+  ["injury",        "How has the injury affected how you see yourself as an athlete?"],
+  ["communication", "Is there something you've been wanting to say to a teammate or coach but haven't?"],
+  ["time",          "What part of your schedule feels hardest to control right now?"],
+];
 
 const TABS: { key: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "home",     label: "Home",     Icon: Home },
@@ -71,7 +90,7 @@ export default function MentorDashboard() {
 
       const { data: matchData } = await supabase
         .from("matches")
-        .select("id, meeting_url, player:player_id(id, name, sport, avatar_url, player_profiles(grade, school, level, challenges, goal))")
+        .select("id, meeting_url, created_at, player:player_id(id, name, sport, avatar_url, player_profiles(grade, school, level, challenges, goal))")
         .eq("mentor_id", user.id)
         .eq("status", "active");
 
@@ -111,6 +130,36 @@ export default function MentorDashboard() {
 
   const { startCall, showPostCallBanner, dismissPostCallBanner } = useCallPresence(activeMatch?.id ?? null);
   const activeSessions = activeMatch ? sessions.filter(s => s.match_id === activeMatch.id) : [];
+
+  const matchAgeInDays = activeMatch?.created_at
+    ? Math.floor((Date.now() - new Date(activeMatch.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+  const milestone =
+    activeSessions.length === 1
+      ? { title: "First session complete!", text: "You've officially started. Keep the momentum going." }
+      : activeSessions.length === 5
+      ? { title: "5 sessions in", text: `${activeMatch?.player.name.split(" ")[0]} is lucky to have a mentor who keeps showing up.` }
+      : matchAgeInDays !== null && matchAgeInDays >= 28 && matchAgeInDays <= 42
+      ? { title: "One month together", text: "Consistency is the foundation of trust. You're building something real." }
+      : null;
+
+  const conversationStarters = (() => {
+    const challenges = activeMatch?.player.player_profiles?.challenges ?? [];
+    const seen = new Set<string>();
+    const results: string[] = [];
+    for (const c of challenges) {
+      const lower = c.toLowerCase();
+      for (const [key, starter] of CONVERSATION_STARTERS) {
+        if (lower.includes(key) && !seen.has(starter)) {
+          seen.add(starter);
+          results.push(starter);
+          break;
+        }
+      }
+      if (results.length >= 3) break;
+    }
+    return results;
+  })();
 
   function switchMentee(playerId: string) {
     setActiveMenteeId(playerId);
@@ -305,6 +354,17 @@ export default function MentorDashboard() {
           {/* ── HOME TAB ── */}
           {activeTab === "home" && (
             <div className="space-y-5">
+              {/* Milestone banner */}
+              {milestone && (
+                <div className="flex items-center gap-3 rounded-lg border border-gold-200 bg-gold-50 px-4 py-3">
+                  <Trophy className="h-4 w-4 text-gold-500 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-navy">{milestone.title}</p>
+                    <p className="text-xs text-muted-foreground">{milestone.text}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Upcoming calls */}
               {userId && activeMatch && (
                 <Card>
@@ -323,6 +383,50 @@ export default function MentorDashboard() {
                     <Button size="sm" variant="outline" className="mt-3 w-full" onClick={() => setShowScheduleModal(true)}>
                       <CalendarClock className="h-3.5 w-3.5 mr-1.5" />Schedule a Call
                     </Button>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">Most pairs meet 2x/month for 30 mins.</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* First session guide — shown until first session is logged */}
+              {activeSessions.length === 0 && (
+                <Card className="border-orange-200 bg-orange-50/40">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4 text-orange-500" />Your first call — a quick guide
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-2">15-min agenda</p>
+                      <div className="space-y-2">
+                        {([
+                          ["0–3 min",   "Quick intro — who you are, how you got into this"],
+                          ["3–8 min",   "Let them talk — what's been hard mentally this season"],
+                          ["8–12 min",  "Share one experience from your career that connects"],
+                          ["12–15 min", "Agree on one thing to focus on next time"],
+                        ] as [string, string][]).map(([time, text]) => (
+                          <div key={time} className="flex gap-3 text-sm">
+                            <span className="text-xs font-mono text-muted-foreground shrink-0 w-16 mt-0.5">{time}</span>
+                            <span className="text-navy">{text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-2">Good opening questions</p>
+                      <ul className="space-y-1.5">
+                        {[
+                          "What made you sign up for Mentality Sports?",
+                          "What does a tough game look like for you mentally?",
+                          "What would a win look like this season — beyond the scoreboard?",
+                        ].map(q => (
+                          <li key={q} className="flex items-start gap-2 text-sm text-navy">
+                            <span className="text-orange-400 shrink-0 mt-0.5">•</span>{q}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -367,6 +471,28 @@ export default function MentorDashboard() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Conversation starters based on athlete's challenges */}
+              {conversationStarters.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4 text-navy/40" />
+                      Talking points for {activeMatch.player.name.split(" ")[0]}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {conversationStarters.map((starter, i) => (
+                        <li key={i} className="flex items-start gap-2.5 text-sm">
+                          <span className="text-orange-400 font-semibold shrink-0 mt-0.5">{i + 1}.</span>
+                          <span className="text-navy leading-snug">{starter}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Share with mentee */}
               <Card>
