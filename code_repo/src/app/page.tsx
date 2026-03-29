@@ -450,77 +450,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              {
-                initials: "JM",
-                name: "Jordan M.",
-                background: "College Basketball · 4 years",
-                tags: ["Confidence", "Pressure moments"],
-                quote: "I spent two years riding the bench before I earned my starting spot. I know what that mental grind feels like — and how to get through it.",
-              },
-              {
-                initials: "AT",
-                name: "Alexis T.",
-                background: "College Soccer · 4 years",
-                tags: ["Anxiety", "Identity & worth"],
-                quote: "I dealt with serious performance anxiety all the way through my playing career. Nobody talked about it. I want to be the mentor I needed back then.",
-              },
-              {
-                initials: "MR",
-                name: "Marcus R.",
-                background: "Football · 6 years",
-                tags: ["Injury recovery", "Motivation"],
-                quote: "Tore my ACL in high school. The mental side of that recovery was harder than the physical. I've been there.",
-              },
-              {
-                initials: "SP",
-                name: "Simone P.",
-                background: "Track & Field · 5 years",
-                tags: ["Goal setting", "Burnout"],
-                quote: "When sport becomes your whole identity, losing or slowing down hits different. I help athletes separate who they are from what they do.",
-              },
-              {
-                initials: "DK",
-                name: "Devon K.",
-                background: "College Basketball · 4 years",
-                tags: ["Coach communication", "Role & playing time"],
-                quote: "Transferred twice. Dealt with every version of the coach relationship problem. I can help you navigate those conversations.",
-              },
-              {
-                initials: "NW",
-                name: "Nia W.",
-                background: "Volleyball · 5 years",
-                tags: ["Team dynamics", "Resilience"],
-                quote: "Sport taught me resilience the hard way. I'm here to help athletes build that strength before the hard moments come.",
-              },
-            ].map((mentor) => (
-              <div
-                key={mentor.name}
-                className="bg-white rounded-sm border border-offWhite-300 p-6 flex flex-col gap-4 hover:border-offWhite-400 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white text-sm font-bold shrink-0">
-                    {mentor.initials}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-navy text-sm">{mentor.name}</p>
-                    <p className="text-xs text-muted-foreground">{mentor.background}</p>
-                  </div>
-                </div>
-                <p className="text-sm text-navy/65 leading-relaxed flex-1 italic">&ldquo;{mentor.quote}&rdquo;</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {mentor.tags.map((tag) => (
-                    <span key={tag} className="rounded-sm bg-offWhite px-2.5 py-1 text-xs font-medium text-navy/60 border border-offWhite-300">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/signup?role=player"
               className="inline-flex items-center gap-1.5 rounded-sm bg-navy px-8 py-3.5 text-sm font-semibold text-white hover:bg-navy/80 transition-colors"
