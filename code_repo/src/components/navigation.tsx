@@ -8,6 +8,7 @@ import { UserPlus, Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Logo } from "@/components/logo";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -119,10 +120,15 @@ export function Navigation() {
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-offWhite-300 shadow-sm transform-gpu">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Logo href="/" variant="dark" size="xs" />
+        <div className="flex items-center gap-2.5">
+          <Logo href="/" variant="dark" size="xs" />
+          <span className="hidden sm:inline-block text-[9px] font-bold uppercase tracking-widest text-navy/30 border border-navy/15 rounded-sm px-1.5 py-0.5 leading-tight">
+            501(c)(3)
+          </span>
+        </div>
 
         {/* Desktop — links + actions on right */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-0.5">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -134,14 +140,23 @@ export function Navigation() {
                 href={item.href}
                 onClick={() => { if (item.href === "/dashboard") markRead(); }}
                 className={cn(
-                  "relative px-3 py-1.5 text-sm font-medium transition-colors rounded-md",
-                  isActive ? "text-navy" : "text-navy/45 hover:text-navy/80"
+                  "group relative px-3.5 py-2 text-sm font-medium transition-colors duration-150",
+                  isActive ? "text-navy" : "text-navy/40 hover:text-navy"
                 )}
               >
-                {isActive && (
-                  <span className="absolute bottom-0 left-3 right-3 h-px bg-orange-400 rounded-full" />
-                )}
                 {item.label}
+                {/* Active underline */}
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-underline"
+                    className="absolute bottom-0 left-3 right-3 h-[1.5px] bg-orange-400 rounded-full"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                {/* Hover underline (non-active) */}
+                {!isActive && (
+                  <span className="absolute bottom-0 left-3 right-3 h-[1.5px] bg-navy/20 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
+                )}
                 {showBadge && (
                   <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">
                     {unreadCount > 9 ? "9+" : unreadCount}
@@ -192,8 +207,15 @@ export function Navigation() {
       </div>
 
       {/* Mobile menu */}
+      <AnimatePresence>
       {mobileOpen && (
-        <div className="md:hidden border-t border-offWhite-300 bg-white px-4 py-3 space-y-0.5">
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+          className="md:hidden border-t border-offWhite-300 bg-white px-4 py-3 space-y-0.5"
+        >
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -238,8 +260,9 @@ export function Navigation() {
               </Link>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </nav>
   );
 }

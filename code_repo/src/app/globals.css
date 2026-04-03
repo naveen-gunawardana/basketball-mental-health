@@ -66,6 +66,13 @@
   .label-tag {
     @apply text-xs font-semibold uppercase tracking-[0.12em] text-orange-500;
   }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 html {
