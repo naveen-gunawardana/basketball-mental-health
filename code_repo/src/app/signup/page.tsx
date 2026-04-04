@@ -251,6 +251,19 @@ function SignupForm() {
         ))}
       </div>
 
+      {/* Mentor volunteer notice */}
+      {role === "mentor" && (
+        <div className="max-w-md mx-auto mb-6 rounded-lg bg-orange-50 border border-orange-200 px-4 py-3 flex gap-3 items-start">
+          <span className="text-orange-500 mt-0.5 text-base leading-none">♥</span>
+          <div>
+            <p className="text-sm font-semibold text-navy">This is a volunteer role</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Mentors are current or former athletes giving back — no payment is involved.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Progress steps */}
       <div className="flex items-center gap-2 mb-8">
         {[1, 2, 3].map((s) => (

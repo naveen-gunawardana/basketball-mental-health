@@ -11,7 +11,7 @@ interface LogoProps {
 }
 
 export function Logo({ href = "/", className, variant = "dark", size = "md" }: LogoProps) {
-  const sizes = { xs: 60, sm: 80, md: 110, lg: 160 };
+  const sizes = { xs: 48, sm: 80, md: 110, lg: 160 };
   const w = sizes[size];
   const h = Math.round(w * 0.35);
 

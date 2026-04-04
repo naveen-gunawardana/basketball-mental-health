@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { UserPlus, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Logo } from "@/components/logo";
@@ -48,7 +48,6 @@ export function Navigation() {
 
     matchIdRef.current = match.id;
 
-    // If already on dashboard, mark as read immediately
     if (window.location.pathname.startsWith("/dashboard")) {
       markRead();
       return;
@@ -69,9 +68,7 @@ export function Navigation() {
         event: "INSERT", schema: "public", table: "messages",
         filter: `match_id=eq.${match.id}`,
       }, (payload) => {
-        if (payload.new.sender_id !== userId) {
-          setUnreadCount((n) => n + 1);
-        }
+        if (payload.new.sender_id !== userId) setUnreadCount((n) => n + 1);
       })
       .subscribe();
 
@@ -107,161 +104,211 @@ export function Navigation() {
     };
   }, []);
 
-  // Mark as read whenever user is on the dashboard
   useEffect(() => {
-    if (pathname.startsWith("/dashboard")) {
-      markRead();
-    }
+    if (pathname.startsWith("/dashboard")) markRead();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-offWhite-300 shadow-sm transform-gpu">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2.5">
-          <Logo href="/" variant="dark" size="xs" />
-          <span className="hidden sm:inline-block text-[9px] font-bold uppercase tracking-widest text-navy/30 border border-navy/15 rounded-sm px-1.5 py-0.5 leading-tight">
-            501(c)(3)
-          </span>
-        </div>
+    <nav className="sticky top-0 z-50 bg-white/96 backdrop-blur-md transform-gpu">
+      {/* Orange top accent line */}
+      <div className="h-[2px] w-full bg-orange-500" />
 
-        {/* Desktop — links + actions on right */}
-        <div className="hidden md:flex items-center gap-0.5">
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/" && pathname.startsWith(item.href));
-            const showBadge = item.href === "/dashboard" && unreadCount > 0;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => { if (item.href === "/dashboard") markRead(); }}
-                className={cn(
-                  "group relative px-3.5 py-2 text-sm font-medium transition-colors duration-150",
-                  isActive ? "text-navy" : "text-navy/40 hover:text-navy"
-                )}
-              >
-                {item.label}
-                {/* Active underline */}
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-underline"
-                    className="absolute bottom-0 left-3 right-3 h-[1.5px] bg-orange-400 rounded-full"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-                {/* Hover underline (non-active) */}
-                {!isActive && (
-                  <span className="absolute bottom-0 left-3 right-3 h-[1.5px] bg-navy/20 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
-                )}
-                {showBadge && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">
-                    {unreadCount > 9 ? "9+" : unreadCount}
+      {/* Bottom border */}
+      <div className="border-b border-offWhite-300">
+        <div className="mx-auto flex h-[52px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+
+          {/* Left — logo + badge */}
+          <div className="flex items-center gap-3">
+            <Logo href="/" variant="dark" size="xs" />
+            <span className="hidden sm:inline-block text-[8px] font-bold uppercase tracking-[0.15em] text-navy/25 leading-tight">
+              501(c)(3)
+            </span>
+          </div>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-6">
+            {navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(item.href));
+              const showBadge = item.href === "/dashboard" && unreadCount > 0;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => { if (item.href === "/dashboard") markRead(); }}
+                  className={cn(
+                    "relative flex flex-col items-center gap-[3px] transition-colors duration-150",
+                    isActive ? "text-navy" : "text-navy/35 hover:text-navy/70"
+                  )}
+                >
+                  <span className="text-[11px] font-bold uppercase tracking-[0.14em]">
+                    {item.label}
                   </span>
-                )}
-              </Link>
-            );
-          })}
+                  {/* Active dot */}
+                  {isActive ? (
+                    <motion.span
+                      layoutId="nav-dot"
+                      className="h-[3px] w-[3px] rounded-full bg-orange-500"
+                      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                    />
+                  ) : (
+                    <span className="h-[3px] w-[3px] rounded-full bg-transparent" />
+                  )}
+                  {showBadge && (
+                    <span className="absolute -top-1.5 -right-2.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-[8px] font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
 
-          <div className="ml-3 flex items-center gap-3 pl-3 border-l border-current/10">
+          {/* Right — auth */}
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <Link
                 href="/profile"
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold overflow-hidden transition-all ring-2",
-                    "ring-navy/20 hover:ring-navy/40 text-navy"
-                )}
                 title="Your profile"
+                className="flex h-7 w-7 items-center justify-center rounded-full overflow-hidden ring-1 ring-navy/15 hover:ring-navy/35 transition-all text-xs font-bold text-navy"
               >
                 {avatarUrl ? (
                   <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="w-full h-full flex items-center justify-center bg-navy/10">
+                  <span className="w-full h-full flex items-center justify-center bg-navy/8">
                     {displayName.charAt(0).toUpperCase()}
                   </span>
                 )}
               </Link>
             ) : (
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-400 transition-colors"
-              >
-                <UserPlus className="h-3.5 w-3.5" />
-                Sign Up
-              </Link>
+              <>
+                <Link
+                  href="/signin"
+                  className="text-[11px] font-bold uppercase tracking-[0.12em] text-navy/40 hover:text-navy transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="group inline-flex items-center gap-2 bg-navy px-4 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-white hover:bg-navy/85 transition-colors"
+                >
+                  Join
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </>
             )}
           </div>
-        </div>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          className="md:hidden p-2 rounded-md transition-colors text-navy/60 hover:text-navy"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+          {/* Mobile toggle */}
+          <button
+            type="button"
+            className="md:hidden p-1.5 text-navy/50 hover:text-navy transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {mobileOpen ? (
+                <motion.span key="x" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <X className="h-5 w-5" />
+                </motion.span>
+              ) : (
+                <motion.span key="menu" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <Menu className="h-5 w-5" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
       <AnimatePresence>
-      {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-          className="md:hidden border-t border-offWhite-300 bg-white px-4 py-3 space-y-0.5"
-        >
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/" && pathname.startsWith(item.href));
-            const showBadge = item.href === "/dashboard" && unreadCount > 0;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => { setMobileOpen(false); if (item.href === "/dashboard") setUnreadCount(0); }}
-                className={cn(
-                  "flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive ? "text-navy bg-navy/8" : "text-navy/50 hover:text-navy hover:bg-navy/5"
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="md:hidden overflow-hidden bg-white border-b border-offWhite-300"
+          >
+            <div className="px-4 pt-2 pb-4">
+              {navItems.map((item, i) => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/" && pathname.startsWith(item.href));
+                const showBadge = item.href === "/dashboard" && unreadCount > 0;
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.2 }}
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={() => { setMobileOpen(false); if (item.href === "/dashboard") setUnreadCount(0); }}
+                      className={cn(
+                        "flex items-center justify-between py-3.5 border-b border-offWhite-300 last:border-0",
+                        isActive ? "text-navy" : "text-navy/40"
+                      )}
+                    >
+                      <span className="text-[11px] font-bold uppercase tracking-[0.14em]">{item.label}</span>
+                      <div className="flex items-center gap-2">
+                        {showBadge && (
+                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                          </span>
+                        )}
+                        {isActive && <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />}
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+
+              {/* Mobile auth */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18, duration: 0.2 }}
+                className="mt-4"
+              >
+                {user ? (
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between w-full border border-navy/15 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-navy/60 hover:text-navy hover:border-navy/30 transition-colors"
+                  >
+                    My Profile
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                ) : (
+                  <div className="flex gap-2">
+                    <Link
+                      href="/signin"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex-1 flex items-center justify-center border border-navy/15 px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-navy/60 hover:text-navy transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex-1 flex items-center justify-center gap-2 bg-navy px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-white hover:bg-navy/85 transition-colors"
+                    >
+                      Join <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
                 )}
-              >
-                {item.label}
-                {showBadge && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-          <div className="pt-2 mt-2 border-t border-offWhite-300">
-            {user ? (
-              <Link
-                href="/profile"
-                onClick={() => setMobileOpen(false)}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-navy/20 px-4 py-2.5 text-sm font-medium text-navy/70 hover:text-navy hover:border-navy/40 transition-colors"
-              >
-                My Profile
-              </Link>
-            ) : (
-              <Link
-                href="/signup"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition-colors"
-              >
-                <UserPlus className="h-3.5 w-3.5" />
-                Sign Up
-              </Link>
-            )}
-          </div>
-        </motion.div>
-      )}
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </nav>
   );
