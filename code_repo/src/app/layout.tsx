@@ -56,11 +56,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Mentality Sports",
+    url: "https://mentalitysports.com",
+    description: "Peer mentorship platform connecting college athletes with high school athletes for mental performance support.",
+    sameAs: [
+      "https://www.instagram.com/mentalitysports",
+      "https://www.tiktok.com/@mentalitysports.com",
+    ],
+  };
+
   return (
     <html lang="en">
       <body
         className={`${outfit.variable} ${inter.variable} antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Analytics />
         <Navigation />
         <main className="min-h-[calc(100vh-4rem)]">{children}</main>
