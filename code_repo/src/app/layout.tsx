@@ -87,20 +87,20 @@ export default function RootLayout({
                 <div className="mb-4">
                   <Logo href="/" variant="light" size="sm" />
                 </div>
-                <p className="text-sm text-white/40 leading-relaxed">
+                <p className="text-sm text-white/60 leading-relaxed">
                   Mentorship, resources, and community for the mental side of sport. Open to athletes and coaches across all sports.
                 </p>
               </div>
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">Explore</h4>
+                <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">Explore</p>
                 <ul className="space-y-2.5 text-sm">
-                  <li><a href="/advice" className="text-white/50 hover:text-white transition-colors">Advice Library</a></li>
-                  <li><a href="/signup" className="text-white/50 hover:text-white transition-colors">Get Involved</a></li>
+                  <li><a href="/advice" className="text-white/60 hover:text-white transition-colors">Advice Library</a></li>
+                  <li><a href="/signup" className="text-white/60 hover:text-white transition-colors">Get Involved</a></li>
                 </ul>
               </div>
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">Join Us</h4>
-                <p className="text-sm text-white/40 mb-4 leading-relaxed">
+                <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">Join Us</p>
+                <p className="text-sm text-white/60 mb-4 leading-relaxed">
                   Currently in pilot. Open to athletes, coaches, and mentors across all sports.
                 </p>
                 <a href="/signup" className="inline-block rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 transition-colors">

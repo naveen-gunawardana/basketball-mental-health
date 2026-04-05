@@ -14,8 +14,10 @@ import {
   Target,
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import Marquee from "react-fast-marquee";
-import CountUp from "react-countup";
+import dynamic from "next/dynamic";
+
+const Marquee = dynamic(() => import("react-fast-marquee"), { ssr: false });
+const CountUp = dynamic(() => import("react-countup"), { ssr: false });
 
 // ── Scroll-reveal wrapper ─────────────────────────────────────────────────────
 function Reveal({
@@ -126,10 +128,33 @@ const challenges = [
   "Inner critic and self-talk",
 ];
 
+interface FeaturedArticle {
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  category: string | null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [serveHover, setServeHover] = useState<"athletes" | "mentors" | null>(null);
+  const [featuredArticles, setFeaturedArticles] = useState<FeaturedArticle[]>([]);
+
+  // fetch featured articles for internal linking
+  useEffect(() => {
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      createClient()
+        .from("resources")
+        .select("title, slug, excerpt, category")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(3)
+        .then(({ data }) => {
+          if (data && data.length > 0) setFeaturedArticles(data as FeaturedArticle[]);
+        });
+    });
+  }, []);
 
   // timeline line draw
   const timelineRef = useRef(null);
@@ -183,7 +208,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.32 }}
-                className="text-[15px] text-white/45 leading-relaxed max-w-[390px] mb-10"
+                className="text-[15px] text-white/65 leading-relaxed max-w-[390px] mb-10"
               >
                 1-on-1 mentorship for high school athletes — matched with a current or former athlete who&apos;s navigated exactly what you&apos;re facing.
               </motion.p>
@@ -214,17 +239,17 @@ export default function Home() {
             >
               <div className="absolute top-0 right-4 w-[58%]" style={{ transform: "rotate(3deg)", background: "white", padding: "10px 10px 32px", boxShadow: "0 14px 44px rgba(0,0,0,0.38), 0 3px 10px rgba(0,0,0,0.2)" }}>
                 <div className="relative w-full" style={{ paddingBottom: "72%" }}>
-                  <Image src="/header_images/logan-weaver-lgnwvr-pZRX3qGeets-unsplash.jpg" alt="" fill className="object-cover" priority />
+                  <Image src="/header_images/logan-weaver-lgnwvr-pZRX3qGeets-unsplash.jpg" alt="Athlete in competition" fill className="object-cover" priority />
                 </div>
               </div>
               <div className="absolute bottom-0 left-0 w-[60%]" style={{ transform: "rotate(-2.5deg)", background: "white", padding: "10px 10px 32px", boxShadow: "0 14px 44px rgba(0,0,0,0.34), 0 3px 10px rgba(0,0,0,0.18)" }}>
                 <div className="relative w-full" style={{ paddingBottom: "72%" }}>
-                  <Image src="/header_images/alliance-football-club-wBJuXJU3aw4-unsplash.jpg" alt="" fill className="object-cover" />
+                  <Image src="/header_images/alliance-football-club-wBJuXJU3aw4-unsplash.jpg" alt="Football team working together" fill className="object-cover" />
                 </div>
               </div>
               <div className="absolute top-[36%] right-1 w-[40%]" style={{ transform: "rotate(-1.8deg)", background: "white", padding: "8px 8px 26px", boxShadow: "0 10px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15)" }}>
                 <div className="relative w-full" style={{ paddingBottom: "72%" }}>
-                  <Image src="/header_images/tim-mossholder-2BPbc98se38-unsplash.jpg" alt="" fill className="object-cover" />
+                  <Image src="/header_images/tim-mossholder-2BPbc98se38-unsplash.jpg" alt="Athlete focused before competition" fill className="object-cover" />
                 </div>
               </div>
             </motion.div>
@@ -344,8 +369,9 @@ export default function Home() {
           <div aria-hidden className="absolute right-4 bottom-0 font-bold text-white/[0.04] leading-none select-none pointer-events-none" style={{ fontSize: "22rem", lineHeight: 1 }}>A</div>
           <div className="relative z-10">
             <span className="inline-block rounded-sm bg-orange-500 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white mb-8">Athletes</span>
-            <p className="text-white/50 text-[15px] leading-relaxed max-w-xs">
+            <p className="text-white/65 text-[15px] leading-relaxed max-w-xs">
               Struggling with the mental side of competing — anxiety, confidence, identity, or just needing honest guidance from someone who gets it.
+
             </p>
           </div>
           <div className="relative z-10 mt-10">
@@ -369,7 +395,7 @@ export default function Home() {
           <div aria-hidden className="absolute right-4 bottom-0 font-bold text-navy/[0.05] leading-none select-none pointer-events-none" style={{ fontSize: "22rem", lineHeight: 1 }}>M</div>
           <div className="relative z-10">
             <span className="inline-block rounded-sm bg-navy px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white mb-8">Mentors</span>
-            <p className="text-navy/50 text-[15px] leading-relaxed max-w-xs">
+            <p className="text-navy/65 text-[15px] leading-relaxed max-w-xs">
               You&apos;ve been through the mental grind — the pressure, the setbacks, the growth. That lived experience is exactly what a younger athlete needs.
             </p>
           </div>
@@ -427,7 +453,7 @@ export default function Home() {
                         {/* Large ghost number */}
                         <span className="text-5xl font-bold text-offWhite-300 leading-none select-none hidden lg:block">{s.n}</span>
                       </div>
-                      <p className="text-sm text-navy/50 leading-relaxed max-w-md">{s.desc}</p>
+                      <p className="text-sm text-navy/65 leading-relaxed max-w-md">{s.desc}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -482,7 +508,7 @@ export default function Home() {
                       <div>
                         <f.Icon className="h-8 w-8 text-orange-400 mb-6" />
                         <h3 className="text-2xl font-bold text-white mb-4">{f.label}</h3>
-                        <p className="text-white/45 text-[15px] leading-relaxed max-w-lg">{f.detail}</p>
+                        <p className="text-white/65 text-[15px] leading-relaxed max-w-lg">{f.detail}</p>
                       </div>
                       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/15 mt-8">
                         {String(activeFeature + 1).padStart(2, "0")} / {String(features.length).padStart(2, "0")}
@@ -534,7 +560,7 @@ export default function Home() {
                   <div className={`h-2 w-2 rounded-full ${item.accent} mt-2 shrink-0`} />
                   <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:gap-12">
                     <h3 className="text-base font-bold text-navy shrink-0 w-44">{item.title}</h3>
-                    <p className="text-sm text-navy/45 leading-relaxed mt-1 sm:mt-0">{item.desc}</p>
+                    <p className="text-sm text-navy/65 leading-relaxed mt-1 sm:mt-0">{item.desc}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-navy/20 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5 hidden sm:block" />
                 </div>
@@ -560,43 +586,88 @@ export default function Home() {
             </Link>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-4">
-            {/* Large featured */}
-            <Reveal>
-              <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="bg-navy rounded-sm p-10 flex flex-col gap-6 h-full min-h-[320px]">
-                <div className="flex items-center gap-2.5">
-                  <BookOpen className="h-4 w-4 text-orange-400" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Confidence</span>
-                </div>
-                <h3 className="font-bold text-white text-xl leading-snug flex-1">
-                  The Practice-to-Game Gap: Why It Happens and How to Close It
-                </h3>
-                <p className="text-sm text-white/40 leading-relaxed">Why your brain treats games differently than practice — and what to do about it.</p>
-                <Link href="/advice" className="group inline-flex items-center gap-2 text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors mt-auto">
-                  Read <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </motion.div>
-            </Reveal>
-
-            {/* Two stacked */}
-            <div className="flex flex-col gap-4">
-              {[
-                { cat: "Coach Communication", Icon: MessageCircle, title: "How to Talk to Your Coach About Playing Time", desc: "A step-by-step script for a productive conversation without sounding entitled." },
-                { cat: "Pressure & Anxiety", Icon: Video, title: "Pre-Competition Anxiety: What's Normal and What Helps", desc: "How to reframe pressure as a signal, not a threat." },
-              ].map((r, i) => (
-                <Reveal key={r.title} delay={i * 0.08} className="flex-1">
-                  <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="bg-offWhite rounded-sm p-7 border border-offWhite-300 flex flex-col gap-4 h-full">
+          {featuredArticles.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-4">
+              {/* Large featured */}
+              <Reveal>
+                <Link href={`/advice/${featuredArticles[0].slug}`}>
+                  <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="bg-navy rounded-sm p-10 flex flex-col gap-6 h-full min-h-[320px] cursor-pointer">
                     <div className="flex items-center gap-2.5">
-                      <r.Icon className="h-4 w-4 text-orange-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-navy/35">{r.cat}</span>
+                      <BookOpen className="h-4 w-4 text-orange-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">{featuredArticles[0].category ?? "Mental Performance"}</span>
                     </div>
-                    <h3 className="font-bold text-navy text-sm leading-snug flex-1">{r.title}</h3>
-                    <p className="text-xs text-navy/45 leading-relaxed">{r.desc}</p>
+                    <h3 className="font-bold text-white text-xl leading-snug flex-1">
+                      {featuredArticles[0].title}
+                    </h3>
+                    {featuredArticles[0].excerpt && (
+                      <p className="text-sm text-white/65 leading-relaxed">{featuredArticles[0].excerpt}</p>
+                    )}
+                    <span className="group inline-flex items-center gap-2 text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors mt-auto">
+                      Read <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
                   </motion.div>
-                </Reveal>
-              ))}
+                </Link>
+              </Reveal>
+
+              {/* Two stacked */}
+              <div className="flex flex-col gap-4">
+                {featuredArticles.slice(1, 3).map((article, i) => (
+                  <Reveal key={article.slug} delay={i * 0.08} className="flex-1">
+                    <Link href={`/advice/${article.slug}`}>
+                      <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="bg-offWhite rounded-sm p-7 border border-offWhite-300 flex flex-col gap-4 h-full cursor-pointer">
+                        <div className="flex items-center gap-2.5">
+                          <BookOpen className="h-4 w-4 text-orange-400" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-navy/35">{article.category ?? "Mental Performance"}</span>
+                        </div>
+                        <h3 className="font-bold text-navy text-sm leading-snug flex-1">{article.title}</h3>
+                        {article.excerpt && (
+                          <p className="text-xs text-navy/65 leading-relaxed line-clamp-2">{article.excerpt}</p>
+                        )}
+                      </motion.div>
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-4">
+              <Reveal>
+                <Link href="/advice">
+                  <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="bg-navy rounded-sm p-10 flex flex-col gap-6 h-full min-h-[320px] cursor-pointer">
+                    <div className="flex items-center gap-2.5">
+                      <BookOpen className="h-4 w-4 text-orange-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Confidence</span>
+                    </div>
+                    <h3 className="font-bold text-white text-xl leading-snug flex-1">
+                      Translating Practice Confidence to Games
+                    </h3>
+                    <p className="text-sm text-white/65 leading-relaxed">Why your brain treats games differently than practice — and how to close the gap.</p>
+                    <span className="group inline-flex items-center gap-2 text-sm font-bold text-orange-400 mt-auto">
+                      Read <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </motion.div>
+                </Link>
+              </Reveal>
+              <div className="flex flex-col gap-4">
+                {[
+                  { title: "Managing Pre-Game Anxiety", cat: "Pressure & Anxiety", slug: "managing-pre-game-anxiety" },
+                  { title: "Losing Your Starting Spot: Identity After the Bench", cat: "Identity", slug: "losing-starting-spot-basketball" },
+                ].map((r, i) => (
+                  <Reveal key={r.slug} delay={i * 0.08} className="flex-1">
+                    <Link href={`/advice/${r.slug}`}>
+                      <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }} className="bg-offWhite rounded-sm p-7 border border-offWhite-300 flex flex-col gap-4 h-full cursor-pointer">
+                        <div className="flex items-center gap-2.5">
+                          <BookOpen className="h-4 w-4 text-orange-400" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-navy/35">{r.cat}</span>
+                        </div>
+                        <h3 className="font-bold text-navy text-sm leading-snug flex-1">{r.title}</h3>
+                      </motion.div>
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -632,7 +703,7 @@ export default function Home() {
                     <p className="text-xs text-navy/35">{m.bg}</p>
                   </div>
                 </div>
-                <p className="text-sm text-navy/55 leading-relaxed italic flex-1">&ldquo;{m.quote}&rdquo;</p>
+                <p className="text-sm text-navy/70 leading-relaxed italic flex-1">&ldquo;{m.quote}&rdquo;</p>
                 <div className="flex flex-wrap gap-1.5">
                   {m.tags.map((t) => (
                     <span key={t} className="rounded-sm bg-offWhite border border-offWhite-300 px-2.5 py-1 text-xs font-medium text-navy/45">{t}</span>
@@ -653,7 +724,7 @@ export default function Home() {
               <h2 className="font-bold text-white tracking-tight leading-[1.02]" style={{ fontSize: "clamp(2.5rem, 5vw, 4.2rem)" }}>
                 Ready to get<br />involved?
               </h2>
-              <p className="text-white/38 text-[15px] leading-relaxed mt-6 max-w-sm">
+              <p className="text-white/65 text-[15px] leading-relaxed mt-6 max-w-sm">
                 Whether you&apos;re an athlete looking for a real relationship, or a former player ready to give back — this is where it starts.
               </p>
             </Reveal>
