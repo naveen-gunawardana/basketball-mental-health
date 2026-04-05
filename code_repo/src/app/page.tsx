@@ -8,7 +8,6 @@ import {
   ArrowUpRight,
   BookOpen,
   MessageCircle,
-  Video,
   CheckCircle,
   PenLine,
   Target,

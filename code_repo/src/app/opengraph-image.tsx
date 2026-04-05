@@ -148,7 +148,7 @@ export default async function Image() {
                 lineHeight: 1.5,
               }}
             >
-              1-on-1 mentorship for high school athletes — matched with a college or former athlete who's navigated exactly what you're facing.
+              1-on-1 mentorship for high school athletes — matched with a college or former athlete who&apos;s navigated exactly what you&apos;re facing.
             </span>
 
             <span
