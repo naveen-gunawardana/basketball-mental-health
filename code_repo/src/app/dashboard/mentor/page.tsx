@@ -136,11 +136,11 @@ export default function MentorDashboard() {
     : null;
   const milestone =
     activeSessions.length === 1
-      ? { title: "First session complete!", text: "You've officially started. Keep the momentum going." }
+      ? { title: "First session complete!", text: "First one down. The hardest part is starting — you did it." }
       : activeSessions.length === 5
-      ? { title: "5 sessions in", text: `${activeMatch?.player.name.split(" ")[0]} is lucky to have a mentor who keeps showing up.` }
+      ? { title: "5 sessions in", text: `Five conversations with ${activeMatch?.player.name.split(" ")[0]}. That adds up.` }
       : matchAgeInDays !== null && matchAgeInDays >= 28 && matchAgeInDays <= 42
-      ? { title: "One month together", text: "Consistency is the foundation of trust. You're building something real." }
+      ? { title: "One month together", text: "A month in. That's the part most people skip." }
       : null;
 
   const conversationStarters = (() => {
@@ -496,7 +496,7 @@ export default function MentorDashboard() {
 
               {/* Share with mentee */}
               <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-base">Share with Mentee</CardTitle></CardHeader>
+                <CardHeader className="pb-2"><CardTitle className="text-base">Pass along</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     {shareArticles.map((res) => (

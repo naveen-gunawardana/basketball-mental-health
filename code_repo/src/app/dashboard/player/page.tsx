@@ -124,7 +124,7 @@ export default function PlayerDashboard() {
           <div>
             <p className="font-semibold text-navy">You&apos;re on the list</p>
             <p className="text-sm text-muted-foreground mt-1">
-              We&apos;re personally reviewing your application and finding the right mentor for you. This usually takes a few days. We&apos;ll reach out by email when you&apos;re matched.
+              We&apos;re reviewing your application and finding the right mentor for you. Usually takes a few days — we&apos;ll email you when you&apos;re matched.
             </p>
           </div>
         </div>
@@ -246,11 +246,11 @@ export default function PlayerDashboard() {
           : null;
         const milestone =
           sessions.length === 1
-            ? { title: "First session complete!", text: "You showed up. That's the hardest part — keep going." }
+            ? { title: "First session done.", text: "You showed up. That's the hardest part." }
             : sessions.length === 5
-            ? { title: "5 sessions in", text: "Five conversations that are already shaping your mental game." }
+            ? { title: "5 sessions in", text: "Five real conversations. That's not nothing." }
             : matchAgeInDays !== null && matchAgeInDays >= 28 && matchAgeInDays <= 42
-            ? { title: "One month in", text: "Your consistency is what makes this work. Keep at it." }
+            ? { title: "One month in", text: "A month of showing up. Keep going." }
             : null;
         const flaggedSessions = sessions.filter(s => s.flagged);
         return (
@@ -370,7 +370,7 @@ export default function PlayerDashboard() {
 
           {/* Quick article recs */}
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Recommended for You</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-base">From the library</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {recommendedArticles.map((res) => (
