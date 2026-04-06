@@ -10,6 +10,7 @@ interface Message {
   sender_id: string;
   content: string;
   created_at: string | null;
+  read_at: string | null;
 }
 
 interface ChatWindowProps {
@@ -18,14 +19,28 @@ interface ChatWindowProps {
   otherPersonName: string;
   otherPersonAvatarUrl?: string | null;
   fullHeight?: boolean;
+  onUnreadChange?: (count: number) => void;
 }
 
-export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPersonAvatarUrl, fullHeight }: ChatWindowProps) {
+export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPersonAvatarUrl, fullHeight, onUnreadChange }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+
+  async function markIncomingAsRead(msgs: Message[]) {
+    const unread = msgs.filter(m => m.sender_id !== currentUserId && !m.read_at);
+    if (unread.length === 0) return;
+    await supabase
+      .from("messages")
+      .update({ read_at: new Date().toISOString() } as never)
+      .in("id", unread.map(m => m.id));
+    setMessages(prev => prev.map(m =>
+      unread.some(u => u.id === m.id) ? { ...m, read_at: new Date().toISOString() } : m
+    ));
+    onUnreadChange?.(0);
+  }
 
   useEffect(() => {
     supabase
@@ -35,7 +50,9 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
       .order("created_at", { ascending: true })
       .limit(100)
       .then(({ data }) => {
-        if (data) setMessages(data);
+        const msgs = (data ?? []) as Message[];
+        setMessages(msgs);
+        markIncomingAsRead(msgs);
       });
 
     const channel = supabase
@@ -44,10 +61,24 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
+          const newMsg = payload.new as Message;
           setMessages((prev) => {
-            if (prev.some((m) => m.id === payload.new.id)) return prev;
-            return [...prev, payload.new as Message];
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
+            const updated = [...prev, newMsg];
+            // Mark as read immediately if it's from the other person
+            if (newMsg.sender_id !== currentUserId) {
+              markIncomingAsRead([newMsg]);
+            }
+            return updated;
           });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+        (payload) => {
+          const updated = payload.new as Message;
+          setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, read_at: updated.read_at } : m));
         }
       )
       .subscribe();
@@ -91,6 +122,10 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
 
   const firstName = otherPersonName.split(" ")[0];
 
+  // Find the last message I sent that has been read
+  const myMessages = messages.filter(m => m.sender_id === currentUserId);
+  const lastReadMsgId = [...myMessages].reverse().find(m => m.read_at)?.id ?? null;
+
   return (
     <div className={`flex flex-col ${fullHeight ? "flex-1 min-h-0" : "h-[520px]"}`}>
       {/* Compact person header */}
@@ -118,39 +153,45 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
         )}
         {messages.map((msg) => {
           const isMe = msg.sender_id === currentUserId;
+          const showSeen = isMe && msg.id === lastReadMsgId;
           return (
-            <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-              {!isMe && (
-                <div className="shrink-0 mb-0.5">
-                  {otherPersonAvatarUrl ? (
-                    <img
-                      src={otherPersonAvatarUrl}
-                      alt={otherPersonName}
-                      className="h-6 w-6 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-600">
-                      {initials(otherPersonName)}
-                    </div>
-                  )}
+            <div key={msg.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+              <div className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                {!isMe && (
+                  <div className="shrink-0 mb-0.5">
+                    {otherPersonAvatarUrl ? (
+                      <img
+                        src={otherPersonAvatarUrl}
+                        alt={otherPersonName}
+                        className="h-6 w-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-600">
+                        {initials(otherPersonName)}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div
+                  className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
+                    isMe
+                      ? "bg-navy text-white rounded-br-sm"
+                      : "bg-slate-100 text-navy rounded-bl-sm"
+                  }`}
+                >
+                  {msg.content}
                 </div>
-              )}
-              <div
-                className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
-                  isMe
-                    ? "bg-navy text-white rounded-br-sm"
-                    : "bg-slate-100 text-navy rounded-bl-sm"
-                }`}
-              >
-                {msg.content}
               </div>
+              {showSeen && (
+                <p className="text-[10px] text-muted-foreground mt-0.5 mr-1">Seen</p>
+              )}
             </div>
           );
         })}
       </div>
 
       {/* Input */}
-      <div className="flex items-center gap-2 border-t border-slate-100 pt-3 pb-1 shrink-0">
+      <div className="flex items-center gap-2 border-t border-slate-100 pt-4 pb-6 shrink-0">
         <input
           type="text"
           value={input}

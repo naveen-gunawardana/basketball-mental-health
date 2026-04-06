@@ -46,6 +46,8 @@ export default function PlayerDashboard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [recommendedArticles, setRecommendedArticles] = useState<RecommendedArticle[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [hasEverMessaged, setHasEverMessaged] = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -78,6 +80,16 @@ export default function PlayerDashboard() {
           .order("date", { ascending: false })
           .limit(20);
         setSessions(sessionData ?? []);
+
+        // Unread messages + first-message check
+        const { data: msgData } = await supabase
+          .from("messages")
+          .select("id, sender_id, read_at")
+          .eq("match_id", md.id);
+        const allMsgs = (msgData ?? []) as unknown as { id: string; sender_id: string; read_at: string | null }[];
+        const unread = allMsgs.filter(m => m.sender_id !== user.id && !m.read_at);
+        setUnreadCount(unread.length);
+        setHasEverMessaged(allMsgs.some(m => m.sender_id === user.id));
       }
 
       const { data: articleData } = await supabase
@@ -222,21 +234,30 @@ export default function PlayerDashboard() {
 
       {/* Desktop tab bar */}
       <div className="hidden md:flex items-center gap-1 border-b border-offWhite-300 mb-6">
-        {TABS.map(({ key, label, Icon }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setActiveTab(key)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === key
-                ? "border-navy text-navy"
-                : "border-transparent text-muted-foreground hover:text-navy"
-            }`}
-          >
-            <Icon className="h-4 w-4" />
-            {label}
-          </button>
-        ))}
+        {TABS.map(({ key, label, Icon }) => {
+          const showDot = key === "chat" && activeTab !== "chat" && (unreadCount > 0 || !hasEverMessaged) && !!matchId;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                setActiveTab(key);
+                if (key === "chat") setUnreadCount(0);
+              }}
+              className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                activeTab === key
+                  ? "border-navy text-navy"
+                  : "border-transparent text-muted-foreground hover:text-navy"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {label}
+              {showDot && (
+                <span className="absolute top-2 right-1.5 h-2 w-2 rounded-full bg-orange-500" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ── HOME TAB ── */}
@@ -403,6 +424,7 @@ export default function PlayerDashboard() {
             otherPersonName={mentor.name}
             otherPersonAvatarUrl={mentor.avatar_url}
             fullHeight
+            onUnreadChange={setUnreadCount}
           />
         </div>
       )}
@@ -488,19 +510,30 @@ export default function PlayerDashboard() {
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-offWhite-300 z-40">
         <div className="grid grid-cols-4">
-          {TABS.map(({ key, label, Icon }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              className={`flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
-                activeTab === key ? "text-navy" : "text-muted-foreground"
-              }`}
-            >
-              <Icon className={`h-5 w-5 ${activeTab === key ? "text-navy" : "text-muted-foreground"}`} />
-              {label}
-            </button>
-          ))}
+          {TABS.map(({ key, label, Icon }) => {
+            const showDot = key === "chat" && activeTab !== "chat" && (unreadCount > 0 || !hasEverMessaged) && !!matchId;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setActiveTab(key);
+                  if (key === "chat") setUnreadCount(0);
+                }}
+                className={`relative flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
+                  activeTab === key ? "text-navy" : "text-muted-foreground"
+                }`}
+              >
+                <div className="relative">
+                  <Icon className={`h-5 w-5 ${activeTab === key ? "text-navy" : "text-muted-foreground"}`} />
+                  {showDot && (
+                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-orange-500" />
+                  )}
+                </div>
+                {label}
+              </button>
+            );
+          })}
         </div>
       </nav>
     </div>
