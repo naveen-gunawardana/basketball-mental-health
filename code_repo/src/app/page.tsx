@@ -71,7 +71,7 @@ const features = [
   {
     label: "1-on-1 Mentorship",
     Icon: CheckCircle,
-    detail: "Matched with a current or former athlete who's navigated what you're facing — in sport and in life. Ongoing. Personal. Real.",
+    detail: "Matched with a current or former athlete who's been where you are. Ongoing. No time limits, no scripts.",
   },
   {
     label: "Private Messaging",
@@ -86,7 +86,7 @@ const features = [
   {
     label: "Session Tracking",
     Icon: Target,
-    detail: "Every check-in documented with topics covered, notes, and follow-ups flagged. Nothing falls through the cracks.",
+    detail: "Every check-in logged with topics covered, notes, and follow-ups. Nothing gets lost.",
   },
   {
     label: "Advice Library",
@@ -96,15 +96,15 @@ const features = [
   {
     label: "Weekly Mental Goals",
     Icon: CheckCircle,
-    detail: "Set and track weekly mental performance goals with your mentor. Effort, focus, attitude — the things that actually move the needle.",
+    detail: "Set and track weekly mental goals with your mentor. Effort, focus, attitude — the stuff that doesn't show up in box scores.",
   },
 ];
 
 const steps = [
   { n: "01", title: "Apply", desc: "Tell us your sport, level, and what you're working through mentally or emotionally. Takes 3 minutes." },
-  { n: "02", title: "Get Matched", desc: "We personally review every application and pair you with a mentor whose experience mirrors exactly what you're facing." },
-  { n: "03", title: "Build It", desc: "Schedule calls whenever it works for you. Honest conversation — no scripts, no agenda. Just real talk." },
-  { n: "04", title: "Go Deeper", desc: "Tap the resource library anytime. Log reflections. Track goals. The relationship keeps growing." },
+  { n: "02", title: "Get Matched", desc: "We review every application and match you with someone whose background fits what you're going through." },
+  { n: "03", title: "Build It", desc: "Schedule calls when it works. No scripts, no agenda — just honest conversation." },
+  { n: "04", title: "Go Deeper", desc: "Tap the article library, log reflections, track goals. The work doesn't stop between calls." },
 ];
 
 const mentors = [
@@ -209,7 +209,7 @@ export default function Home() {
                 transition={{ duration: 0.7, delay: 0.32 }}
                 className="text-[15px] text-white/65 leading-relaxed max-w-[390px] mb-10"
               >
-                1-on-1 mentorship for high school athletes — matched with a current or former athlete who&apos;s navigated exactly what you&apos;re facing.
+                1-on-1 mentorship for high school athletes — paired with a current or former athlete who&apos;s been through what you&apos;re dealing with.
               </motion.p>
 
               <motion.div
@@ -331,7 +331,7 @@ export default function Home() {
           <Reveal delay={0.35} className="mt-16 flex items-center gap-8">
             <div className="h-px flex-1 max-w-[80px] bg-navy/15" />
             <p className="text-navy/35 font-bold text-[11px] uppercase tracking-[0.22em]">
-              That&apos;s the relationship we exist to create.
+              That&apos;s the gap we&apos;re here to close.
             </p>
           </Reveal>
 
@@ -395,7 +395,7 @@ export default function Home() {
           <div className="relative z-10">
             <span className="inline-block rounded-sm bg-navy px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white mb-8">Mentors</span>
             <p className="text-navy/65 text-[15px] leading-relaxed max-w-xs">
-              You&apos;ve been through the mental grind — the pressure, the setbacks, the growth. That lived experience is exactly what a younger athlete needs.
+              You&apos;ve been through it — the pressure, the doubt, the setbacks. That&apos;s the kind of experience that actually helps someone.
             </p>
           </div>
           <div className="relative z-10 mt-10">
@@ -549,10 +549,10 @@ export default function Home() {
 
           <div className="space-y-px bg-offWhite-300 border border-offWhite-300 rounded-sm overflow-hidden">
             {[
-              { title: "A Real Mentor", desc: "Personally matched with a current or former athlete — ongoing, honest, built on shared experience in sport.", accent: "bg-orange-500" },
-              { title: "Mental Guidance", desc: "Work through the mental side and navigate the demands of competing with someone who's actually been there.", accent: "bg-navy" },
-              { title: "Advice Library", desc: "Articles and guides on confidence, anxiety, identity, and the mental skills that translate to performance.", accent: "bg-sage-600" },
-              { title: "Built to Give Back", desc: "Every mentor chose to show up for the next generation. No cost, no catch, no subscriptions.", accent: "bg-gold-500" },
+              { title: "A Real Mentor", desc: "Matched with a current or former athlete whose experience fits yours. Ongoing — not a one-time call.", accent: "bg-orange-500" },
+              { title: "Mental Guidance", desc: "Work through what competing at your level does to your head — with someone who's been there.", accent: "bg-navy" },
+              { title: "Advice Library", desc: "Articles on confidence, anxiety, identity, and the parts of the mental game nobody talks about.", accent: "bg-sage-600" },
+              { title: "Built to Give Back", desc: "Mentors are here because they chose to be. No cost, no subscriptions.", accent: "bg-gold-500" },
             ].map((item, i) => (
               <Reveal key={item.title} delay={i * 0.07}>
                 <div className="bg-white flex items-start gap-6 px-8 py-7 hover:bg-offWhite/60 transition-colors group">
@@ -577,7 +577,7 @@ export default function Home() {
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-500 mb-3">From the library</p>
               <h2 className="font-bold text-navy tracking-tight" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
-                Mental skills,<br />built through advice.
+                Read what athletes<br />actually deal with.
               </h2>
             </div>
             <Link href="/advice" className="group inline-flex items-center gap-2 text-sm font-bold text-navy hover:text-orange-500 transition-colors shrink-0">
@@ -677,7 +677,7 @@ export default function Home() {
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-500 mb-3">The mentors</p>
               <h2 className="font-bold text-navy tracking-tight" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
-                Real athletes.<br />Real experience.
+                They&apos;ve been<br />where you are.
               </h2>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -719,12 +719,12 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <Reveal>
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-400 mb-5">Get Started</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-400 mb-5">Jump in</p>
               <h2 className="font-bold text-white tracking-tight leading-[1.02]" style={{ fontSize: "clamp(2.5rem, 5vw, 4.2rem)" }}>
-                Ready to get<br />involved?
+                Pick<br />your side.
               </h2>
               <p className="text-white/65 text-[15px] leading-relaxed mt-6 max-w-sm">
-                Whether you&apos;re an athlete looking for a real relationship, or a former player ready to give back — this is where it starts.
+                Athlete looking for a mentor, or former player ready to give back — same place, different door.
               </p>
             </Reveal>
             <Reveal delay={0.1} className="space-y-3">
