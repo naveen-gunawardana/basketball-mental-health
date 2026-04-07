@@ -116,6 +116,8 @@ export default async function Image() {
 
             <div
               style={{
+                display: "flex",
+                flexDirection: "column",
                 fontSize: 82,
                 fontWeight: 800,
                 color: "#F6F3EC",
@@ -123,12 +125,9 @@ export default async function Image() {
                 lineHeight: 0.92,
               }}
             >
-              The mental
-              <br />
-              game{" "}
-              <span style={{ color: "#C4633A", fontStyle: "italic" }}>starts</span>
-              <br />
-              here.
+              <span>The mental</span>
+              <span>game <span style={{ color: "#C4633A", fontStyle: "italic" }}>starts</span></span>
+              <span>here.</span>
             </div>
           </div>
 
