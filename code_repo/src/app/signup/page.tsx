@@ -110,11 +110,11 @@ function SignupForm() {
   const [password, setPassword] = useState("");
 
   // Player fields
-  const [playerSport, setPlayerSport] = useState("");
+  const [playerSports, setPlayerSports] = useState<string[]>([]);
   const [playerAge, setPlayerAge] = useState("");
   const [playerSchool, setPlayerSchool] = useState("");
   const [playerGrade, setPlayerGrade] = useState("");
-  const [playerLevel, setPlayerLevel] = useState("");
+  const [playerLevelsSelected, setPlayerLevelsSelected] = useState<string[]>([]);
   const [playerLocation, setPlayerLocation] = useState("");
   const [playerChallenges, setPlayerChallenges] = useState<string[]>([]);
   const [playerGoal, setPlayerGoal] = useState("");
@@ -126,8 +126,8 @@ function SignupForm() {
   const [availability, setAvailability] = useState("");
 
   // Mentor fields
-  const [mentorSport, setMentorSport] = useState("");
-  const [mentorPlayingLevel, setMentorPlayingLevel] = useState("");
+  const [mentorSports, setMentorSports] = useState<string[]>([]);
+  const [mentorLevelsSelected, setMentorLevelsSelected] = useState<string[]>([]);
   const [mentorInstitution, setMentorInstitution] = useState("");
   const [mentorLocation, setMentorLocation] = useState("");
   const [mentorYearsPlayed, setMentorYearsPlayed] = useState("");
@@ -155,7 +155,7 @@ function SignupForm() {
         data: {
           name,
           role,
-          sport: role === "player" ? playerSport : mentorSport,
+          sport: role === "player" ? playerSports[0] ?? "" : mentorSports[0] ?? "",
         },
       },
     });
@@ -174,12 +174,12 @@ function SignupForm() {
           userId: data.user.id,
           name,
           role,
-          sport: role === "player" ? playerSport || null : mentorSport || null,
+          sport: role === "player" ? (playerSports.length > 0 ? playerSports : null) : (mentorSports.length > 0 ? mentorSports : null),
           playerProfile: role === "player" ? {
             age: playerAge ? parseInt(playerAge) : null,
             school: playerSchool || null,
             grade: playerGrade || null,
-            level: playerLevel || null,
+            level: playerLevelsSelected.length > 0 ? playerLevelsSelected : null,
             location: playerLocation || null,
             challenges: playerChallenges.length > 0 ? playerChallenges : null,
             goal: playerGoal || null,
@@ -189,7 +189,7 @@ function SignupForm() {
             parent_phone: parentPhone || null,
           } : null,
           mentorProfile: role === "mentor" ? {
-            playing_level: mentorPlayingLevel || null,
+            playing_level: mentorLevelsSelected.length > 0 ? mentorLevelsSelected : null,
             institution: mentorInstitution || null,
             location: mentorLocation || null,
             years_played: mentorYearsPlayed ? parseInt(mentorYearsPlayed) : null,
@@ -376,11 +376,11 @@ function SignupForm() {
               {role === "mentor" && (
                 <>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-foreground">Highest / current playing level</label>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">Levels you&apos;ve competed at <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
                     <div className="flex flex-wrap gap-2">
                       {mentorPlayingLevels.map((lvl) => (
-                        <button key={lvl} type="button" onClick={() => setMentorPlayingLevel(lvl)}
-                          className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${mentorPlayingLevel === lvl ? "bg-navy text-white border-navy" : "bg-white text-muted-foreground hover:bg-muted"}`}>
+                        <button key={lvl} type="button" onClick={() => toggleItem(mentorLevelsSelected, lvl, setMentorLevelsSelected)}
+                          className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${mentorLevelsSelected.includes(lvl) ? "bg-navy text-white border-navy" : "bg-white text-muted-foreground hover:bg-muted"}`}>
                           {lvl}
                         </button>
                       ))}
@@ -428,14 +428,14 @@ function SignupForm() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">Your sport</label>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Your sport(s) <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
                 <div className="flex flex-wrap gap-2">
                   {sports.map((s) => {
-                    const selected = role === "mentor" ? mentorSport === s : playerSport === s;
-                    const setter = role === "mentor" ? setMentorSport : setPlayerSport;
+                    const list = role === "mentor" ? mentorSports : playerSports;
+                    const setter = role === "mentor" ? setMentorSports : setPlayerSports;
                     return (
-                      <button key={s} type="button" onClick={() => setter(s)}
-                        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${selected ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
+                      <button key={s} type="button" onClick={() => toggleItem(list, s, setter)}
+                        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${list.includes(s) ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
                         {s}
                       </button>
                     );
@@ -445,11 +445,11 @@ function SignupForm() {
 
               {role === "player" && (
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground">Level of competition</label>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">Level(s) of competition <span className="text-muted-foreground font-normal">(select all that apply)</span></label>
                   <div className="flex flex-wrap gap-2">
                     {playerLevels.map((l) => (
-                      <button key={l} type="button" onClick={() => setPlayerLevel(l)}
-                        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${playerLevel === l ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
+                      <button key={l} type="button" onClick={() => toggleItem(playerLevelsSelected, l, setPlayerLevelsSelected)}
+                        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${playerLevelsSelected.includes(l) ? "bg-navy text-white" : "bg-muted text-muted-foreground hover:bg-navy/10"}`}>
                         {l}
                       </button>
                     ))}

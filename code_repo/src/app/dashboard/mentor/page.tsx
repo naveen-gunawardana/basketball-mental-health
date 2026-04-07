@@ -19,8 +19,8 @@ import { WeeklyGoals } from "@/components/weekly-goals";
 
 type Tab = "home" | "chat" | "sessions" | "mentee";
 
-interface PlayerProfile { grade: string | null; school: string | null; level: string | null; challenges: string[] | null; goal: string | null }
-interface Mentee { id: string; name: string; sport: string | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
+interface PlayerProfile { grade: string | null; school: string | null; level: string[] | null; challenges: string[] | null; goal: string | null }
+interface Mentee { id: string; name: string; sport: string[] | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
 interface Match { id: string; meeting_url: string | null; created_at: string; player: Mentee }
 interface SessionRecord {
   id: string; date: string | null; topics: string[] | null;
@@ -467,10 +467,10 @@ export default function MentorDashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-0.5">Your Athlete</p>
                       <p className="font-semibold text-navy">{activeMatch.player.name}</p>
-                      {activeMatch.player.sport && <p className="text-sm text-muted-foreground">{activeMatch.player.sport}</p>}
-                      {activeMatch.player.player_profiles?.level && (
-                        <p className="text-xs text-muted-foreground">{activeMatch.player.player_profiles.level}</p>
-                      )}
+                      {activeMatch.player.sport?.length ? <p className="text-sm text-muted-foreground">{activeMatch.player.sport.join(", ")}</p> : null}
+                      {activeMatch.player.player_profiles?.level?.length ? (
+                        <p className="text-xs text-muted-foreground">{activeMatch.player.player_profiles.level.join(", ")}</p>
+                      ) : null}
                     </div>
                     <Button size="sm" variant="outline" onClick={() => setActiveTab("chat")}>
                       Message <MessageCircle className="h-3.5 w-3.5 ml-1.5" />

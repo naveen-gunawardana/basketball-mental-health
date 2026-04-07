@@ -107,7 +107,7 @@ export type Database = {
           institution: string | null
           location: string | null
           mentee_age_pref: string | null
-          playing_level: string | null
+          playing_level: string[] | null
           skills: string[] | null
           why: string | null
           years_played: number | null
@@ -120,7 +120,7 @@ export type Database = {
           institution?: string | null
           location?: string | null
           mentee_age_pref?: string | null
-          playing_level?: string | null
+          playing_level?: string[] | null
           skills?: string[] | null
           why?: string | null
           years_played?: number | null
@@ -133,7 +133,7 @@ export type Database = {
           institution?: string | null
           location?: string | null
           mentee_age_pref?: string | null
-          playing_level?: string | null
+          playing_level?: string[] | null
           skills?: string[] | null
           why?: string | null
           years_played?: number | null
@@ -156,7 +156,7 @@ export type Database = {
           goal: string | null
           grade: string | null
           id: string
-          level: string | null
+          level: string[] | null
           location: string | null
           parent_email: string | null
           parent_name: string | null
@@ -170,7 +170,7 @@ export type Database = {
           goal?: string | null
           grade?: string | null
           id: string
-          level?: string | null
+          level?: string[] | null
           location?: string | null
           parent_email?: string | null
           parent_name?: string | null
@@ -184,7 +184,7 @@ export type Database = {
           goal?: string | null
           grade?: string | null
           id?: string
-          level?: string | null
+          level?: string[] | null
           location?: string | null
           parent_email?: string | null
           parent_name?: string | null
@@ -208,7 +208,7 @@ export type Database = {
           id: string
           name: string
           role: string
-          sport: string | null
+          sport: string[] | null
         }
         Insert: {
           avatar_url?: string | null
@@ -216,7 +216,7 @@ export type Database = {
           id: string
           name: string
           role: string
-          sport?: string | null
+          sport?: string[] | null
         }
         Update: {
           avatar_url?: string | null
@@ -224,7 +224,7 @@ export type Database = {
           id?: string
           name?: string
           role?: string
-          sport?: string | null
+          sport?: string[] | null
         }
         Relationships: []
       }

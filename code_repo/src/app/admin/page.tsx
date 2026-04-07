@@ -9,17 +9,17 @@ import { Badge } from "@/components/ui/badge";
 
 interface PlayerProfile {
   age: number | null; school: string | null; grade: string | null;
-  level: string | null; location: string | null; challenges: string[] | null;
+  level: string[] | null; location: string | null; challenges: string[] | null;
   goal: string | null; availability: string | null;
   parent_name: string | null; parent_email: string | null; parent_phone: string | null;
 }
 interface MentorProfile {
-  institution: string | null; playing_level: string | null; location: string | null;
+  institution: string | null; playing_level: string[] | null; location: string | null;
   years_played: number | null; skills: string[] | null; why: string | null;
   bio: string | null; mentee_age_pref: string | null; availability: string | null; approved: boolean;
 }
 interface Person {
-  id: string; name: string; role: string; sport: string | null; created_at: string | null;
+  id: string; name: string; role: string; sport: string[] | null; created_at: string | null;
   player_profiles: PlayerProfile | null;
   mentor_profiles: MentorProfile | null;
 }
@@ -130,19 +130,19 @@ export default function AdminPage() {
   const approvedMentors = mentors.filter(m => m.mentor_profiles?.approved);
 
   // Unique sports for filter dropdowns
-  const playerSports = Array.from(new Set(players.map(p => p.sport).filter(Boolean))) as string[];
-  const mentorSports = Array.from(new Set(mentors.map(m => m.sport).filter(Boolean))) as string[];
+  const playerSports = Array.from(new Set(players.flatMap(p => p.sport ?? []).filter(Boolean))) as string[];
+  const mentorSports = Array.from(new Set(mentors.flatMap(m => m.sport ?? []).filter(Boolean))) as string[];
 
   // Filtered lists
   const filteredPlayers = players.filter(p => {
-    if (playerSportFilter !== "all" && p.sport !== playerSportFilter) return false;
+    if (playerSportFilter !== "all" && !p.sport?.includes(playerSportFilter)) return false;
     if (playerMatchFilter === "matched" && !matchedPlayerIds.has(p.id)) return false;
     if (playerMatchFilter === "unmatched" && matchedPlayerIds.has(p.id)) return false;
     return true;
   });
 
   const filteredMentors = mentors.filter(m => {
-    if (mentorSportFilter !== "all" && m.sport !== mentorSportFilter) return false;
+    if (mentorSportFilter !== "all" && !m.sport?.includes(mentorSportFilter)) return false;
     if (mentorMatchFilter === "matched" && !matchedMentorIds.has(m.id)) return false;
     if (mentorMatchFilter === "unmatched" && matchedMentorIds.has(m.id)) return false;
     return true;
@@ -313,7 +313,7 @@ export default function AdminPage() {
                         <span className="text-xs text-muted-foreground">{playerCount} player{playerCount !== 1 ? "s" : ""}</span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{m.mentor_profiles?.institution ? ` · ${m.mentor_profiles.institution}` : ""}{m.mentor_profiles?.playing_level ? ` · ${m.mentor_profiles.playing_level}` : ""}</p>
+                    <p className="text-xs text-muted-foreground">{m.sport?.join(", ") ?? "—"}{m.mentor_profiles?.institution ? ` · ${m.mentor_profiles.institution}` : ""}{m.mentor_profiles?.playing_level?.length ? ` · ${m.mentor_profiles.playing_level.join(", ")}` : ""}</p>
                   </button>
                 );
               })}
@@ -439,7 +439,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-navy">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">{p.sport ?? "—"}{pp?.grade ? ` · ${pp.grade}` : ""}{pp?.school ? ` · ${pp.school}` : ""}{pp?.location ? ` · ${pp.location}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{p.sport?.join(", ") ?? "—"}{pp?.grade ? ` · ${pp.grade}` : ""}{pp?.school ? ` · ${pp.school}` : ""}{pp?.location ? ` · ${pp.location}` : ""}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -463,7 +463,7 @@ export default function AdminPage() {
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         {pp?.age && <div><p className="text-xs text-muted-foreground">Age</p><p className="font-medium text-navy">{pp.age}</p></div>}
                         {pp?.grade && <div><p className="text-xs text-muted-foreground">Grade</p><p className="font-medium text-navy">{pp.grade}</p></div>}
-                        {pp?.level && <div><p className="text-xs text-muted-foreground">Level</p><p className="font-medium text-navy">{pp.level}</p></div>}
+                        {pp?.level?.length ? <div className="col-span-2"><p className="text-xs text-muted-foreground">Level(s)</p><p className="font-medium text-navy">{pp.level.join(", ")}</p></div> : null}
                         {pp?.location && <div><p className="text-xs text-muted-foreground">State</p><p className="font-medium text-navy">{pp.location}</p></div>}
                         {pp?.school && <div className="col-span-2"><p className="text-xs text-muted-foreground">School / Team</p><p className="font-medium text-navy">{pp.school}</p></div>}
                         {pp?.availability && <div className="col-span-2"><p className="text-xs text-muted-foreground">Availability</p><p className="font-medium text-navy">{pp.availability}</p></div>}
@@ -571,7 +571,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-navy">{m.name}</p>
-                        <p className="text-xs text-muted-foreground">{m.sport ?? "—"}{mp?.institution ? ` · ${mp.institution}` : ""}{mp?.playing_level ? ` · ${mp.playing_level}` : ""}</p>
+                        <p className="text-xs text-muted-foreground">{m.sport?.join(", ") ?? "—"}{mp?.institution ? ` · ${mp.institution}` : ""}{mp?.playing_level?.length ? ` · ${mp.playing_level.join(", ")}` : ""}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -595,7 +595,7 @@ export default function AdminPage() {
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-3 text-sm">
-                        {mp?.playing_level && <div><p className="text-xs text-muted-foreground">Playing level</p><p className="font-medium text-navy">{mp.playing_level}</p></div>}
+                        {mp?.playing_level?.length ? <div className="col-span-2"><p className="text-xs text-muted-foreground">Playing level(s)</p><p className="font-medium text-navy">{mp.playing_level.join(", ")}</p></div> : null}
                         {mp?.years_played && <div><p className="text-xs text-muted-foreground">Years played</p><p className="font-medium text-navy">{mp.years_played}</p></div>}
                         {mp?.location && <div><p className="text-xs text-muted-foreground">State</p><p className="font-medium text-navy">{mp.location}</p></div>}
                         {mp?.mentee_age_pref && <div><p className="text-xs text-muted-foreground">Prefers mentoring</p><p className="font-medium text-navy">{mp.mentee_age_pref}</p></div>}

@@ -18,8 +18,8 @@ import { WeeklyGoals } from "@/components/weekly-goals";
 
 type Tab = "home" | "chat" | "sessions" | "journal";
 
-interface Profile { name: string; sport: string | null; avatar_url: string | null }
-interface MentorInfo { id: string; name: string; sport: string | null; avatar_url: string | null }
+interface Profile { name: string; sport: string[] | null; avatar_url: string | null }
+interface MentorInfo { id: string; name: string; sport: string[] | null; avatar_url: string | null }
 interface MatchData { id: string; meeting_url: string | null; created_at: string; mentor: MentorInfo }
 interface SessionRecord { id: string; date: string | null; topics: string[] | null; notes: string | null; flagged: boolean | null; flag_reason: string | null }
 interface RecommendedArticle { slug: string; title: string; read_time: string | null }
@@ -380,7 +380,7 @@ export default function PlayerDashboard() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-0.5">Your Mentor</p>
                   <p className="font-semibold text-navy leading-tight">{mentor?.name}</p>
-                  {mentor?.sport && <p className="text-sm text-muted-foreground">{mentor.sport}</p>}
+                  {mentor?.sport?.length ? <p className="text-sm text-muted-foreground">{mentor.sport.join(", ")}</p> : null}
                 </div>
                 <Button size="sm" variant="outline" onClick={() => setActiveTab("chat")}>
                   Message <MessageCircle className="h-3.5 w-3.5 ml-1.5" />
