@@ -88,18 +88,17 @@ function TiltCard({
         className="group cursor-default"
       >
         {/* Photo */}
-        <div className={`relative overflow-hidden ${founder ? "ring-2 ring-orange-400 ring-offset-2" : ""}`}
+        <div className={`relative aspect-[3/4] overflow-hidden ${founder ? "ring-2 ring-orange-400 ring-offset-2" : ""}`}
           style={{ borderRadius: 2 }}>
-          <div className="relative w-full" style={{ paddingBottom: "130%" }}>
             <Image
               src={src}
               alt={name}
               fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
               className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
             />
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
-          </div>
           {founder && (
             <span className="absolute top-2.5 left-2.5 bg-orange-500 text-white text-[9px] font-bold uppercase tracking-[0.14em] px-2 py-0.5">
               Founder
@@ -119,11 +118,11 @@ function TiltCard({
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const team = [
+  { src: "/team/tj.png",     name: "TJ",      role: "CFO",               founder: false },
+  { src: "/team/peter.png",  name: "Peter",   role: "COO",               founder: false },
   { src: "/team/naveen.png", name: "Naveen",  role: "CEO & Founder",     founder: true  },
   { src: "/team/juli.png",   name: "Juli",    role: "CMO & Co-Founder",  founder: true  },
   { src: "/team/logan.png",  name: "Logan",   role: "President",         founder: false },
-  { src: "/team/peter.png",  name: "Peter",   role: "COO",               founder: false },
-  { src: "/team/tj.png",     name: "TJ",      role: "CFO",               founder: false },
 ];
 
 const values = [
@@ -284,16 +283,17 @@ export default function AboutPage() {
           </Reveal>
 
           {/* 5-card responsive grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8 items-end">
             {team.map((member, i) => (
-              <TiltCard
-                key={member.name}
-                src={member.src}
-                name={member.name}
-                role={member.role}
-                founder={member.founder}
-                delay={i * 0.08}
-              />
+              <div key={member.name} className={member.name === "Naveen" ? "sm:-mt-8" : ""}>
+                <TiltCard
+                  src={member.src}
+                  name={member.name}
+                  role={member.role}
+                  founder={member.founder}
+                  delay={i * 0.08}
+                />
+              </div>
             ))}
           </div>
         </div>
