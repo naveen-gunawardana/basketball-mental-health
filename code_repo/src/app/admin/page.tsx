@@ -49,6 +49,7 @@ export default function AdminPage() {
   const [emails, setEmails] = useState<Record<string, string>>({});
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   // Filter state
   const [playerSportFilter, setPlayerSportFilter] = useState("all");
@@ -195,12 +196,18 @@ export default function AdminPage() {
   }
 
   async function approveMentor(mentorId: string) {
+    setApprovingId(mentorId);
     const mentor = mentors.find(m => m.id === mentorId);
-    await fetch("/api/admin/approve-mentor", {
+    const res = await fetch("/api/admin/approve-mentor", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mentorId, mentorName: mentor?.name }),
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert(`Failed to approve mentor: ${body.error ?? res.status}`);
+    }
+    setApprovingId(null);
     await load();
   }
 
@@ -615,9 +622,9 @@ export default function AdminPage() {
                       )}
                       <div className="pt-2 space-y-2">
                         {!mp?.approved ? (
-                          <button type="button" onClick={() => approveMentor(m.id)}
-                            className="flex items-center gap-1.5 rounded-md bg-sage px-3 py-1.5 text-xs font-medium text-white hover:bg-sage-600 transition-colors">
-                            <CheckCircle className="h-3.5 w-3.5" /> Approve Mentor
+                          <button type="button" onClick={() => approveMentor(m.id)} disabled={approvingId === m.id}
+                            className="flex items-center gap-1.5 rounded-md bg-sage px-3 py-1.5 text-xs font-medium text-white hover:bg-sage-600 transition-colors disabled:opacity-60">
+                            <CheckCircle className="h-3.5 w-3.5" /> {approvingId === m.id ? "Approving…" : "Approve Mentor"}
                           </button>
                         ) : mentorMatches.length > 0 ? (
                           <div className="space-y-1.5">

@@ -120,6 +120,7 @@ export default function SignInPage() {
             <div className="rounded-lg bg-sage-50 border border-sage-200 p-5 text-center mb-4">
               <p className="font-medium text-sage-700">Check your email</p>
               <p className="text-sm text-sage-600 mt-1">We sent a password reset link to {forgotEmail}.</p>
+              <p className="text-xs text-sage-500 mt-2">Don&apos;t see it? Check your spam folder.</p>
             </div>
           ) : (
             <form onSubmit={handleForgot} className="space-y-4">

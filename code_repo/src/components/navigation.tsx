@@ -124,7 +124,7 @@ export function Navigation() {
           <div className="flex items-center gap-3">
             <Logo href="/" variant="dark" size="xs" />
             <span className="hidden sm:inline-block text-[8px] font-bold uppercase tracking-[0.15em] text-navy/25 leading-tight">
-              501(c)(3)
+              Nonprofit
             </span>
           </div>
 
