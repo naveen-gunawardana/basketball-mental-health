@@ -66,11 +66,12 @@ export default function ProfilePage() {
 
   async function sendPasswordReset() {
     setResetStatus("sending");
-    const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(currentEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const res = await fetch("/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: currentEmail }),
     });
-    setResetStatus(error ? "error" : "sent");
+    setResetStatus(res.ok ? "sent" : "error");
     setTimeout(() => setResetStatus(""), 5000);
   }
 

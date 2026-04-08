@@ -37,11 +37,12 @@ export default function SignInPage() {
   async function handleForgot(e: React.FormEvent) {
     e.preventDefault();
     setForgotStatus("sending");
-    const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const res = await fetch("/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: forgotEmail }),
     });
-    setForgotStatus(error ? "error" : "sent");
+    setForgotStatus(res.ok ? "sent" : "error");
   }
 
   return (
