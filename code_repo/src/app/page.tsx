@@ -11,6 +11,7 @@ import {
   CheckCircle,
   PenLine,
   Target,
+  ChevronDown,
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -116,6 +117,41 @@ const mentors = [
   { initials: "NW", name: "Nia W.", bg: "Volleyball · 5 yrs", tags: ["Team dynamics", "Resilience"], quote: "Sport taught me resilience the hard way. I'm here to help athletes build that strength before the hard moments come." },
 ];
 
+const faqs = [
+  {
+    q: "Is Mentality Sports free?",
+    a: "Yes. 100% free for athletes, forever. Mentors volunteer their time. The platform is funded through nonprofit grants — not athlete fees.",
+  },
+  {
+    q: "Is this therapy or mental health treatment?",
+    a: "No. Every mentor is a current or former college athlete, not a licensed therapist. This is peer mentorship — real conversations with someone who's been through the same things. If you're in crisis, we'll refer you to qualified professional support.",
+  },
+  {
+    q: "How does matching work?",
+    a: "You tell us your sport, level, and what you're working through mentally. We review every application and match you with a mentor whose background fits yours. It's not automated — we read every one.",
+  },
+  {
+    q: "How often do I meet with my mentor?",
+    a: "Weekly check-ins are the goal, but the schedule fits around you. School, practice, games — your mentor works around it. The minimum ask on their end is about 15 minutes a week.",
+  },
+  {
+    q: "What sports do you support?",
+    a: "All of them. The platform launched through basketball in San Francisco, but we work with athletes across every sport. If you compete, you're eligible.",
+  },
+  {
+    q: "What if my mentor isn't the right fit?",
+    a: "Say the word and we'll rematch you. A real relationship is the whole point — there's no reason to stick with a match that isn't working.",
+  },
+  {
+    q: "Can my coach or parent refer me?",
+    a: "Yes. Athletes, parents, and coaches can all start the process at mentalitysports.com. School and team partnerships are also available — email hello@mentalitysports.com.",
+  },
+  {
+    q: "What makes a Mentality Sports mentor qualified?",
+    a: "Their experience. Every mentor has competed at the college level and went through the same pressures you're facing — playing time anxiety, coach conflicts, identity after an injury, confidence gaps. That lived experience is the qualification.",
+  },
+];
+
 const challenges = [
   "Practice-to-game confidence gap",
   "Fear of failure",
@@ -139,6 +175,7 @@ export default function Home() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [serveHover, setServeHover] = useState<"athletes" | "mentors" | null>(null);
   const [featuredArticles, setFeaturedArticles] = useState<FeaturedArticle[]>([]);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // fetch featured articles for internal linking
   useEffect(() => {
@@ -711,6 +748,61 @@ export default function Home() {
               </motion.div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* ─── FAQ ──────────────────────────────────────────────────────────── */}
+      <section className="bg-white py-28 px-6 sm:px-8 border-t border-offWhite-300">
+        <div className="mx-auto max-w-4xl">
+          <Reveal className="mb-16">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-500 mb-3">Common questions</p>
+            <h2 className="font-bold text-navy tracking-tight" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
+              Straight answers.
+            </h2>
+          </Reveal>
+
+          <div className="space-y-px bg-offWhite-300 border border-offWhite-300 rounded-sm overflow-hidden">
+            {faqs.map((faq, i) => (
+              <Reveal key={faq.q} delay={i * 0.04}>
+                <div className="bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between gap-6 px-8 py-6 text-left hover:bg-offWhite/60 transition-colors group"
+                    aria-expanded={openFaq === i}
+                  >
+                    <span className="font-semibold text-navy text-[15px] leading-snug">{faq.q}</span>
+                    <ChevronDown
+                      className={`h-4 w-4 text-navy/30 shrink-0 transition-transform duration-300 group-hover:text-orange-400 ${openFaq === i ? "rotate-180 text-orange-400" : ""}`}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {openFaq === i && (
+                      <motion.div
+                        key="answer"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-8 pb-6 text-sm text-navy/65 leading-relaxed max-w-2xl">{faq.a}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal delay={0.2} className="mt-10 text-center">
+            <p className="text-sm text-navy/40">
+              Still have questions?{" "}
+              <a href="mailto:hello@mentalitysports.com" className="font-semibold text-orange-500 hover:text-orange-400 transition-colors">
+                Email us
+              </a>
+            </p>
+          </Reveal>
         </div>
       </section>
 
