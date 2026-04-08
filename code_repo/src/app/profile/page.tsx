@@ -66,10 +66,10 @@ export default function ProfilePage() {
 
   async function sendPasswordReset() {
     setResetStatus("sending");
-    const res = await fetch("/api/auth/forgot-password", {
+    const res = await fetch("/api/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: currentEmail }),
+      body: JSON.stringify({ type: "forgot_password", email: currentEmail }),
     });
     setResetStatus(res.ok ? "sent" : "error");
     setTimeout(() => setResetStatus(""), 5000);

@@ -37,10 +37,10 @@ export default function SignInPage() {
   async function handleForgot(e: React.FormEvent) {
     e.preventDefault();
     setForgotStatus("sending");
-    const res = await fetch("/api/auth/forgot-password", {
+    const res = await fetch("/api/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: forgotEmail }),
+      body: JSON.stringify({ type: "forgot_password", email: forgotEmail }),
     });
     setForgotStatus(res.ok ? "sent" : "error");
   }

@@ -30,7 +30,30 @@ export async function POST(request: Request) {
   if (!resend) return NextResponse.json({ ok: true, skipped: "no api key" });
 
   try {
-    if (type === "welcome") {
+    if (type === "forgot_password") {
+      const { email } = payload;
+      const admin = getAdmin();
+      const { data, error } = await admin.auth.admin.generateLink({
+        type: "recovery",
+        email,
+        options: { redirectTo: `${BASE_URL}/reset-password` },
+      });
+      // Always return ok to avoid email enumeration
+      if (error || !data.properties?.action_link) {
+        return NextResponse.json({ ok: true });
+      }
+      await resend.emails.send({
+        from: FROM,
+        to: email,
+        subject: "Reset your Mentality Sports password",
+        html: `<p>Hi,</p>
+<p>Click the link below to reset your password. This link expires in 1 hour.</p>
+<p><a href="${data.properties.action_link}">Reset password</a></p>
+<p>If you didn't request this, you can ignore this email.</p>
+<p>— The Mentality Sports Team</p>`,
+      });
+
+    } else if (type === "welcome") {
       const { email, name, role } = payload;
       await resend.emails.send({
         from: FROM,
