@@ -155,7 +155,7 @@ function SignupForm() {
         data: {
           name,
           role,
-          sport: role === "player" ? playerSports[0] ?? "" : mentorSports[0] ?? "",
+          sport: role === "player" ? playerSports : mentorSports,
         },
       },
     });

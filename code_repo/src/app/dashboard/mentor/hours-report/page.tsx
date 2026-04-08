@@ -13,7 +13,7 @@ interface SessionRow {
   topics: string[] | null;
   match_id: string;
   player_name: string;
-  player_sport: string | null;
+  player_sport: string[] | null;
 }
 
 export default function HoursReportPage() {
@@ -45,9 +45,9 @@ export default function HoursReportPage() {
       }
 
       const matchIds = matches.map((m) => m.id);
-      const playerByMatch: Record<string, { name: string; sport: string | null }> = {};
+      const playerByMatch: Record<string, { name: string; sport: string[] | null }> = {};
       for (const m of matches) {
-        const p = (m.player as unknown) as { name: string; sport: string | null } | null;
+        const p = (m.player as unknown) as { name: string; sport: string[] | null } | null;
         if (p) playerByMatch[m.id] = p;
       }
 

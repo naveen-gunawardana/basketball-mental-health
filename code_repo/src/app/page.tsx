@@ -238,12 +238,12 @@ export default function Home() {
             >
               <div className="absolute top-0 right-4 w-[58%]" style={{ transform: "rotate(3deg)", background: "white", padding: "10px 10px 32px", boxShadow: "0 14px 44px rgba(0,0,0,0.38), 0 3px 10px rgba(0,0,0,0.2)" }}>
                 <div className="relative w-full" style={{ paddingBottom: "72%" }}>
-                  <Image src="/header_images/logan-weaver-lgnwvr-pZRX3qGeets-unsplash.jpg" alt="Athlete in competition" fill className="object-cover" priority />
+                  <Image src="/header_images/result_0.png" alt="Athlete in competition" fill className="object-cover" priority />
                 </div>
               </div>
               <div className="absolute bottom-0 left-0 w-[60%]" style={{ transform: "rotate(-2.5deg)", background: "white", padding: "10px 10px 32px", boxShadow: "0 14px 44px rgba(0,0,0,0.34), 0 3px 10px rgba(0,0,0,0.18)" }}>
                 <div className="relative w-full" style={{ paddingBottom: "72%" }}>
-                  <Image src="/header_images/alliance-football-club-wBJuXJU3aw4-unsplash.jpg" alt="Football team working together" fill className="object-cover" />
+                  <Image src="/header_images/photo-1766525064566-80fba50c52cf.png" alt="Athletes working together" fill className="object-cover" />
                 </div>
               </div>
               <div className="absolute top-[36%] right-1 w-[40%]" style={{ transform: "rotate(-1.8deg)", background: "white", padding: "8px 8px 26px", boxShadow: "0 10px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15)" }}>
