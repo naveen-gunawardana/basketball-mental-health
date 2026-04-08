@@ -1,13 +1,16 @@
 {
-    "permissions": {
-      "allow": [
-        "Bash",
-        "Edit",
-        "Write",
-        "Read",
-        "Glob",
-        "Grep",
-        "WebFetch"
-      ]
-    }
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Edit",
+      "Write",
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch"
+    ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
   }
+}
