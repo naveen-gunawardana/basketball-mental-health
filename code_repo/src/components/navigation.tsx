@@ -40,8 +40,6 @@ export function Navigation() {
       .maybeSingle();
     if (!match) return;
 
-    matchIdRef.current = match.id;
-
     // Count messages not sent by me that haven't been read yet (DB-driven)
     const { count } = await supabase
       .from("messages")
