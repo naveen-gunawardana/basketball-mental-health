@@ -145,7 +145,7 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
       </div>
 
       {/* Messages */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto py-4 space-y-2.5 min-h-0">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-2.5 min-h-0">
         {messages.length === 0 && (
           <p className="text-sm text-slate-400 text-center pt-10">
             No messages yet — say hi to {firstName}!
@@ -173,7 +173,7 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
                   </div>
                 )}
                 <div
-                  className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
+                  className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words min-w-0 ${
                     isMe
                       ? "bg-navy text-white rounded-br-sm"
                       : "bg-slate-100 text-navy rounded-bl-sm"
