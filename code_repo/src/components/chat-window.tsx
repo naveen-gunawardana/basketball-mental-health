@@ -155,8 +155,8 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
           const isMe = msg.sender_id === currentUserId;
           const showSeen = isMe && msg.id === lastReadMsgId;
           return (
-            <div key={msg.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-              <div className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+            <div key={msg.id} className={`flex flex-col w-full ${isMe ? "items-end" : "items-start"}`}>
+              <div className={`flex items-end gap-2 w-full ${isMe ? "flex-row-reverse" : "flex-row"}`}>
                 {!isMe && (
                   <div className="shrink-0 mb-0.5">
                     {otherPersonAvatarUrl ? (
@@ -173,7 +173,7 @@ export function ChatWindow({ matchId, currentUserId, otherPersonName, otherPerso
                   </div>
                 )}
                 <div
-                  className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words min-w-0 ${
+                  className={`max-w-[72%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed break-words ${
                     isMe
                       ? "bg-navy text-white rounded-br-sm"
                       : "bg-slate-100 text-navy rounded-bl-sm"

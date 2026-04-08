@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -23,13 +23,6 @@ export function Navigation() {
   const [user, setUser] = useState<User | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const matchIdRef = useRef<string | null>(null);
-
-  function markRead() {
-    if (!matchIdRef.current) return;
-    localStorage.setItem(`lastReadAt:${matchIdRef.current}`, new Date().toISOString());
-    setUnreadCount(0);
-  }
 
   async function fetchAvatar(userId: string) {
     const supabase = createClient();
@@ -49,18 +42,13 @@ export function Navigation() {
 
     matchIdRef.current = match.id;
 
-    if (window.location.pathname.startsWith("/dashboard")) {
-      markRead();
-      return;
-    }
-
-    const lastRead = localStorage.getItem(`lastReadAt:${match.id}`) ?? new Date(0).toISOString();
+    // Count messages not sent by me that haven't been read yet (DB-driven)
     const { count } = await supabase
       .from("messages")
       .select("id", { count: "exact", head: true })
       .eq("match_id", match.id)
       .neq("sender_id", userId)
-      .gt("created_at", lastRead);
+      .is("read_at", null);
     setUnreadCount(count ?? 0);
 
     const channel = supabase
@@ -70,6 +58,15 @@ export function Navigation() {
         filter: `match_id=eq.${match.id}`,
       }, (payload) => {
         if (payload.new.sender_id !== userId) setUnreadCount((n) => n + 1);
+      })
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "messages",
+        filter: `match_id=eq.${match.id}`,
+      }, (payload) => {
+        // Message was marked read — decrement if it was from the other person
+        if (payload.new.read_at && !payload.old?.read_at && payload.new.sender_id !== userId) {
+          setUnreadCount((n) => Math.max(0, n - 1));
+        }
       })
       .subscribe();
 
@@ -105,10 +102,6 @@ export function Navigation() {
     };
   }, []);
 
-  useEffect(() => {
-    if (pathname.startsWith("/dashboard")) markRead();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
 
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";
 
@@ -141,7 +134,7 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => { if (item.href === "/dashboard") markRead(); }}
+                  onClick={() => {}}
                   className={cn(
                     "relative flex flex-col items-center gap-[3px] transition-colors duration-150",
                     isActive ? "text-navy" : "text-navy/35 hover:text-navy/70"
@@ -263,7 +256,7 @@ export function Navigation() {
                   >
                     <Link
                       href={item.href}
-                      onClick={() => { setMobileOpen(false); if (item.href === "/dashboard") setUnreadCount(0); }}
+                      onClick={() => { setMobileOpen(false); }}
                       className={cn(
                         "flex items-center justify-between py-3.5 border-b border-offWhite-300 last:border-0",
                         isActive ? "text-navy" : "text-navy/40"
