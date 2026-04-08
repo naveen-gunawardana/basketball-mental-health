@@ -15,7 +15,7 @@ export default function SignInPage() {
 
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotStatus, setForgotStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [forgotStatus, setForgotStatus] = useState<"idle" | "sending" | "sent" | "error" | "not_found">("idle");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,7 +42,12 @@ export default function SignInPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "forgot_password", email: forgotEmail }),
     });
-    setForgotStatus(res.ok ? "sent" : "error");
+    if (res.ok) {
+      setForgotStatus("sent");
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setForgotStatus(json.reason === "not_found" ? "not_found" : "error");
+    }
   }
 
   return (
@@ -136,6 +141,7 @@ export default function SignInPage() {
                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               </div>
+              {forgotStatus === "not_found" && <p className="text-sm text-red-500">No account found with that email.</p>}
               {forgotStatus === "error" && <p className="text-sm text-red-500">Something went wrong. Try again.</p>}
               <button
                 type="submit"

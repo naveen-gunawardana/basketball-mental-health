@@ -38,9 +38,8 @@ export async function POST(request: Request) {
         email,
         options: { redirectTo: `${BASE_URL}/reset-password` },
       });
-      // Always return ok to avoid email enumeration
       if (error || !data.properties?.action_link) {
-        return NextResponse.json({ ok: true });
+        return NextResponse.json({ ok: false, reason: "not_found" }, { status: 404 });
       }
       await resend.emails.send({
         from: FROM,

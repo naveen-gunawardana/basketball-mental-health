@@ -71,7 +71,12 @@ export default function ProfilePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "forgot_password", email: currentEmail }),
     });
-    setResetStatus(res.ok ? "sent" : "error");
+    if (res.ok) {
+      setResetStatus("sent");
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setResetStatus(json.reason === "not_found" ? "not_found" : "error");
+    }
     setTimeout(() => setResetStatus(""), 5000);
   }
 
@@ -186,6 +191,7 @@ export default function ProfilePage() {
                 {resetStatus === "sending" ? "Sending..." : "Send Reset Link"}
               </Button>
               {resetStatus === "sent" && <p className="text-sm text-sage-600">Check your email.</p>}
+              {resetStatus === "not_found" && <p className="text-sm text-red-500">No account found with that email.</p>}
               {resetStatus === "error" && <p className="text-sm text-red-500">Something went wrong.</p>}
             </div>
           </CardContent>
