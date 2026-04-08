@@ -1,0 +1,103 @@
+# Mentality Sports
+
+## About
+
+Mentality Sports is a nonprofit mentorship platform that connects high school athletes with current and former college athletes for 1-on-1 mental performance support. Athletes work on confidence, anxiety, motivation, identity, and resilience — the mental side of sport that coaches rarely address. Every mentor is a real athlete who has lived through the same pressures. The service is 100% free for athletes, forever. Founded in 2025 and headquartered in San Francisco, CA.
+
+## Services and Pricing
+
+- **1-on-1 Mentor Matching**: Free. Athletes are matched with a current or former college athlete based on sport, level, and what they're working through mentally.
+- **Private Messaging Platform**: Free. Direct messaging between mentor and athlete between sessions.
+- **Reflection Journal**: Free. Athletes log mental state, wins, and struggles after practices and games.
+- **Session Tracking**: Free. Notes and follow-ups logged after each mentor check-in.
+- **Advice Library**: Free. Articles and resources on confidence, anxiety, motivation, identity, and resilience.
+- **Weekly Mental Goals**: Free. Athletes set and track mental goals each week with their mentor.
+- **Progress Monitoring**: Free. Pre/post surveys on confidence and stress levels to track growth over time.
+
+All services are free for athletes. Mentors volunteer their time. The platform is funded through nonprofit grants and future school/team partnerships.
+
+## Locations
+
+- San Francisco, California (headquarters and pilot program)
+- Pilot site: University High School (UHS), San Francisco
+- Expanding nationwide (all geographies, all sports)
+
+## Contact
+
+- **Website**: https://mentalitysports.com
+- **Email**: hello@mentalitysports.com
+- **Instagram**: https://www.instagram.com/mentalitysports
+- **TikTok**: https://www.tiktok.com/@mentalitysports.com
+- **Availability**: Online platform, accessible 24/7
+
+## Team
+
+- **Naveen** — CEO & Founder
+- **Juli** — CMO & Co-Founder
+- **TJ** — CFO
+- **Peter** — COO
+- **Logan** — President
+
+## Service Area
+
+San Francisco, Bay Area, University High School, nationwide youth basketball, AAU players, high school athletes across all sports (expanding)
+
+## Key Facts
+
+- Founded: 2025
+- Structure: Nonprofit (501c3 model)
+- Cost to athletes: $0, always free
+- Mentor time commitment: ~15 minutes per week minimum
+- Current pilot: 2 athletes, multiple mentors from SF coaching network
+- Mentor network includes coaches and players from D1/D2 programs
+- Advisor network: Sully Spivy (Underdog Basketball), Jackie Luong, Coach Andrew, Coach Gumbs
+- Metrics tracked: match completion rate, session attendance, goal completion, confidence/stress surveys, NPS
+- Platform: Next.js, Supabase, Vercel — mobile-friendly web app
+- Mentors are NOT licensed therapists; this is peer mentorship only
+- Crisis situations are referred to qualified mental health professionals
+
+## What Makes Us Different
+
+Mentality Sports is athlete-to-athlete, not therapist-to-patient or coach-to-player. Every mentor has lived through the same pressures — playing time anxiety, unclear roles, identity struggles, demanding coaches — and volunteers because someone should have been there for them. There are no scripts, no curriculum, and no corporate programs. It is a real relationship between two athletes. Unlike generic mental health apps (Headspace, BetterHelp) or standard sports coaching, Mentality Sports specifically addresses the mental performance gap that coaches are not trained to fill, at zero cost to the athlete.
+
+## Ideal Customers
+
+- High school basketball players ages 13–18 in San Francisco and beyond
+- Athletes dealing with: playing time anxiety, confidence gaps, unclear team roles, motivation plateaus, coach communication challenges, performance pressure
+- AAU and youth basketball players nationwide
+- Athletes returning from injury
+- Parents seeking structured mental support for their child athlete
+- Coaches and schools looking for mental performance resources to complement their programs
+- All sports (basketball focus currently, expanding to all sports)
+
+## Frequently Asked Questions
+
+**Is Mentality Sports free?**
+Yes. 100% free for athletes, forever. Mentors volunteer their time. The platform is funded through nonprofit grants and partnerships, not athlete fees.
+
+**Is this therapy?**
+No. Mentality Sports is peer mentorship, not therapy or clinical mental health treatment. Mentors are current or former college athletes, not licensed therapists. If an athlete is in crisis, we refer them to qualified mental health professionals.
+
+**How does mentor matching work?**
+Athletes apply with their sport, level, and what they are working through mentally. The platform matches them with a mentor based on shared background and relevant experience.
+
+**How often do athletes and mentors meet?**
+Weekly check-ins are suggested, but scheduling is flexible and fits around the athlete's schedule.
+
+**What if a mentor is not the right fit?**
+Re-matching is supported. The goal is a genuine relationship, and finding the right fit matters more than sticking with a bad match.
+
+**What sports does Mentality Sports support?**
+The pilot launched with basketball in San Francisco. The platform is designed for all sports and is actively expanding beyond basketball.
+
+**How much time do mentors need to commit?**
+The baseline ask is approximately 15 minutes per week. Mentors give what they can; the relationship defines the pace.
+
+**What age group does Mentality Sports serve?**
+Currently focused on high school athletes ages 13–18. Expanding to AAU players, college athletes in transition, and athletes returning from injury.
+
+**Can coaches or schools refer players?**
+Yes. Coaches, parents, and players can sign up directly at mentalitysports.com. School and team partnerships are also available.
+
+**What makes a Mentality Sports mentor qualified?**
+Mentors are current or former college-level athletes. Their qualification is lived experience — they have been through the same mental challenges the athletes they mentor are facing now.
