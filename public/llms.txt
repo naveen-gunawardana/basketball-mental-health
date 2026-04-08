@@ -1,5 +1,14 @@
 # Mentality Sports
 
+## Markdown Mirrors
+
+Plain-text versions of key pages are available for AI indexing:
+
+- Homepage: https://mentalitysports.com/index.md
+- About: https://mentalitysports.com/about/index.md
+- Advice Library: https://mentalitysports.com/advice/index.md
+- Sign Up / Get Involved: https://mentalitysports.com/signup/index.md
+
 ## About
 
 Mentality Sports is a nonprofit mentorship platform that connects high school athletes with current and former college athletes for 1-on-1 mental performance support. Athletes work on confidence, anxiety, motivation, identity, and resilience — the mental side of sport that coaches rarely address. Every mentor is a real athlete who has lived through the same pressures. The service is 100% free for athletes, forever. Founded in 2025 and headquartered in San Francisco, CA.
