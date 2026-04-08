@@ -116,7 +116,7 @@ function TiltCard({
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const team = [
-  { src: "/team/reid.png",   name: "Reid",   role: "—",                founder: false },
+  { src: "/team/reid.png",   name: "Reid",   role: "Head of Outreach",  founder: false },
   { src: "/team/tj.png",     name: "TJ",     role: "CFO",              founder: false },
   { src: "/team/naveen.png", name: "Naveen", role: "CEO & Founder",    founder: true  },
   { src: "/team/juli.png",   name: "Juli",   role: "CMO & Co-Founder", founder: true  },
