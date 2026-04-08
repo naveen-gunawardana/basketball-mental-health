@@ -24,6 +24,18 @@ const US_STATES = [
   "VA","WA","WV","WI","WY","DC",
 ];
 
+const COUNTRIES = [
+  "United States", "Canada", "United Kingdom", "Australia", "New Zealand",
+  "Ireland", "Germany", "France", "Spain", "Italy", "Netherlands", "Sweden",
+  "Norway", "Denmark", "Finland", "Switzerland", "Austria", "Belgium",
+  "Portugal", "Poland", "Czech Republic", "Hungary", "Greece", "Turkey",
+  "Israel", "South Africa", "Nigeria", "Ghana", "Kenya", "Egypt",
+  "Brazil", "Argentina", "Mexico", "Colombia", "Chile", "Peru",
+  "Japan", "South Korea", "China", "India", "Philippines", "Singapore",
+  "Malaysia", "Indonesia", "Thailand", "Vietnam", "United Arab Emirates",
+  "Saudi Arabia", "Qatar", "Kuwait", "Other",
+];
+
 const playerGrades = ["6th", "7th", "8th", "9th", "10th", "11th", "12th", "College"];
 
 const playerLevels = [
@@ -115,6 +127,7 @@ function SignupForm() {
   const [playerSchool, setPlayerSchool] = useState("");
   const [playerGrade, setPlayerGrade] = useState("");
   const [playerLevelsSelected, setPlayerLevelsSelected] = useState<string[]>([]);
+  const [playerCountry, setPlayerCountry] = useState("United States");
   const [playerLocation, setPlayerLocation] = useState("");
   const [playerChallenges, setPlayerChallenges] = useState<string[]>([]);
   const [playerGoal, setPlayerGoal] = useState("");
@@ -129,6 +142,7 @@ function SignupForm() {
   const [mentorSports, setMentorSports] = useState<string[]>([]);
   const [mentorLevelsSelected, setMentorLevelsSelected] = useState<string[]>([]);
   const [mentorInstitution, setMentorInstitution] = useState("");
+  const [mentorCountry, setMentorCountry] = useState("United States");
   const [mentorLocation, setMentorLocation] = useState("");
   const [mentorYearsPlayed, setMentorYearsPlayed] = useState("");
   const [mentorSkillsSelected, setMentorSkillsSelected] = useState<string[]>([]);
@@ -180,7 +194,9 @@ function SignupForm() {
             school: playerSchool || null,
             grade: playerGrade || null,
             level: playerLevelsSelected.length > 0 ? playerLevelsSelected : null,
-            location: playerLocation || null,
+            location: playerCountry === "United States"
+              ? (playerLocation ? `${playerLocation}, US` : "United States")
+              : playerCountry || null,
             challenges: playerChallenges.length > 0 ? playerChallenges : null,
             goal: playerGoal || null,
             availability: availability || null,
@@ -191,7 +207,9 @@ function SignupForm() {
           mentorProfile: role === "mentor" ? {
             playing_level: mentorLevelsSelected.length > 0 ? mentorLevelsSelected : null,
             institution: mentorInstitution || null,
-            location: mentorLocation || null,
+            location: mentorCountry === "United States"
+              ? (mentorLocation ? `${mentorLocation}, US` : "United States")
+              : mentorCountry || null,
             years_played: mentorYearsPlayed ? parseInt(mentorYearsPlayed) : null,
             skills: mentorSkillsSelected.length > 0 ? mentorSkillsSelected : null,
             why: mentorWhy || null,
@@ -306,6 +324,18 @@ function SignupForm() {
                   <div className="grid grid-cols-2 gap-4">
                     <Input label="Age" type="number" placeholder="e.g. 14" value={playerAge} onChange={(e) => setPlayerAge(e.target.value)} />
                     <div>
+                      <label className="mb-1.5 block text-sm font-medium text-foreground">Country</label>
+                      <select
+                        value={playerCountry}
+                        onChange={(e) => { setPlayerCountry(e.target.value); setPlayerLocation(""); }}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  {playerCountry === "United States" && (
+                    <div>
                       <label className="mb-1.5 block text-sm font-medium text-foreground">State</label>
                       <select
                         value={playerLocation}
@@ -316,7 +346,7 @@ function SignupForm() {
                         {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
-                  </div>
+                  )}
 
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-foreground">Grade</label>
@@ -393,16 +423,28 @@ function SignupForm() {
                     onChange={(e) => setMentorInstitution(e.target.value)}
                   />
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-foreground">State</label>
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">Country</label>
                     <select
-                      value={mentorLocation}
-                      onChange={(e) => setMentorLocation(e.target.value)}
+                      value={mentorCountry}
+                      onChange={(e) => { setMentorCountry(e.target.value); setMentorLocation(""); }}
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
-                      <option value="">Select state</option>
-                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
+                  {mentorCountry === "United States" && (
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-foreground">State</label>
+                      <select
+                        value={mentorLocation}
+                        onChange={(e) => setMentorLocation(e.target.value)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <option value="">Select state</option>
+                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                  )}
                 </>
               )}
 
