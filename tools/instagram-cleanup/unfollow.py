@@ -162,24 +162,43 @@ def main():
             locale="en-US",
         )
         page = ctx.new_page()
+        page.set_default_timeout(60000)   # 60s global timeout
         page.on("response", handle_response)
 
         # ── Login ──────────────────────────────────────────────────────────
         print("Step 1 — Logging in...")
-        page.goto("https://www.instagram.com/accounts/login/", wait_until="networkidle")
-        jitter(2, 4)
+        page.goto("https://www.instagram.com/accounts/login/", wait_until="load")
+        jitter(3, 5)
+
+        # Dismiss cookie consent banners (common in EU / some regions)
+        for label in ["Allow all cookies", "Allow essential and optional cookies",
+                      "Accept All", "Accept", "Decline optional cookies"]:
+            try:
+                btn = page.get_by_role("button", name=label).first
+                if btn.is_visible(timeout=2000):
+                    btn.click()
+                    jitter(1, 2)
+                    break
+            except Exception:
+                pass
+
+        # Wait up to 60s for the username input to actually appear
+        try:
+            page.wait_for_selector('input[name="username"]', timeout=60000, state="visible")
+        except PWTimeout:
+            sys.exit("Login page didn't load the form. Instagram may be blocking headless — try running again.")
 
         page.fill('input[name="username"]', USERNAME)
-        jitter(0.4, 0.9)
+        jitter(0.6, 1.2)
         page.fill('input[name="password"]', PASSWORD)
-        jitter(0.4, 0.8)
+        jitter(0.5, 1.0)
         page.click('button[type="submit"]')
-        jitter(3, 5)
+        page.wait_for_timeout(5000)
 
         dismiss_popups(page)
 
         if "login" in page.url:
-            sys.exit("Login failed — check your credentials or complete 2FA manually.")
+            sys.exit("Login failed — check your credentials or complete 2FA manually then re-run.")
 
         log("Logged in ✓")
 
