@@ -188,11 +188,18 @@ def main():
         except PWTimeout:
             sys.exit("Login page didn't load the form. Instagram may be blocking headless — try running again.")
 
-        page.fill('input[name="username"]', USERNAME)
+        username_input = page.locator('input[name="username"]')
+        username_input.click()
+        jitter(0.3, 0.6)
+        page.keyboard.type(USERNAME, delay=random.randint(60, 130))
         jitter(0.6, 1.2)
-        page.fill('input[name="password"]', PASSWORD)
+
+        password_input = page.locator('input[name="password"]')
+        password_input.click()
+        jitter(0.3, 0.6)
+        page.keyboard.type(PASSWORD, delay=random.randint(60, 130))
         jitter(0.5, 1.0)
-        page.click('button[type="submit"]')
+        page.keyboard.press("Enter")
         page.wait_for_timeout(5000)
 
         dismiss_popups(page)
