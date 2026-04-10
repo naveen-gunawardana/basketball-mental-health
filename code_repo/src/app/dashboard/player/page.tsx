@@ -5,9 +5,10 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Home, MessageCircle, Calendar, BookOpen, ChevronDown, ChevronUp, CalendarClock, ChevronRight, AlertTriangle, Lightbulb, Trophy } from "lucide-react";
+import { Home, MessageCircle, Calendar, BookOpen, ChevronDown, ChevronUp, CalendarClock, ChevronRight, AlertTriangle, Lightbulb, Trophy, PenLine, Lock, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
+import { SessionReflectionEditor, type ReflectionData } from "@/components/session-reflection-editor";
 import { ReflectionJournal } from "@/components/reflection-journal";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { ChatWindow } from "@/components/chat-window";
@@ -21,7 +22,8 @@ type Tab = "home" | "chat" | "sessions" | "journal";
 interface Profile { name: string; sport: string[] | null; avatar_url: string | null }
 interface MentorInfo { id: string; name: string; sport: string[] | null; avatar_url: string | null }
 interface MatchData { id: string; meeting_url: string | null; created_at: string; mentor: MentorInfo }
-interface SessionRecord { id: string; date: string | null; topics: string[] | null; notes: string | null; flagged: boolean | null; flag_reason: string | null }
+interface SessionReflection { id: string; author_id: string; body: string; shared: boolean; updated_at: string | null }
+interface SessionRecord { id: string; date: string | null; topics: string[] | null; notes: string | null; flagged: boolean | null; flag_reason: string | null; session_reflections: SessionReflection[] }
 interface RecommendedArticle { slug: string; title: string; read_time: string | null }
 
 const TABS: { key: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
@@ -37,6 +39,7 @@ export default function PlayerDashboard() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  const [reflectingSessionId, setReflectingSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [mentor, setMentor] = useState<MentorInfo | null>(null);
@@ -75,7 +78,7 @@ export default function PlayerDashboard() {
 
         const { data: sessionData } = await supabase
           .from("sessions")
-          .select("id, date, topics, notes, flagged, flag_reason")
+          .select("id, date, topics, notes, flagged, flag_reason, session_reflections(id, author_id, body, shared, updated_at)")
           .eq("match_id", matchData.id)
           .order("date", { ascending: false })
           .limit(20);
@@ -110,11 +113,11 @@ export default function PlayerDashboard() {
     const supabase = createClient();
     const { data } = await supabase
       .from("sessions")
-      .select("id, date, topics, notes, flagged, flag_reason")
+      .select("id, date, topics, notes, flagged, flag_reason, session_reflections(id, author_id, body, shared, updated_at)")
       .eq("match_id", matchId)
       .order("date", { ascending: false })
       .limit(20);
-    setSessions(data ?? []);
+    setSessions((data ?? []) as SessionRecord[]);
   }
 
   if (loading) {
@@ -452,6 +455,10 @@ export default function PlayerDashboard() {
             <div className="space-y-2">
               {sessions.map((session) => {
                 const isOpen = expandedSessionId === session.id;
+                const myReflection = session.session_reflections?.find(r => r.author_id === userId) ?? null;
+                const theirReflection = session.session_reflections?.find(r => r.author_id !== userId) ?? null;
+                const isReflecting = reflectingSessionId === session.id;
+
                 return (
                   <div key={session.id} className="rounded-lg border overflow-hidden">
                     <button type="button" onClick={() => setExpandedSessionId(isOpen ? null : session.id)}
@@ -471,26 +478,88 @@ export default function PlayerDashboard() {
                           )}
                         </div>
                       </div>
-                      {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {myReflection && <BookOpen className="h-3.5 w-3.5 text-navy/30" />}
+                        {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                      </div>
                     </button>
+
                     {isOpen && (
-                      <div className="border-t px-4 pb-4 pt-3 bg-offWhite/30 space-y-3">
-                        {session.topics && session.topics.length > 0 && (
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1.5">Topics</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {session.topics.map(t => <Badge key={t} variant="outline" className="text-xs">{t}</Badge>)}
+                      <div className="border-t bg-offWhite/30 divide-y divide-offWhite-300">
+                        {/* Shared session info */}
+                        <div className="px-4 py-3 space-y-3">
+                          {session.topics && session.topics.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1.5">Topics</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {session.topics.map(t => <Badge key={t} variant="outline" className="text-xs">{t}</Badge>)}
+                              </div>
                             </div>
+                          )}
+                          {session.notes && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Shared Notes</p>
+                              <p className="text-sm text-navy leading-relaxed">{session.notes}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* My reflection */}
+                        <div className="px-4 py-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-semibold text-navy uppercase tracking-widest">My Reflection</p>
+                            {myReflection && !isReflecting && (
+                              <button type="button" onClick={() => setReflectingSessionId(session.id)}
+                                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-navy transition-colors">
+                                <PenLine className="h-3 w-3" />Edit
+                              </button>
+                            )}
                           </div>
-                        )}
-                        {session.notes && (
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Notes</p>
-                            <p className="text-sm text-navy leading-relaxed">{session.notes}</p>
+
+                          {isReflecting ? (
+                            <SessionReflectionEditor
+                              sessionId={session.id}
+                              userId={userId!}
+                              otherPersonName={mentor?.name ?? "your mentor"}
+                              existing={myReflection ? { id: myReflection.id, body: myReflection.body, shared: myReflection.shared } : null}
+                              onSave={(saved: ReflectionData) => {
+                                setSessions(prev => prev.map(s => s.id !== session.id ? s : {
+                                  ...s,
+                                  session_reflections: [
+                                    ...s.session_reflections.filter(r => r.author_id !== userId),
+                                    { id: saved.id, author_id: userId!, body: saved.body, shared: saved.shared, updated_at: new Date().toISOString() },
+                                  ],
+                                }));
+                                setReflectingSessionId(null);
+                              }}
+                              onCancel={() => setReflectingSessionId(null)}
+                            />
+                          ) : myReflection ? (
+                            <div>
+                              <p className="text-sm text-navy leading-relaxed">{myReflection.body}</p>
+                              <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
+                                {myReflection.shared
+                                  ? <><Eye className="h-3 w-3" />Shared with {mentor?.name ?? "mentor"}</>
+                                  : <><Lock className="h-3 w-3" />Private</>
+                                }
+                              </p>
+                            </div>
+                          ) : (
+                            <button type="button" onClick={() => setReflectingSessionId(session.id)}
+                              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-navy transition-colors">
+                              <PenLine className="h-3.5 w-3.5" />Add your reflection
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Their reflection (only if shared) */}
+                        {theirReflection && (
+                          <div className="px-4 py-3">
+                            <p className="text-xs font-semibold text-navy uppercase tracking-widest mb-2">
+                              {mentor?.name ?? "Mentor"}&apos;s Reflection
+                            </p>
+                            <p className="text-sm text-navy leading-relaxed">{theirReflection.body}</p>
                           </div>
-                        )}
-                        {!session.notes && !session.topics?.length && (
-                          <p className="text-sm text-muted-foreground">No details recorded.</p>
                         )}
                       </div>
                     )}
