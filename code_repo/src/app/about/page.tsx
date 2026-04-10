@@ -41,13 +41,13 @@ function TiltCard({
   src,
   name,
   role,
-  founder,
+  badge,
   delay,
 }: {
   src: string;
   name: string;
   role: string;
-  founder?: boolean;
+  badge?: string;
   delay: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -88,7 +88,7 @@ function TiltCard({
         className="group cursor-default"
       >
         <div
-          className={`relative aspect-[3/4] overflow-hidden ${founder ? "ring-2 ring-orange-400 ring-offset-2" : ""}`}
+          className={`relative aspect-[3/4] overflow-hidden ${badge ? "ring-2 ring-orange-400 ring-offset-2" : ""}`}
           style={{ borderRadius: 2 }}
         >
           <Image
@@ -99,9 +99,9 @@ function TiltCard({
             className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
-          {founder && (
+          {badge && (
             <span className="absolute top-2.5 left-2.5 bg-orange-500 text-white text-[9px] font-bold uppercase tracking-[0.14em] px-2 py-0.5">
-              Founder
+              {badge}
             </span>
           )}
         </div>
@@ -116,12 +116,12 @@ function TiltCard({
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const team = [
-  { src: "/team/reid.png",   name: "Reid",   role: "Head of Outreach",  founder: false },
-  { src: "/team/tj.png",     name: "TJ",     role: "CFO",              founder: false },
-  { src: "/team/naveen.png", name: "Naveen", role: "CEO & Founder",    founder: true  },
-  { src: "/team/juli.png",   name: "Juli",   role: "CMO & Co-Founder", founder: true  },
-  { src: "/team/peter.png",  name: "Peter",  role: "COO",              founder: false },
-  { src: "/team/logan.png",  name: "Logan",  role: "President",        founder: false },
+  { src: "/team/reid.png",   name: "Reid",   role: "Head of Outreach",  badge: ""           },
+  { src: "/team/tj.png",     name: "TJ",     role: "CFO",              badge: ""            },
+  { src: "/team/naveen.png", name: "Naveen", role: "CEO",              badge: "Founder"     },
+  { src: "/team/juli.png",   name: "Juli",   role: "CMO",              badge: "Co-Founder"  },
+  { src: "/team/peter.png",  name: "Peter",  role: "COO",              badge: ""            },
+  { src: "/team/logan.png",  name: "Logan",  role: "President",        badge: ""            },
 ];
 
 const values = [
@@ -275,7 +275,7 @@ export default function AboutPage() {
                   src={member.src}
                   name={member.name}
                   role={member.role}
-                  founder={member.founder}
+                  badge={member.badge}
                   delay={i * 0.08}
                 />
               </div>
