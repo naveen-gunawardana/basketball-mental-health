@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronDown, ChevronUp, ChevronRight, PenLine, CalendarClock, Clock, Award, Lightbulb, Trophy, Lock, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
@@ -177,12 +176,6 @@ export default function MentorDashboard() {
     }
     return results;
   })();
-
-  function switchMentee(playerId: string) {
-    setActiveMenteeId(playerId);
-    setExpandedSessionId(null);
-    setActiveTab("home");
-  }
 
   async function refreshSessions() {
     if (!activeMatch) return;

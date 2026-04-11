@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -319,16 +318,29 @@ export default function Home() {
               }}
             />
           </AnimatePresence>
-          {/* Glass fade — bleeds from navy into photo */}
+          {/* Glass fade — smooth eased blend from navy into photo */}
           <div
-            className="absolute inset-y-0 left-0 z-10"
+            className="absolute inset-0 z-10"
             style={{
-              width: "55%",
-              background: "linear-gradient(to right, #0c1628 0%, #0c1628 15%, rgba(12,22,40,0.9) 45%, rgba(12,22,40,0.4) 75%, transparent 100%)",
+              background: `linear-gradient(to right,
+                #0c1628 0%,
+                rgba(12,22,40,0.98) 8%,
+                rgba(12,22,40,0.93) 16%,
+                rgba(12,22,40,0.85) 24%,
+                rgba(12,22,40,0.74) 32%,
+                rgba(12,22,40,0.61) 40%,
+                rgba(12,22,40,0.47) 48%,
+                rgba(12,22,40,0.34) 56%,
+                rgba(12,22,40,0.22) 64%,
+                rgba(12,22,40,0.12) 72%,
+                rgba(12,22,40,0.05) 80%,
+                rgba(12,22,40,0.01) 90%,
+                transparent 100%
+              )`,
             }}
           />
-          <div className="absolute inset-x-0 top-0 h-32 z-10" style={{ background: "linear-gradient(to bottom, #0c1628, transparent)" }} />
-          <div className="absolute inset-x-0 bottom-0 h-32 z-10" style={{ background: "linear-gradient(to top, #0c1628, transparent)" }} />
+          <div className="absolute inset-x-0 top-0 h-40 z-10" style={{ background: "linear-gradient(to bottom, #0c1628 0%, rgba(12,22,40,0.6) 50%, transparent 100%)" }} />
+          <div className="absolute inset-x-0 bottom-0 h-40 z-10" style={{ background: "linear-gradient(to top, #0c1628 0%, rgba(12,22,40,0.6) 50%, transparent 100%)" }} />
         </div>
 
         {/* Solid navy behind text (left side) */}
