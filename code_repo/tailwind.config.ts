@@ -109,6 +109,7 @@ const config: Config = {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         serif: ["var(--font-outfit)", "system-ui", "sans-serif"],
         mono: ["monospace"],
+        condensed: ["var(--font-barlow)", "sans-serif"],
       },
       keyframes: {
         "fade-up": {

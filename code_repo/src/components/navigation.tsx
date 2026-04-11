@@ -14,6 +14,7 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/advice", label: "Advice" },
+  { href: "/opportunities", label: "Work With Us" },
   { href: "/dashboard", label: "Locker Room" },
 ];
 

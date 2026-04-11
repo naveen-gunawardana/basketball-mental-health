@@ -10,7 +10,6 @@ import { Home, MessageCircle, Calendar, Users, AlertTriangle, BookOpen, ChevronD
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
 import { SessionReflectionEditor, type ReflectionData } from "@/components/session-reflection-editor";
-import { MenteeReflections } from "@/components/mentee-reflections";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { ChatWindow } from "@/components/chat-window";
 import { useCallPresence } from "@/hooks/use-call-presence";
@@ -18,7 +17,7 @@ import { ScheduleCallModal } from "@/components/schedule-call-modal";
 import { UpcomingCalls } from "@/components/upcoming-calls";
 import { WeeklyGoals } from "@/components/weekly-goals";
 
-type Tab = "home" | "chat" | "sessions" | "mentee";
+type Tab = "home" | "chat" | "sessions" | "reflections" | "roster";
 
 interface PlayerProfile { grade: string | null; school: string | null; level: string[] | null; challenges: string[] | null; goal: string | null }
 interface Mentee { id: string; name: string; sport: string[] | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
@@ -52,10 +51,11 @@ const CONVERSATION_STARTERS: [string, string][] = [
 ];
 
 const TABS: { key: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
-  { key: "home",     label: "Home",     Icon: Home },
-  { key: "chat",     label: "Chat",     Icon: MessageCircle },
-  { key: "sessions", label: "Sessions", Icon: Calendar },
-  { key: "mentee",   label: "Mentee",   Icon: Users },
+  { key: "home",        label: "Home",        Icon: Home },
+  { key: "chat",        label: "Chat",        Icon: MessageCircle },
+  { key: "sessions",    label: "Sessions",    Icon: Calendar },
+  { key: "reflections", label: "Reflections", Icon: BookOpen },
+  { key: "roster",      label: "Roster",      Icon: Users },
 ];
 
 export default function MentorDashboard() {
@@ -293,40 +293,6 @@ export default function MentorDashboard() {
           <Link href="/advice/submit"><PenLine className="h-3.5 w-3.5 mr-1.5" />Give Advice</Link>
         </Button>
       </div>
-
-      {/* Mentee switcher */}
-      {matches.filter(m => m.player).length > 0 && (
-        <div className="flex items-center gap-4 mb-5 overflow-x-auto pb-1">
-          {matches.filter(m => m.player).map((match) => {
-            const isActive = activeMenteeId === match.player.id;
-            const hasFlag = sessions.some(s => s.match_id === match.id && s.flagged);
-            return (
-              <button key={match.player.id} type="button" onClick={() => switchMentee(match.player.id)}
-                className="flex flex-col items-center gap-1.5 shrink-0">
-                <div className="relative">
-                  <div className={`rounded-full p-0.5 transition-all ${isActive ? "bg-navy" : "bg-transparent opacity-60 hover:opacity-100"}`}>
-                    {match.player.avatar_url ? (
-                      <img src={match.player.avatar_url} alt={match.player.name} className="h-12 w-12 rounded-full object-cover block" />
-                    ) : (
-                      <div className="h-12 w-12 rounded-full overflow-hidden">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className={hasFlag ? "bg-red-100 text-red-700" : "bg-navy/10 text-navy"}>
-                            {match.player.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    )}
-                  </div>
-                  {hasFlag && <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-red-500 border-2 border-white" />}
-                </div>
-                <span className={`text-xs font-medium ${isActive ? "text-navy" : "text-muted-foreground"}`}>
-                  {match.player.name.split(" ")[0]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       {/* Post-call banner */}
       {showPostCallBanner && (
@@ -723,68 +689,151 @@ export default function MentorDashboard() {
             </div>
           )}
 
-          {/* ── MENTEE TAB ── */}
-          {activeTab === "mentee" && (
-            <div className="space-y-6">
-              {/* Full mentee profile */}
-              {activeMatch.player.player_profiles && (
-                <Card>
-                  <CardHeader className="pb-2"><CardTitle className="text-base">Athlete Profile</CardTitle></CardHeader>
-                  <CardContent className="space-y-3">
-                    {activeMatch.player.player_profiles.goal && (
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Their #1 goal</p>
-                        <p className="text-sm text-navy leading-relaxed">{activeMatch.player.player_profiles.goal}</p>
-                      </div>
-                    )}
-                    {activeMatch.player.player_profiles.challenges && activeMatch.player.player_profiles.challenges.length > 0 && (
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-1.5">Working through</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {activeMatch.player.player_profiles.challenges.map(c => (
-                            <span key={c} className="rounded-sm bg-offWhite px-2.5 py-1 text-xs font-medium text-navy/70 border border-offWhite-300">{c}</span>
-                          ))}
+          {/* ── REFLECTIONS TAB ── */}
+          {activeTab === "reflections" && (() => {
+            const allReflections = sessions.flatMap(s =>
+              (s.session_reflections ?? []).map(r => ({ ...r, session: s }))
+            );
+            const myReflections = allReflections
+              .filter(r => r.author_id === userId)
+              .sort((a, b) => (b.session.date ?? "") > (a.session.date ?? "") ? 1 : -1);
+            const menteeShared = allReflections
+              .filter(r => r.author_id !== userId && r.shared)
+              .sort((a, b) => (b.session.date ?? "") > (a.session.date ?? "") ? 1 : -1);
+
+            if (myReflections.length === 0 && menteeShared.length === 0) {
+              return (
+                <div className="rounded-lg border-2 border-dashed border-offWhite-300 p-10 text-center">
+                  <BookOpen className="h-8 w-8 text-navy/20 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-navy mb-1">No reflections yet</p>
+                  <p className="text-xs text-muted-foreground">Write one after your next session from the Sessions tab.</p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-6">
+                {myReflections.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-3">My Reflections</p>
+                    <div className="space-y-3">
+                      {myReflections.map(r => {
+                        const match = matches.find(m => m.id === r.session.match_id);
+                        const menteeName = match?.player?.name ?? "Athlete";
+                        return (
+                          <Card key={r.id}>
+                            <CardContent className="pt-4 pb-4 space-y-2">
+                              <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <p className="text-xs font-medium text-navy">
+                                  {r.session.date ? new Date(r.session.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
+                                  <span className="text-muted-foreground"> · {menteeName}</span>
+                                </p>
+                                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  {r.shared ? <><Eye className="h-3 w-3" />Shared</> : <><Lock className="h-3 w-3" />Private</>}
+                                </p>
+                              </div>
+                              {r.session.topics && r.session.topics.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {r.session.topics.map((t: string) => <Badge key={t} variant="outline" className="text-xs">{t}</Badge>)}
+                                </div>
+                              )}
+                              <p className="text-sm text-navy leading-relaxed">{r.body}</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {menteeShared.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-3">From My Athletes</p>
+                    <div className="space-y-3">
+                      {menteeShared.map(r => {
+                        const match = matches.find(m => m.id === r.session.match_id);
+                        const menteeName = match?.player?.name ?? "Athlete";
+                        return (
+                          <Card key={r.id} className="border-offWhite-300 bg-offWhite/30">
+                            <CardContent className="pt-4 pb-4 space-y-2">
+                              <p className="text-xs font-medium text-navy">
+                                {r.session.date ? new Date(r.session.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
+                                <span className="text-muted-foreground"> · From {menteeName.split(" ")[0]}</span>
+                              </p>
+                              {r.session.topics && r.session.topics.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {r.session.topics.map((t: string) => <Badge key={t} variant="outline" className="text-xs">{t}</Badge>)}
+                                </div>
+                              )}
+                              <p className="text-sm text-navy leading-relaxed">{r.body}</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* ── ROSTER TAB ── */}
+          {activeTab === "roster" && (
+            <div className="space-y-4">
+              {matches.filter(m => m.player).map(match => {
+                const matchSessions = sessions.filter(s => s.match_id === match.id);
+                const latestSession = matchSessions.length > 0
+                  ? matchSessions.reduce((a, b) => (a.date ?? "") > (b.date ?? "") ? a : b)
+                  : null;
+                const daysSince = latestSession?.date
+                  ? Math.floor((Date.now() - new Date(latestSession.date).getTime()) / (1000 * 60 * 60 * 24))
+                  : null;
+                const needsCheckIn = !latestSession || (daysSince !== null && daysSince > 14);
+                const lastSessionLabel = latestSession?.date
+                  ? new Date(latestSession.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                  : "No sessions yet";
+                const challenges = match.player.player_profiles?.challenges ?? [];
+                return (
+                  <Card key={match.id}>
+                    <CardContent className="pt-5">
+                      <div className="flex items-start gap-4">
+                        {match.player.avatar_url ? (
+                          <img src={match.player.avatar_url} alt={match.player.name} className="h-12 w-12 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="h-12 w-12 rounded-full bg-navy/10 flex items-center justify-center text-navy text-base font-bold shrink-0">
+                            {match.player.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-navy">{match.player.name}</p>
+                            {needsCheckIn && (
+                              <span className="rounded-full bg-amber-100 border border-amber-200 px-2 py-0.5 text-xs font-medium text-amber-700">Check in soon</span>
+                            )}
+                          </div>
+                          {match.player.sport?.length ? <p className="text-xs text-muted-foreground mt-0.5">{match.player.sport.join(", ")}{match.player.player_profiles?.grade ? ` · Grade ${match.player.player_profiles.grade}` : ""}{match.player.player_profiles?.school ? ` · ${match.player.player_profiles.school}` : ""}</p> : null}
+                          <p className="text-xs text-muted-foreground mt-1">{matchSessions.length} session{matchSessions.length !== 1 ? "s" : ""} · Last: {lastSessionLabel}</p>
+                          {challenges.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {challenges.slice(0, 3).map(c => (
+                                <span key={c} className="rounded-sm bg-offWhite px-2 py-0.5 text-xs font-medium text-navy/70 border border-offWhite-300">{c}</span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    )}
-                    <div className="grid grid-cols-2 gap-3 pt-1">
-                      {activeMatch.player.player_profiles.grade && (
-                        <div><p className="text-xs text-muted-foreground">Grade</p><p className="text-sm font-medium text-navy">{activeMatch.player.player_profiles.grade}</p></div>
-                      )}
-                      {activeMatch.player.player_profiles.level && (
-                        <div><p className="text-xs text-muted-foreground">Level</p><p className="text-sm font-medium text-navy">{activeMatch.player.player_profiles.level}</p></div>
-                      )}
-                      {activeMatch.player.player_profiles.school && (
-                        <div><p className="text-xs text-muted-foreground">School</p><p className="text-sm font-medium text-navy">{activeMatch.player.player_profiles.school}</p></div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Shared reflections */}
-              <MenteeReflections playerId={activeMatch.player.id} playerName={activeMatch.player.name} />
-
-              {/* Flagged session prep */}
-              {activeSessions.some(s => s.flagged) && (
-                <Card className="border-red-200">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-red-500" />Session Prep
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {activeSessions.filter(s => s.flagged).map(s => (
-                        <div key={s.id} className="flex items-start gap-2 text-sm">
-                          <AlertTriangle className="h-3.5 w-3.5 text-red-500 mt-0.5 shrink-0" />
-                          <span className="text-muted-foreground">{s.flag_reason ?? "Flagged for follow-up"}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                      <div className="flex gap-2 mt-4">
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => { setActiveMenteeId(match.player.id); setActiveTab("home"); }}>
+                          View
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => { setActiveMenteeId(match.player.id); setActiveTab("chat"); setUnreadCount(0); }}>
+                          <MessageCircle className="h-3.5 w-3.5 mr-1.5" />Chat
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </>
@@ -792,7 +841,7 @@ export default function MentorDashboard() {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-offWhite-300 z-40">
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {TABS.map(({ key, label, Icon }) => {
             const showDot = key === "chat" && activeTab !== "chat" && (unreadCount > 0 || !hasEverMessaged) && matches.length > 0;
             return (

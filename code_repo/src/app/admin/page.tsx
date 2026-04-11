@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2, Activity } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2, Activity, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -34,6 +34,8 @@ export default function AdminPage() {
   const [mentors, setMentors] = useState<Person[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [flagged, setFlagged] = useState<FlaggedSession[]>([]);
+  const [nudges, setNudges] = useState<{ matchId: string; playerName: string; mentorName: string; matchCreatedAt: string | null; daysSince: number | null }[]>([]);
+  const [allSessions, setAllSessions] = useState<{ id: string; date: string | null; match_id: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
   const [expandedMentorId, setExpandedMentorId] = useState<string | null>(null);
@@ -69,14 +71,32 @@ export default function AdminPage() {
     const typedMatches = (rawMatches ?? []) as unknown as Match[];
     setMatches(typedMatches);
 
-    const flaggedSessions = (sessions ?? []).filter((s: { flagged: boolean }) => s.flagged);
-    setFlagged(flaggedSessions.map((s: { id: string; date: string | null; flag_reason: string | null; match_id: string }) => {
+    const typedSessions = (sessions ?? []) as { id: string; date: string | null; flagged: boolean; flag_reason: string | null; match_id: string }[];
+    setAllSessions(typedSessions.map(s => ({ id: s.id, date: s.date, match_id: s.match_id })));
+    const flaggedSessions = typedSessions.filter(s => s.flagged);
+    setFlagged(flaggedSessions.map(s => {
       const match = typedMatches.find(m => m.id === s.match_id);
       return { id: s.id, date: s.date, flag_reason: s.flag_reason, match_id: s.match_id,
         player_name: match?.player?.name ?? "Unknown", mentor_name: match?.mentor?.name ?? "Unknown" };
     }));
 
     setPendingArticles((articles ?? []) as PendingArticle[]);
+
+    // Nudges: active matches with no sessions or last session > 14 days ago
+    const NOW = Date.now();
+    const nudgeItems = typedMatches
+      .filter(m => m.status === "active")
+      .map(m => {
+        const matchSessions = (sessions ?? []).filter((s: { match_id: string; date: string | null }) => s.match_id === m.id && s.date);
+        const lastDate = matchSessions.length > 0
+          ? Math.max(...matchSessions.map((s: { date: string }) => new Date(s.date).getTime()))
+          : null;
+        const daysSince = lastDate ? Math.floor((NOW - lastDate) / (1000 * 60 * 60 * 24)) : null;
+        return { matchId: m.id, playerName: m.player?.name ?? "Unknown", mentorName: m.mentor?.name ?? "Unknown", matchCreatedAt: m.created_at, daysSince };
+      })
+      .filter(n => n.daysSince === null || n.daysSince > 14);
+    setNudges(nudgeItems);
+
     setLoading(false);
   }
 
@@ -128,6 +148,18 @@ export default function AdminPage() {
   const matchedMentorIds = new Set(activeMatches.map(m => m.mentor?.id));
   const pendingMentors = mentors.filter(m => !m.mentor_profiles?.approved);
   const approvedMentors = mentors.filter(m => m.mentor_profiles?.approved);
+
+  const today = Date.now();
+  const inactiveMatches = activeMatches
+    .map(match => {
+      const matchSessions = allSessions.filter(s => s.match_id === match.id);
+      if (matchSessions.length === 0) return { match, label: "No sessions yet", daysSince: null as number | null };
+      const latestDate = Math.max(...matchSessions.map(s => s.date ? new Date(s.date).getTime() : 0));
+      const daysSince = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
+      if (daysSince > 14) return { match, label: `${daysSince} days since last session`, daysSince };
+      return null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
 
   // Unique sports for filter dropdowns
   const playerSports = Array.from(new Set(players.flatMap(p => p.sport ?? []).filter(Boolean))) as string[];
@@ -343,6 +375,56 @@ export default function AdminPage() {
                     {s.flag_reason && <p className="text-xs text-red-700 mt-0.5">{s.flag_reason}</p>}
                   </div>
                   <span className="text-xs text-muted-foreground shrink-0 ml-4">{fmt(s.date)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Inactive match nudges */}
+      {inactiveMatches.length > 0 && (
+        <Card className="mb-8 border-amber-200">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2 text-amber-700">
+              <Clock className="h-4 w-4" /> {inactiveMatches.length} Match{inactiveMatches.length !== 1 ? "es" : ""} Need Attention
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="divide-y divide-offWhite-300">
+              {inactiveMatches.map(({ match, label }) => (
+                <div key={match.id} className="py-3 flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-navy">{match.player?.name} <span className="text-muted-foreground font-normal">with</span> {match.mentor?.name}</p>
+                    <p className="text-xs text-amber-700 mt-0.5">{label}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0 ml-4">{fmt(match.created_at)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Mentor nudges */}
+      {nudges.length > 0 && (
+        <Card className="mb-8 border-amber-200">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2 text-amber-700">
+              <Clock className="h-4 w-4" /> {nudges.length} Match{nudges.length !== 1 ? "es" : ""} Need Attention
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="divide-y divide-offWhite-300">
+              {nudges.map(n => (
+                <div key={n.matchId} className="py-3 flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-navy">{n.playerName} <span className="text-muted-foreground font-normal">with</span> {n.mentorName}</p>
+                    <p className="text-xs text-amber-700 mt-0.5">
+                      {n.daysSince === null ? "No sessions yet" : `${n.daysSince} days since last session`}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0 ml-4">Matched {fmt(n.matchCreatedAt)}</span>
                 </div>
               ))}
             </div>

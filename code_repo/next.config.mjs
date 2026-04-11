@@ -13,6 +13,11 @@ const nextConfig = {
         destination: "/advice/:slug",
         permanent: true,
       },
+      {
+        source: "/donate",
+        destination: "https://gofund.me/535c025ab",
+        permanent: false,
+      },
     ];
   },
 };

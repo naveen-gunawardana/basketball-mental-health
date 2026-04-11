@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Inter } from "next/font/google";
+import { Outfit, Inter, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { Logo } from "@/components/logo";
@@ -14,6 +14,14 @@ const outfit = Outfit({
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["700", "800", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-barlow",
   display: "swap",
 });
 
@@ -266,7 +274,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${outfit.variable} ${inter.variable} antialiased`}
+        className={`${outfit.variable} ${inter.variable} ${barlowCondensed.variable} antialiased`}
       >
         <script
           type="application/ld+json"

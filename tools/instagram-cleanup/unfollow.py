@@ -23,15 +23,13 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 load_dotenv()
 
 # ── Config ────────────────────────────────────────────────────────────────────
-USERNAME        = os.environ.get("IG_USERNAME", "")
-PASSWORD        = os.environ.get("IG_PASSWORD", "")
+USERNAME        = "mentalitysports"
+PASSWORD        = "nDRGJ4KFY!63yzYp"
 DRY_RUN         = False    # set True to preview without unfollowing
 UNFOLLOW_LIMIT  = 50       # max per session — keep ≤ 50 to stay under radar
 DELAY_BETWEEN   = (10, 20) # random seconds between unfollows (lo, hi)
 WHITELIST       = set()    # usernames to never unfollow e.g. {"friend1", "brand2"}
 
-if not USERNAME or not PASSWORD:
-    sys.exit("Error: set IG_USERNAME and IG_PASSWORD in .env")
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def jitter(lo=1.5, hi=3.5):
@@ -165,53 +163,33 @@ def main():
         page.set_default_timeout(60000)   # 60s global timeout
         page.on("response", handle_response)
 
-        # ── Login ──────────────────────────────────────────────────────────
+        # ── Login — manual ─────────────────────────────────────────────────
+        # We open Instagram and let you log in yourself in the browser window.
+        # The script waits until Instagram's home feed is loaded, then takes over.
         print("Step 1 — Logging in...")
+        print()
+        print("  ➜  A browser window will open. Log into Instagram manually.")
+        print("     The script will continue automatically once you're logged in.")
+        print()
+
         page.goto("https://www.instagram.com/accounts/login/", wait_until="load")
-        jitter(3, 5)
 
-        # Dismiss cookie consent banners (common in EU / some regions)
-        for label in ["Allow all cookies", "Allow essential and optional cookies",
-                      "Accept All", "Accept", "Decline optional cookies"]:
-            try:
-                btn = page.get_by_role("button", name=label).first
-                if btn.is_visible(timeout=2000):
-                    btn.click()
-                    jitter(1, 2)
-                    break
-            except Exception:
-                pass
-
-        # Wait up to 60s for the username input to actually appear
+        # Wait up to 3 minutes for the user to log in (URL leaves /login)
         try:
-            page.wait_for_selector('input[name="username"]', timeout=60000, state="visible")
+            page.wait_for_url(
+                lambda url: "instagram.com" in url and "/login" not in url and "/accounts" not in url,
+                timeout=180000,
+            )
         except PWTimeout:
-            sys.exit("Login page didn't load the form. Instagram may be blocking headless — try running again.")
+            sys.exit("Timed out waiting for login. Please run again and log in within 3 minutes.")
 
-        username_input = page.locator('input[name="username"]')
-        username_input.click()
-        jitter(0.3, 0.6)
-        page.keyboard.type(USERNAME, delay=random.randint(60, 130))
-        jitter(0.6, 1.2)
-
-        password_input = page.locator('input[name="password"]')
-        password_input.click()
-        jitter(0.3, 0.6)
-        page.keyboard.type(PASSWORD, delay=random.randint(60, 130))
-        jitter(0.5, 1.0)
-        page.keyboard.press("Enter")
-        page.wait_for_timeout(5000)
-
+        jitter(2, 3)
         dismiss_popups(page)
-
-        if "login" in page.url:
-            sys.exit("Login failed — check your credentials or complete 2FA manually then re-run.")
-
         log("Logged in ✓")
 
         # ── Collect following ──────────────────────────────────────────────
         print("\nStep 2 — Fetching following list...")
-        page.goto(f"https://www.instagram.com/{USERNAME}/", wait_until="networkidle")
+        page.goto(f"https://www.instagram.com/{USERNAME}/", wait_until="domcontentloaded")
         jitter(2, 3)
         scroll_dialog_and_collect(page, following_data, "following")
         following = collect_usernames(following_data)
@@ -219,7 +197,7 @@ def main():
 
         # ── Collect followers ──────────────────────────────────────────────
         print("\nStep 3 — Fetching followers list...")
-        page.goto(f"https://www.instagram.com/{USERNAME}/", wait_until="networkidle")
+        page.goto(f"https://www.instagram.com/{USERNAME}/", wait_until="domcontentloaded")
         jitter(2, 3)
         scroll_dialog_and_collect(page, followers_data, "followers")
         followers = collect_usernames(followers_data)
