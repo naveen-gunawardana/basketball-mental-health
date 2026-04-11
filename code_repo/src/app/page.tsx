@@ -301,7 +301,7 @@ export default function Home() {
         style={{ "--mx": "50%", "--my": "40%" } as React.CSSProperties}
       >
         {/* ── Right-side photo panel ── */}
-        <div className="absolute top-0 right-0 bottom-0 w-[58%] hidden lg:block overflow-hidden">
+        <div className="absolute inset-0 hidden lg:block overflow-hidden">
           <AnimatePresence initial={false}>
             <motion.div
               key={photoTick}
@@ -318,33 +318,17 @@ export default function Home() {
               }}
             />
           </AnimatePresence>
-          {/* Glass fade — smooth eased blend from navy into photo */}
+          {/* Glass fade — full width, solid left to transparent right */}
           <div
             className="absolute inset-0 z-10"
             style={{
-              background: `linear-gradient(to right,
-                #0c1628 0%,
-                rgba(12,22,40,0.98) 8%,
-                rgba(12,22,40,0.93) 16%,
-                rgba(12,22,40,0.85) 24%,
-                rgba(12,22,40,0.74) 32%,
-                rgba(12,22,40,0.61) 40%,
-                rgba(12,22,40,0.47) 48%,
-                rgba(12,22,40,0.34) 56%,
-                rgba(12,22,40,0.22) 64%,
-                rgba(12,22,40,0.12) 72%,
-                rgba(12,22,40,0.05) 80%,
-                rgba(12,22,40,0.01) 90%,
-                transparent 100%
-              )`,
+              background: "linear-gradient(to right, #0c1628 0%, #0c1628 25%, rgba(12,22,40,0.9) 45%, rgba(12,22,40,0.4) 70%, transparent 100%)",
             }}
           />
-          <div className="absolute inset-x-0 top-0 h-40 z-10" style={{ background: "linear-gradient(to bottom, #0c1628 0%, rgba(12,22,40,0.6) 50%, transparent 100%)" }} />
-          <div className="absolute inset-x-0 bottom-0 h-40 z-10" style={{ background: "linear-gradient(to top, #0c1628 0%, rgba(12,22,40,0.6) 50%, transparent 100%)" }} />
+          <div className="absolute inset-x-0 top-0 h-32 z-10" style={{ background: "linear-gradient(to bottom, #0c1628, transparent)" }} />
+          <div className="absolute inset-x-0 bottom-0 h-32 z-10" style={{ background: "linear-gradient(to top, #0c1628, transparent)" }} />
         </div>
 
-        {/* Solid navy behind text (left side) */}
-        <div className="absolute inset-y-0 left-0 w-[46%] bg-[#0c1628]" />
 
         {/* ── Film grain ── */}
         <div
