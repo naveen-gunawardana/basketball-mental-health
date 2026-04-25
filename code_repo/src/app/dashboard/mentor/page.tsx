@@ -37,7 +37,7 @@ export default function MentorDashboard() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [recentSessions, setRecentSessions] = useState<SessionRecord[]>([]);
   const [shareArticles, setShareArticles] = useState<ShareArticle[]>([]);
-  const [messageCount, setMessageCount] = useState(0);
+  const [, setMessageCount] = useState(0);
   const [scheduledCallCount, setScheduledCallCount] = useState(0);
   const [showIcebreaker, setShowIcebreaker] = useState(false);
   const [chipRotateKey, setChipRotateKey] = useState(0);
