@@ -263,6 +263,39 @@ export type Database = {
           },
         ]
       }
+      service_hours: {
+        Row: {
+          id: string
+          mentor_id: string
+          match_id: string
+          session_id: string | null
+          date: string
+          minutes: number
+          notes: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          mentor_id: string
+          match_id: string
+          session_id?: string | null
+          date: string
+          minutes: number
+          notes?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          mentor_id?: string
+          match_id?: string
+          session_id?: string | null
+          date?: string
+          minutes?: number
+          notes?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       scheduled_calls: {
         Row: {
           id: string

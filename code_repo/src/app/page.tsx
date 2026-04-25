@@ -646,9 +646,9 @@ export default function Home() {
       <section className="bg-[#f5f0e8] border-[#0a1628]/8 border-t">
         <div className="flex sm:flex-row flex-col justify-between items-center gap-6 mx-auto px-6 sm:px-8 lg:px-12 py-14 max-w-7xl">
           <div>
-            <p className="mb-2 font-bold text-[#e8703a] text-[11px] uppercase tracking-[0.22em]">Join the Team</p>
-            <h2 className="font-bold text-[#0a1628] text-2xl sm:text-3xl tracking-tight">Work With Us</h2>
-            <p className="mt-1.5 max-w-md text-[#0a1628]/50 text-[14px]">We&apos;re accepting applications for Summer 2026 internships. Join the team building the mental health infrastructure athletes never had.</p>
+            <p className="mb-2 font-bold text-[#e8703a] text-[11px] uppercase tracking-[0.22em]">Get Involved</p>
+            <h2 className="font-bold text-[#0a1628] text-2xl sm:text-3xl tracking-tight">Join Us</h2>
+            <p className="mt-1.5 max-w-md text-[#0a1628]/50 text-[14px]">Become a mentor, apply for a Summer 2026 internship, or partner with us. Every role helps build the mental health infrastructure athletes never had.</p>
           </div>
           <Link
             href="/opportunities"

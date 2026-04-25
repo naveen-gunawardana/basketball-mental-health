@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { ArrowUpRight, Mail } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Mail, Heart } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import dynamic from "next/dynamic";
 
@@ -34,13 +35,13 @@ function Reveal({
 }
 
 const marqueeWords = [
-  "WORK WITH US",
+  "JOIN US",
+  "BECOME A MENTOR",
+  "VOLUNTEER",
   "SUMMER 2026",
-  "GET INVOLVED",
   "INTERNSHIPS",
   "PARTNERSHIPS",
   "GIVE BACK",
-  "JOIN THE TEAM",
   "MAKE AN IMPACT",
 ];
 
@@ -51,7 +52,7 @@ const roles = [
   { title: "Outreach Intern", desc: "Connect with schools, coaches, and athletes to expand our reach." },
 ];
 
-export default function WorkWithUsPage() {
+export default function JoinUsPage() {
   return (
     <div className="overflow-x-hidden">
 
@@ -82,7 +83,7 @@ export default function WorkWithUsPage() {
           >
             <span className="h-px w-8 bg-orange-400/50" />
             <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-400/80">
-              Get Involved
+              Volunteer · Mentor · Partner
             </span>
           </motion.div>
 
@@ -93,18 +94,18 @@ export default function WorkWithUsPage() {
             className="font-bold leading-[0.92] tracking-tight text-[#f5f0e8] mb-6"
             style={{ fontSize: "clamp(3.2rem, 8vw, 6.5rem)" }}
           >
-            Work
+            Join
             <br />
-            <span className="text-[#e8703a] italic">With Us</span>
+            <span className="text-[#e8703a] italic">Us</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.32 }}
-            className="text-[15px] text-white/55 leading-relaxed max-w-[420px]"
+            className="text-[15px] text-white/55 leading-relaxed max-w-[460px]"
           >
-            Join a fast-growing nonprofit building the mental health infrastructure athletes never had. Real work. Real impact.
+            Mentor a young athlete, intern with our team, or partner with us. Every role helps build the mental health infrastructure athletes never had.
           </motion.p>
         </div>
       </section>
@@ -124,6 +125,83 @@ export default function WorkWithUsPage() {
         </Marquee>
       </div>
 
+      {/* ─── BECOME A MENTOR (featured) ───────────────────────────────────── */}
+      <section className="relative bg-[#f5f0e8] py-24 px-6 sm:px-8 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute right-0 top-0 font-bold text-[#0a1628]/[0.04] leading-none select-none pointer-events-none"
+          style={{ fontSize: "clamp(8rem, 16vw, 16rem)", lineHeight: 1 }}
+        >
+          MENTOR
+        </div>
+
+        <div className="relative mx-auto max-w-7xl">
+          <Reveal className="mb-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#e8703a] flex items-center gap-3">
+              <span className="h-px w-8 bg-[#e8703a]" />
+              The #1 Way to Help
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.05} className="mb-6">
+            <h2 className="font-bold text-[#0a1628] tracking-tight" style={{ fontSize: "clamp(2rem, 4.5vw, 3.6rem)" }}>
+              Become a Mentor
+            </h2>
+          </Reveal>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <Reveal delay={0.08} className="space-y-5">
+              <p className="text-[16px] text-[#0a1628]/75 leading-relaxed">
+                You&apos;ve been through it — the pressure, the doubt, the setbacks. That&apos;s the kind of experience that actually helps a young athlete who&apos;s stuck in the same place you once were.
+              </p>
+              <p className="text-[15px] text-[#0a1628]/65 leading-relaxed">
+                One conversation a week. Real mentorship, not advice from a stranger. We match you with a player whose path looks like yours did.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                {["1:1 Match", "Weekly Check-ins", "Flexible", "Lasting Impact"].map((tag) => (
+                  <span key={tag} className="px-3 py-1.5 rounded-sm bg-white border border-[#0a1628]/10 text-[11px] font-bold uppercase tracking-wider text-[#0a1628]/50">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="pt-2">
+                <Link
+                  href="/signup?role=mentor"
+                  className="group inline-flex items-center gap-3 rounded-sm bg-[#e8703a] px-8 py-4 text-sm font-bold text-white hover:bg-[#0a1628] transition-colors"
+                >
+                  <Heart className="h-4 w-4" />
+                  Apply to Mentor
+                  <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Link>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.14} className="space-y-3">
+              {[
+                { n: "01", title: "Share what you wish you'd known", desc: "Your scars are someone else's shortcut. Talk through pressure, recruiting, injuries, identity — whatever shaped you." },
+                { n: "02", title: "Show up consistently", desc: "A short check-in each week. Presence matters more than perfect advice." },
+                { n: "03", title: "Help build something bigger", desc: "Every mentor is part of the mental health infrastructure athletes never had — and you're building it with us." },
+              ].map((item) => (
+                <div key={item.n} className="bg-white border border-[#0a1628]/8 rounded-sm p-5 hover:border-[#e8703a]/30 hover:shadow-sm transition-all duration-200">
+                  <div className="flex items-start gap-3">
+                    <span className="text-[11px] font-bold text-[#e8703a]/70 mt-0.5 tabular-nums">{item.n}</span>
+                    <div>
+                      <p className="font-bold text-[#0a1628] text-[14px] mb-1">{item.title}</p>
+                      <p className="text-[13px] text-[#0a1628]/55 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── DIVIDER ──────────────────────────────────────────────────────── */}
+      <div className="bg-[#f5f0e8] px-6 sm:px-8">
+        <div className="mx-auto max-w-7xl border-t border-[#0a1628]/10" />
+      </div>
+
       {/* ─── INTERNSHIP ───────────────────────────────────────────────────── */}
       <section className="bg-[#f5f0e8] py-24 px-6 sm:px-8">
         <div className="mx-auto max-w-7xl">
@@ -131,7 +209,7 @@ export default function WorkWithUsPage() {
           <Reveal className="mb-4">
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#e8703a] flex items-center gap-3">
               <span className="h-px w-8 bg-[#e8703a]" />
-              Now Accepting Applications
+              Other Ways to Get Involved · Now Accepting Applications
             </p>
           </Reveal>
 

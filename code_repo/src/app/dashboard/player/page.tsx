@@ -1,56 +1,51 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Home, MessageCircle, Calendar, BookOpen, ChevronDown, ChevronUp, CalendarClock, ChevronRight, AlertTriangle, Lightbulb, Trophy, PenLine, Lock, Eye } from "lucide-react";
+import { CalendarClock, BookOpen, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
-import { SessionReflectionEditor, type ReflectionData } from "@/components/session-reflection-editor";
-import { ReflectionJournal } from "@/components/reflection-journal";
 import { AvatarUpload } from "@/components/avatar-upload";
-import { ChatWindow } from "@/components/chat-window";
+import { ChatWindow, type ChatWindowHandle } from "@/components/chat-window";
 import { useCallPresence } from "@/hooks/use-call-presence";
 import { ScheduleCallModal } from "@/components/schedule-call-modal";
-import { UpcomingCalls } from "@/components/upcoming-calls";
-import { WeeklyGoals } from "@/components/weekly-goals";
-
-type Tab = "home" | "chat" | "sessions" | "journal";
+import { IcebreakerOverlay } from "@/components/icebreaker-overlay";
+import { StarterChips } from "@/components/starter-chips";
+import { FirstCallCard } from "@/components/first-call-card";
+import { PostSessionNudge } from "@/components/post-session-nudge";
+import { DashboardRightPanel } from "@/components/dashboard-right-panel";
 
 interface Profile { name: string; sport: string[] | null; avatar_url: string | null }
+interface PlayerProfile { challenges: string[] | null; goal: string | null; grade: string | null; school: string | null; level: string[] | null }
 interface MentorInfo { id: string; name: string; sport: string[] | null; avatar_url: string | null }
+interface MentorExtras { bio: string | null; why: string | null; skills: string[] | null; playing_level: string[] | null }
 interface MatchData { id: string; meeting_url: string | null; created_at: string; mentor: MentorInfo }
-interface SessionReflection { id: string; author_id: string; body: string; shared: boolean; updated_at: string | null }
-interface SessionRecord { id: string; date: string | null; topics: string[] | null; notes: string | null; flagged: boolean | null; flag_reason: string | null; session_reflections: SessionReflection[] }
+interface SessionRecord { id: string; date: string | null; topics: string[] | null }
 interface RecommendedArticle { slug: string; title: string; read_time: string | null }
 
-const TABS: { key: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
-  { key: "home",     label: "Home",     Icon: Home },
-  { key: "chat",     label: "Chat",     Icon: MessageCircle },
-  { key: "sessions", label: "Sessions", Icon: Calendar },
-  { key: "journal",  label: "Journal",  Icon: BookOpen },
-];
-
 export default function PlayerDashboard() {
-  const [activeTab, setActiveTab] = useState<Tab>("home");
   const [logOpen, setLogOpen] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleRefreshKey, setScheduleRefreshKey] = useState(0);
-  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
-  const [reflectingSessionId, setReflectingSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(null);
   const [mentor, setMentor] = useState<MentorInfo | null>(null);
+  const [mentorExtras, setMentorExtras] = useState<MentorExtras | null>(null);
   const [matchId, setMatchId] = useState<string | null>(null);
-  const [matchCreatedAt, setMatchCreatedAt] = useState<string | null>(null);
   const { startCall, showPostCallBanner, dismissPostCallBanner } = useCallPresence(matchId);
   const [userId, setUserId] = useState<string | null>(null);
-  const [sessions, setSessions] = useState<SessionRecord[]>([]);
+  const [recentSessions, setRecentSessions] = useState<SessionRecord[]>([]);
   const [recommendedArticles, setRecommendedArticles] = useState<RecommendedArticle[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [hasEverMessaged, setHasEverMessaged] = useState(true);
+  const [messageCount, setMessageCount] = useState(0);
+  const [scheduledCallCount, setScheduledCallCount] = useState(0);
+  const [showIcebreaker, setShowIcebreaker] = useState(false);
+  const [chipRotateKey, setChipRotateKey] = useState(0);
+  const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const chatRef = useRef<ChatWindowHandle | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -63,6 +58,10 @@ export default function PlayerDashboard() {
         .from("profiles").select("name, sport, avatar_url").eq("id", user.id).single();
       setProfile(profileData);
 
+      const { data: playerProfileData } = await supabase
+        .from("player_profiles").select("challenges, goal, grade, school, level").eq("id", user.id).single();
+      setPlayerProfile(playerProfileData);
+
       const { data: matchData } = await supabase
         .from("matches")
         .select("id, meeting_url, created_at, mentor:mentor_id(id, name, sport, avatar_url)")
@@ -73,26 +72,35 @@ export default function PlayerDashboard() {
       if (matchData) {
         const md = matchData as unknown as MatchData;
         setMatchId(md.id);
-        setMatchCreatedAt(md.created_at);
         setMentor(md.mentor);
+
+        const { data: extras } = await supabase
+          .from("mentor_profiles")
+          .select("bio, why, skills, playing_level")
+          .eq("id", md.mentor.id)
+          .single();
+        setMentorExtras(extras as MentorExtras | null);
 
         const { data: sessionData } = await supabase
           .from("sessions")
-          .select("id, date, topics, notes, flagged, flag_reason, session_reflections(id, author_id, body, shared, updated_at)")
-          .eq("match_id", matchData.id)
+          .select("id, date, topics")
+          .eq("match_id", md.id)
           .order("date", { ascending: false })
-          .limit(20);
-        setSessions(sessionData ?? []);
+          .limit(5);
+        setRecentSessions((sessionData ?? []) as SessionRecord[]);
 
-        // Unread messages + first-message check
-        const { data: msgData } = await supabase
+        const { count: msgCount } = await supabase
           .from("messages")
-          .select("id, sender_id, read_at")
+          .select("id", { count: "exact", head: true })
           .eq("match_id", md.id);
-        const allMsgs = (msgData ?? []) as unknown as { id: string; sender_id: string; read_at: string | null }[];
-        const unread = allMsgs.filter(m => m.sender_id !== user.id && !m.read_at);
-        setUnreadCount(unread.length);
-        setHasEverMessaged(allMsgs.some(m => m.sender_id === user.id));
+        setMessageCount(msgCount ?? 0);
+
+        const { count: callCount } = await supabase
+          .from("scheduled_calls")
+          .select("id", { count: "exact", head: true })
+          .eq("match_id", md.id)
+          .gte("scheduled_at", new Date().toISOString());
+        setScheduledCallCount(callCount ?? 0);
       }
 
       const { data: articleData } = await supabase
@@ -108,23 +116,17 @@ export default function PlayerDashboard() {
     load();
   }, []);
 
-  async function refreshSessions() {
+  useEffect(() => {
     if (!matchId) return;
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("sessions")
-      .select("id, date, topics, notes, flagged, flag_reason, session_reflections(id, author_id, body, shared, updated_at)")
-      .eq("match_id", matchId)
-      .order("date", { ascending: false })
-      .limit(20);
-    setSessions((data ?? []) as SessionRecord[]);
-  }
+    let seen = false;
+    try { seen = localStorage.getItem(`icebreaker_seen_${matchId}`) === "1"; } catch {}
+    if (!seen) setShowIcebreaker(true);
+  }, [matchId]);
 
   if (loading) {
     return <div className="mx-auto max-w-7xl px-4 py-20 text-center text-muted-foreground">Entering the locker room...</div>;
   }
 
-  // No match yet — waiting screen
   if (!matchId) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
@@ -141,25 +143,6 @@ export default function PlayerDashboard() {
             <p className="text-sm text-muted-foreground mt-1">
               We&apos;re reviewing your application and finding the right mentor for you. Usually takes a few days — we&apos;ll email you when you&apos;re matched.
             </p>
-          </div>
-        </div>
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-4">What happens next</p>
-          <div className="space-y-4">
-            {[
-              { step: "1", title: "We review your application", desc: "We look at your sport, level, and what you're working through to find the right fit." },
-              { step: "2", title: "We match you with a mentor", desc: "A current or former athlete whose experience lines up with yours." },
-              { step: "3", title: "You get an intro email", desc: "We'll connect you and your mentor over email to set up your first check-in." },
-              { step: "4", title: "First session — 15 minutes", desc: "Get to know each other. No pressure, just a conversation." },
-            ].map((item) => (
-              <div key={item.step} className="flex items-start gap-4">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-navy text-white text-xs font-bold shrink-0">{item.step}</div>
-                <div>
-                  <p className="font-medium text-navy text-sm">{item.title}</p>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
         <div>
@@ -182,7 +165,6 @@ export default function PlayerDashboard() {
     );
   }
 
-  // Log session view
   if (logOpen && matchId && userId) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -191,28 +173,61 @@ export default function PlayerDashboard() {
           userId={userId}
           otherPersonName={mentor?.name ?? ""}
           onCancel={() => setLogOpen(false)}
-          onSuccess={() => { setLogOpen(false); refreshSessions(); setActiveTab("sessions"); }}
+          onSuccess={() => { setLogOpen(false); setRefreshKey(k => k + 1); }}
         />
       </div>
     );
   }
 
+  const recentSession = recentSessions.find(s => {
+    if (!s.date || !s.topics || s.topics.length === 0) return false;
+    const ageDays = (Date.now() - new Date(s.date).getTime()) / (1000 * 60 * 60 * 24);
+    return ageDays <= 7;
+  }) ?? null;
+
+  const needsFirstCall = scheduledCallCount === 0 && recentSessions.length === 0;
+
   return (
-    <div className={`mx-auto max-w-4xl px-4 pt-6 sm:px-6 lg:px-8 ${activeTab === "chat" ? "flex flex-col h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] pb-4" : "pb-24 md:pb-10"}`}>
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        {userId && (
-          <AvatarUpload userId={userId} name={profile?.name ?? ""} avatarUrl={profile?.avatar_url ?? null} />
-        )}
-        <div>
-          <h1 className="text-2xl font-bold text-navy">Locker Room</h1>
-          <p className="text-sm text-muted-foreground">Hey {profile?.name?.split(" ")[0]} — here&apos;s where your mental game lives.</p>
+    <div
+      key={refreshKey}
+      className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8 flex flex-col h-[calc(100dvh-3.5rem)] pb-6 bg-offWhite/20"
+    >
+      {showIcebreaker && matchId && userId && mentor && (
+        <IcebreakerOverlay
+          matchId={matchId}
+          currentUserId={userId}
+          role="mentee"
+          myFirstName={profile?.name?.split(" ")[0] ?? "there"}
+          otherFirstName={mentor.name.split(" ")[0]}
+          menteeChallenges={playerProfile?.challenges ?? []}
+          onSent={() => { setShowIcebreaker(false); setMessageCount(c => c + 1); }}
+          onSkip={() => setShowIcebreaker(false)}
+        />
+      )}
+
+      <div className="flex items-center justify-between gap-4 mb-5 shrink-0">
+        <div className="flex items-center gap-3.5">
+          {userId && (
+            <AvatarUpload userId={userId} name={profile?.name ?? ""} avatarUrl={profile?.avatar_url ?? null} />
+          )}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-orange-500">Locker room</p>
+            <h1 className="text-xl font-bold text-navy tracking-tight leading-tight mt-0.5">Welcome back, {profile?.name?.split(" ")[0]}</h1>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={() => setShowScheduleModal(true)}
+          aria-label="Schedule a call"
+          className="md:hidden inline-flex items-center gap-1.5 rounded-full ring-1 ring-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-700 px-3 h-9 text-[12px] font-bold uppercase tracking-[0.1em] transition-all"
+        >
+          <CalendarClock className="h-3.5 w-3.5" />
+          Call
+        </button>
       </div>
 
-      {/* Post-call banner */}
       {showPostCallBanner && (
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sage-300 bg-sage-50 px-4 py-3">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sage-300 bg-sage-50 px-4 py-3 shrink-0">
           <p className="text-sm font-medium text-sage-800">Just finished your call? Log it while it&apos;s fresh.</p>
           <div className="flex items-center gap-2 shrink-0">
             <Button size="sm" className="bg-sage-600 hover:bg-sage-700 text-white h-7 text-xs" onClick={() => { dismissPostCallBanner(); setLogOpen(true); }}>
@@ -223,7 +238,6 @@ export default function PlayerDashboard() {
         </div>
       )}
 
-      {/* Schedule call modal */}
       {showScheduleModal && matchId && userId && mentor && (
         <ScheduleCallModal
           matchId={matchId}
@@ -231,380 +245,104 @@ export default function PlayerDashboard() {
           otherPersonId={mentor.id}
           otherPersonName={mentor.name}
           onClose={() => setShowScheduleModal(false)}
-          onScheduled={() => setScheduleRefreshKey(k => k + 1)}
+          onScheduled={() => { setScheduleRefreshKey(k => k + 1); setScheduledCallCount(c => c + 1); }}
         />
       )}
 
-      {/* Desktop tab bar */}
-      <div className="hidden md:flex items-center gap-1 border-b border-offWhite-300 mb-6">
-        {TABS.map(({ key, label, Icon }) => {
-          const showDot = key === "chat" && activeTab !== "chat" && (unreadCount > 0 || !hasEverMessaged) && !!matchId;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => {
-                setActiveTab(key);
-                if (key === "chat") setUnreadCount(0);
-              }}
-              className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-                activeTab === key
-                  ? "border-navy text-navy"
-                  : "border-transparent text-muted-foreground hover:text-navy"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-              {showDot && (
-                <span className="absolute top-2 right-1.5 h-2 w-2 rounded-full bg-orange-500" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── HOME TAB ── */}
-      {activeTab === "home" && (() => {
-        const matchAgeInDays = matchCreatedAt
-          ? Math.floor((Date.now() - new Date(matchCreatedAt).getTime()) / (1000 * 60 * 60 * 24))
-          : null;
-        const milestone =
-          sessions.length === 1
-            ? { title: "First session done.", text: "You showed up. That's the hardest part." }
-            : sessions.length === 5
-            ? { title: "5 sessions in", text: "Five real conversations. That's not nothing." }
-            : matchAgeInDays !== null && matchAgeInDays >= 28 && matchAgeInDays <= 42
-            ? { title: "One month in", text: "A month of showing up. Keep going." }
-            : null;
-        const flaggedSessions = sessions.filter(s => s.flagged);
-        return (
-        <div className="space-y-5">
-          {/* Milestone banner */}
-          {milestone && (
-            <div className="flex items-center gap-3 rounded-lg border border-gold-200 bg-gold-50 px-4 py-3">
-              <Trophy className="h-4 w-4 text-gold-500 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-navy">{milestone.title}</p>
-                <p className="text-xs text-muted-foreground">{milestone.text}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Session prep — mirrors what mentor sees for flagged sessions */}
-          {flaggedSessions.length > 0 && (
-            <Card className="border-amber-200 bg-amber-50/30">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />Before your next call
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {flaggedSessions.map(s => (
-                    <div key={s.id} className="flex items-start gap-2 text-sm">
-                      <span className="text-amber-500 shrink-0 mt-0.5">•</span>
-                      <span className="text-navy">{s.flag_reason ?? "Your mentor noted something to follow up on."}</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">Your mentor flagged this for your next conversation.</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Upcoming calls */}
-          {matchId && userId && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <CalendarClock className="h-4 w-4 text-navy/50" />Upcoming Calls
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <UpcomingCalls
-                  matchId={matchId}
-                  currentUserId={userId}
-                  onJoin={() => { startCall(); }}
-                  refreshKey={scheduleRefreshKey}
-                />
-                <Button size="sm" variant="outline" className="mt-3 w-full" onClick={() => setShowScheduleModal(true)}>
-                  <CalendarClock className="h-3.5 w-3.5 mr-1.5" />Schedule a Call
-                </Button>
-                <p className="text-xs text-muted-foreground mt-2 text-center">Most pairs meet 2x/month for 30 mins.</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* First session guide — shown until first session is logged */}
-          {sessions.length === 0 && (
-            <Card className="border-orange-200 bg-orange-50/40">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4 text-orange-500" />Your first call — what to expect
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">Your mentor is here to listen, not judge. It&apos;s a conversation, not a performance.</p>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-2">Things you can talk about</p>
-                  <ul className="space-y-1.5">
-                    {[
-                      "What's been hardest for you mentally this season",
-                      "What your goals are — beyond just winning",
-                      "What kind of support you're actually looking for",
-                    ].map(q => (
-                      <li key={q} className="flex items-start gap-2 text-sm text-navy">
-                        <span className="text-orange-400 shrink-0 mt-0.5">•</span>{q}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <p className="text-xs text-muted-foreground">It&apos;s okay if it feels a little awkward — that&apos;s normal. Just show up and be honest.</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Weekly goals */}
-          {matchId && userId && (
-            <WeeklyGoals matchId={matchId} userId={userId} />
-          )}
-
-          {/* Mentor card */}
-          <Card>
-            <CardContent className="pt-5">
-              <div className="flex items-center gap-4">
-                {mentor?.avatar_url ? (
-                  <img src={mentor.avatar_url} alt={mentor.name} className="h-14 w-14 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="h-14 w-14 rounded-full bg-navy flex items-center justify-center text-white text-lg font-bold shrink-0">
-                    {mentor?.name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-0.5">Your Mentor</p>
-                  <p className="font-semibold text-navy leading-tight">{mentor?.name}</p>
-                  {mentor?.sport?.length ? <p className="text-sm text-muted-foreground">{mentor.sport.join(", ")}</p> : null}
-                </div>
-                <Button size="sm" variant="outline" onClick={() => setActiveTab("chat")}>
-                  Message <MessageCircle className="h-3.5 w-3.5 ml-1.5" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick article recs */}
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">From the library</CardTitle></CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {recommendedArticles.map((res) => (
-                  <Link key={res.slug} href={`/advice/${res.slug}`}
-                    className="flex items-center gap-3 rounded-lg border p-3 hover:bg-offWhite transition-colors">
-                    <BookOpen className="h-4 w-4 text-orange-500 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-navy truncate">{res.title}</p>
-                      {res.read_time && <p className="text-xs text-muted-foreground">{res.read_time} read</p>}
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  </Link>
-                ))}
-              </div>
-              <Button asChild variant="ghost" className="w-full mt-3">
-                <Link href="/advice">View all advice</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-        );
-      })()}
-
-      {/* ── CHAT TAB ── */}
-      {activeTab === "chat" && matchId && userId && mentor && (
-        <div className="flex-1 flex flex-col min-h-0">
-          <ChatWindow
-            matchId={matchId}
-            currentUserId={userId}
-            otherPersonName={mentor.name}
-            otherPersonAvatarUrl={mentor.avatar_url}
-            fullHeight
-            onUnreadChange={setUnreadCount}
-          />
-        </div>
-      )}
-
-      {/* ── SESSIONS TAB ── */}
-      {activeTab === "sessions" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-navy">Session History</h2>
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => setLogOpen(true)}>
-              <Calendar className="h-3.5 w-3.5 mr-1.5" />Log Session
-            </Button>
-          </div>
-
-          {sessions.length === 0 ? (
-            <div className="rounded-lg border-2 border-dashed border-offWhite-300 p-10 text-center">
-              <Calendar className="h-8 w-8 text-navy/20 mx-auto mb-2" />
-              <p className="text-sm font-medium text-navy mb-1">No sessions logged yet</p>
-              <p className="text-xs text-muted-foreground mb-4">Log your first session after your check-in.</p>
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white" onClick={() => setLogOpen(true)}>
-                Log your first session
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {sessions.map((session) => {
-                const isOpen = expandedSessionId === session.id;
-                const myReflection = session.session_reflections?.find(r => r.author_id === userId) ?? null;
-                const theirReflection = session.session_reflections?.find(r => r.author_id !== userId) ?? null;
-                const isReflecting = reflectingSessionId === session.id;
-
-                return (
-                  <div key={session.id} className="rounded-lg border overflow-hidden">
-                    <button type="button" onClick={() => setExpandedSessionId(isOpen ? null : session.id)}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-offWhite/60 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-offWhite shrink-0">
-                          <Calendar className="h-4 w-4 text-navy" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-navy">
-                            {session.date ? new Date(session.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
-                          </p>
-                          {session.topics && session.topics.length > 0 && (
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {session.topics.slice(0, 2).join(", ")}{session.topics.length > 2 ? ` +${session.topics.length - 2}` : ""}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {myReflection && <BookOpen className="h-3.5 w-3.5 text-navy/30" />}
-                        {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                      </div>
-                    </button>
-
-                    {isOpen && (
-                      <div className="border-t bg-offWhite/30 divide-y divide-offWhite-300">
-                        {/* Shared session info */}
-                        <div className="px-4 py-3 space-y-3">
-                          {session.topics && session.topics.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground mb-1.5">Topics</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {session.topics.map(t => <Badge key={t} variant="outline" className="text-xs">{t}</Badge>)}
-                              </div>
-                            </div>
-                          )}
-                          {session.notes && (
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground mb-1">Shared Notes</p>
-                              <p className="text-sm text-navy leading-relaxed">{session.notes}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* My reflection */}
-                        <div className="px-4 py-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs font-semibold text-navy uppercase tracking-widest">My Reflection</p>
-                            {myReflection && !isReflecting && (
-                              <button type="button" onClick={() => setReflectingSessionId(session.id)}
-                                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-navy transition-colors">
-                                <PenLine className="h-3 w-3" />Edit
-                              </button>
-                            )}
-                          </div>
-
-                          {isReflecting ? (
-                            <SessionReflectionEditor
-                              sessionId={session.id}
-                              userId={userId!}
-                              otherPersonName={mentor?.name ?? "your mentor"}
-                              existing={myReflection ? { id: myReflection.id, body: myReflection.body, shared: myReflection.shared } : null}
-                              onSave={(saved: ReflectionData) => {
-                                setSessions(prev => prev.map(s => s.id !== session.id ? s : {
-                                  ...s,
-                                  session_reflections: [
-                                    ...s.session_reflections.filter(r => r.author_id !== userId),
-                                    { id: saved.id, author_id: userId!, body: saved.body, shared: saved.shared, updated_at: new Date().toISOString() },
-                                  ],
-                                }));
-                                setReflectingSessionId(null);
-                              }}
-                              onCancel={() => setReflectingSessionId(null)}
-                            />
-                          ) : myReflection ? (
-                            <div>
-                              <p className="text-sm text-navy leading-relaxed">{myReflection.body}</p>
-                              <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
-                                {myReflection.shared
-                                  ? <><Eye className="h-3 w-3" />Shared with {mentor?.name ?? "mentor"}</>
-                                  : <><Lock className="h-3 w-3" />Private</>
-                                }
-                              </p>
-                            </div>
-                          ) : (
-                            <button type="button" onClick={() => setReflectingSessionId(session.id)}
-                              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-navy transition-colors">
-                              <PenLine className="h-3.5 w-3.5" />Add your reflection
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Their reflection (only if shared) */}
-                        {theirReflection && (
-                          <div className="px-4 py-3">
-                            <p className="text-xs font-semibold text-navy uppercase tracking-widest mb-2">
-                              {mentor?.name ?? "Mentor"}&apos;s Reflection
-                            </p>
-                            <p className="text-sm text-navy leading-relaxed">{theirReflection.body}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── JOURNAL TAB ── */}
-      {activeTab === "journal" && userId && (
-        <ReflectionJournal playerId={userId} />
-      )}
-
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-offWhite-300 z-40">
-        <div className="grid grid-cols-4">
-          {TABS.map(({ key, label, Icon }) => {
-            const showDot = key === "chat" && activeTab !== "chat" && (unreadCount > 0 || !hasEverMessaged) && !!matchId;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => {
-                  setActiveTab(key);
-                  if (key === "chat") setUnreadCount(0);
-                }}
-                className={`relative flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
-                  activeTab === key ? "text-navy" : "text-muted-foreground"
-                }`}
-              >
-                <div className="relative">
-                  <Icon className={`h-5 w-5 ${activeTab === key ? "text-navy" : "text-muted-foreground"}`} />
-                  {showDot && (
-                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-orange-500" />
+      {matchId && userId && mentor && (
+        <div className="flex-1 flex gap-6 min-h-0">
+          <div className="flex-1 min-w-0 flex flex-col">
+            <ChatWindow
+              ref={chatRef}
+              matchId={matchId}
+              currentUserId={userId}
+              otherUserId={mentor.id}
+              otherPersonName={mentor.name}
+              otherPersonAvatarUrl={mentor.avatar_url}
+              fullHeight
+              onMessageSent={() => { setChipRotateKey(k => k + 1); setMessageCount(c => c + 1); }}
+              topSlot={needsFirstCall ? <FirstCallCard onSchedule={() => setShowScheduleModal(true)} /> : undefined}
+              bottomSlot={
+                <>
+                  {recentSession && recentSession.topics && (
+                    <PostSessionNudge
+                      sessionId={recentSession.id}
+                      topics={recentSession.topics}
+                      role="mentee"
+                      onPick={(text) => chatRef.current?.setDraft(text)}
+                    />
                   )}
-                </div>
-                {label}
-              </button>
-            );
-          })}
+                  <StarterChips
+                    userId={userId}
+                    role="mentee"
+                    challenges={playerProfile?.challenges ?? []}
+                    rotateKey={chipRotateKey}
+                    onPick={(text) => chatRef.current?.setDraft(text)}
+                  />
+                </>
+              }
+            />
+          </div>
+          <aside className="hidden md:block w-[340px] shrink-0 overflow-y-auto pr-1">
+            <DashboardRightPanel
+              role="mentee"
+              matchId={matchId}
+              currentUserId={userId}
+              scheduleRefreshKey={scheduleRefreshKey}
+              onScheduleClick={() => setShowScheduleModal(true)}
+              onJoinCall={() => startCall()}
+              onLogSession={() => setLogOpen(true)}
+              needsFirstCall={needsFirstCall}
+              mentor={{
+                id: mentor.id,
+                name: mentor.name,
+                sport: mentor.sport,
+                avatar_url: mentor.avatar_url,
+                bio: mentorExtras?.bio ?? null,
+                why: mentorExtras?.why ?? null,
+                skills: mentorExtras?.skills ?? null,
+                playing_level: mentorExtras?.playing_level ?? null,
+              }}
+            />
+          </aside>
         </div>
-      </nav>
+      )}
+
+      {mobileInfoOpen && matchId && userId && mentor && (
+        <div className="md:hidden fixed inset-0 z-40 flex items-end" onClick={() => setMobileInfoOpen(false)}>
+          <div className="absolute inset-0 bg-navy/40" />
+          <div className="relative w-full max-h-[85vh] bg-white rounded-t-2xl shadow-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-white border-b border-offWhite-300 flex items-center justify-between px-4 py-3 z-10">
+              <p className="font-bold text-navy text-sm">Match info</p>
+              <button type="button" onClick={() => setMobileInfoOpen(false)} aria-label="Close" className="text-navy/40 hover:text-navy">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-4">
+              <DashboardRightPanel
+                role="mentee"
+                matchId={matchId}
+                currentUserId={userId}
+                scheduleRefreshKey={scheduleRefreshKey}
+                onScheduleClick={() => { setShowScheduleModal(true); setMobileInfoOpen(false); }}
+                onJoinCall={() => { startCall(); setMobileInfoOpen(false); }}
+                onLogSession={() => { setLogOpen(true); setMobileInfoOpen(false); }}
+                needsFirstCall={needsFirstCall}
+                mentor={{
+                  id: mentor.id,
+                  name: mentor.name,
+                  sport: mentor.sport,
+                  avatar_url: mentor.avatar_url,
+                  bio: mentorExtras?.bio ?? null,
+                  why: mentorExtras?.why ?? null,
+                  skills: mentorExtras?.skills ?? null,
+                  playing_level: mentorExtras?.playing_level ?? null,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

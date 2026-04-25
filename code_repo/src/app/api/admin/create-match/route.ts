@@ -25,12 +25,34 @@ export async function POST(request: Request) {
     serviceKey,
   );
 
-  const { error } = await admin
+  const { data: created, error } = await admin
     .from("matches")
-    .insert({ player_id: playerId, mentor_id: mentorId, status: "active" });
+    .insert({ player_id: playerId, mentor_id: mentorId, status: "active" })
+    .select("id")
+    .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !created) {
+    return NextResponse.json({ error: error?.message ?? "match insert failed" }, { status: 500 });
+  }
+
+  // Auto-schedule an intro call ~7 days out at 5pm UTC, on the hour.
+  // Mentors/mentees will typically reschedule — this just plants a marker.
+  const intro = new Date();
+  intro.setUTCDate(intro.getUTCDate() + 7);
+  intro.setUTCHours(17, 0, 0, 0);
+
+  const { error: callError } = await admin
+    .from("scheduled_calls")
+    .insert({
+      match_id: created.id,
+      proposed_by: mentorId,
+      scheduled_at: intro.toISOString(),
+      note: "Intro call — auto-scheduled. Reschedule if this time doesn't work.",
+    });
+
+  // Don't fail the match creation if the auto-call insert fails — just log.
+  if (callError) {
+    console.error("auto-schedule intro call failed:", callError.message);
   }
 
   return NextResponse.json({ ok: true });
