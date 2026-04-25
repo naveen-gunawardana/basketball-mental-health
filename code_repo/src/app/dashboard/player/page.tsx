@@ -38,7 +38,7 @@ export default function PlayerDashboard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [recentSessions, setRecentSessions] = useState<SessionRecord[]>([]);
   const [recommendedArticles, setRecommendedArticles] = useState<RecommendedArticle[]>([]);
-  const [messageCount, setMessageCount] = useState(0);
+  const [, setMessageCount] = useState(0);
   const [scheduledCallCount, setScheduledCallCount] = useState(0);
   const [showIcebreaker, setShowIcebreaker] = useState(false);
   const [chipRotateKey, setChipRotateKey] = useState(0);
