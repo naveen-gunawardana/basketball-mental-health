@@ -83,7 +83,7 @@ export default function AdminContentPage() {
       sport: tags.sport,
       category: tags.category,
       media_type: tags.media_type,
-    }).eq("id", id);
+    } as never).eq("id", id);
     await load();
     setActingId(null);
   }
@@ -97,7 +97,7 @@ export default function AdminContentPage() {
       status,
       ...(status === "published" ? { published_at: new Date().toISOString() } : {}),
       ...(tags ? { sport: tags.sport, category: tags.category, media_type: tags.media_type } : {}),
-    }).eq("id", id);
+    } as never).eq("id", id);
 
     if (status === "published") {
       const article = articles.find(a => a.id === id);
