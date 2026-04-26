@@ -63,7 +63,7 @@ export async function POST(request: Request) {
 ${role === "player"
   ? `<p>Our team is reviewing your application and will match you with a mentor soon. We'll reach out by email when you're matched.</p>`
   : `<p>Our team is reviewing your mentor application. You'll hear back within a few days once you're approved.</p>`}
-<p>While you wait, check out our advice library: <a href="${BASE_URL}/advice">${BASE_URL}/advice</a></p>
+<p>Head to your <a href="${BASE_URL}/dashboard">Locker Room</a> to see your status.</p>
 <p>— The Mentality Sports Team</p>`,
       });
 

@@ -2,7 +2,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowUp, CalendarClock, Video, Smile, Download } from "lucide-react";
+import { ArrowUp, CalendarClock, Video, Smile } from "lucide-react";
 import { usePresence } from "@/hooks/use-presence";
 
 interface Message {
@@ -397,14 +397,6 @@ export const ChatWindow = forwardRef<ChatWindowHandle, ChatWindowProps>(function
                         {at.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })}
                       </p>
                       {c.note && <p className="text-xs text-navy/60 mt-2 leading-snug italic">&ldquo;{c.note}&rdquo;</p>}
-                      {!isPast && (
-                        <a
-                          href={`/api/calls/${c.id}/ics`}
-                          className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-orange-600 hover:text-orange-700 transition-colors mt-2"
-                        >
-                          <Download className="h-3 w-3" /> Add to calendar
-                        </a>
-                      )}
                     </div>
                   </div>
                 </div>
