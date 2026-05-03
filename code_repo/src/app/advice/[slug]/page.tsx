@@ -4,6 +4,8 @@ import { ArrowLeft, BookOpen, Clock } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 
+export const revalidate = 3600; // rebuild article pages hourly so new articles are live without redeployment
+
 interface Article {
   id: string;
   title: string;

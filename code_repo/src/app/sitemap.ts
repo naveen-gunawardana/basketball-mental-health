@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://mentalitysports.com";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 async function getPublishedSlugs(): Promise<{ slug: string; published_at: string | null }[]> {
   try {

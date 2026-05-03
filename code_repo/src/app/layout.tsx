@@ -57,6 +57,9 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
+  alternates: {
+    canonical: "https://mentalitysports.com",
+  },
 };
 
 export default function RootLayout({
