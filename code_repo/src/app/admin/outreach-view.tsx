@@ -38,8 +38,6 @@ export default function AdminOutreachView({ players, mentors, matches, emails, r
   const [mentorSportFilter, setMentorSportFilter] = useState("all");
 
   const activeMatches = matches.filter(m => m.status === "active");
-  const matchedPlayerIds = new Set(activeMatches.map(m => m.player?.id));
-  const matchedMentorIds = new Set(activeMatches.map(m => m.mentor?.id));
 
   const playerSports = Array.from(new Set(players.flatMap(p => p.sport ?? []).filter(Boolean))) as string[];
   const mentorSports = Array.from(new Set(mentors.flatMap(m => m.sport ?? []).filter(Boolean))) as string[];
