@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import AdminOutreachView from "./outreach-view";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2, Activity, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,7 @@ interface PendingArticle { id: string; title: string; category: string | null; e
 type MatchFilter = "all" | "matched" | "unmatched";
 
 export default function AdminPage() {
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [players, setPlayers] = useState<Person[]>([]);
   const [mentors, setMentors] = useState<Person[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -141,7 +143,14 @@ export default function AdminPage() {
     setConfirmDeleteId(null);
   }
 
-  useEffect(() => { load(); loadEmails(); }, []);
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserRole(user?.app_metadata?.role ?? null);
+    });
+    load();
+    loadEmails();
+  }, []);
 
   const activeMatches = matches.filter(m => m.status === "active");
   const matchedPlayerIds = new Set(activeMatches.map(m => m.player?.id));
@@ -254,6 +263,10 @@ export default function AdminPage() {
   }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground text-sm">Loading admin...</div>;
+
+  if (userRole === "outreach" || userRole === "operations") {
+    return <AdminOutreachView players={players} mentors={mentors} matches={matches} emails={emails} role={userRole} />;
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

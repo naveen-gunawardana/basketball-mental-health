@@ -6,7 +6,8 @@ import type { Database } from "@/lib/supabase/types";
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.app_metadata?.role !== "admin") {
+  const role = user?.app_metadata?.role;
+  if (!role || !["admin", "outreach", "operations"].includes(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 

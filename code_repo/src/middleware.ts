@@ -37,10 +37,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/signup", request.url));
   }
 
-  // Protect admin — must have admin role in app_metadata
+  // Protect admin — must have admin, outreach, or operations role in app_metadata
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    const isAdmin = user?.app_metadata?.role === "admin";
-    if (!isAdmin) {
+    const role = user?.app_metadata?.role;
+    const allowed = role === "admin" || role === "outreach" || role === "operations";
+    if (!allowed) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
