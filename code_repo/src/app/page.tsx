@@ -11,10 +11,23 @@ import {
   PenLine,
   Target,
   ChevronDown,
-  ChevronRight,
+  Brain,
+  Users,
+  Heart,
+  Trophy,
+  Zap,
+  Shield,
+  TrendingUp,
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
+import { PROGRAMS } from "@/lib/programs";
+
+const programStatusPill: Record<string, { text: string; cls: string } | null> = {
+  new: { text: "New", cls: "bg-orange-500 text-white" },
+  soon: { text: "Coming soon", cls: "bg-navy/10 text-navy/45" },
+  live: { text: "Available", cls: "bg-sage/15 text-sage-700" },
+};
 
 const Marquee = dynamic(() => import("react-fast-marquee"), { ssr: false });
 const CountUp = dynamic(() => import("react-countup"), { ssr: false });
@@ -102,10 +115,10 @@ const features = [
 ];
 
 const steps = [
-  { n: "01", title: "Apply", desc: "Tell us your sport, level, and what you're working through mentally or emotionally. Takes 3 minutes." },
-  { n: "02", title: "Get Matched", desc: "We review every application and match you with someone whose background fits what you're going through." },
-  { n: "03", title: "Build It", desc: "Schedule calls when it works. No scripts, no agenda — just honest conversation." },
-  { n: "04", title: "Go Deeper", desc: "Tap the article library, log reflections, track goals. The work doesn't stop between calls." },
+  { n: "01", title: "Apply", desc: "Tell us your sport, level, and what you're working through mentally or emotionally. Takes 3 minutes.", Icon: PenLine },
+  { n: "02", title: "Get Matched", desc: "We review every application and match you with someone whose background fits what you're going through.", Icon: Users },
+  { n: "03", title: "Build It", desc: "Schedule calls when it works. No scripts, no agenda — just honest conversation.", Icon: MessageCircle },
+  { n: "04", title: "Go Deeper", desc: "Tap the article library, log reflections, track goals. The work doesn't stop between calls.", Icon: TrendingUp },
 ];
 
 
@@ -183,10 +196,6 @@ export default function Home() {
         });
     });
   }, []);
-
-  // timeline line draw
-  const timelineRef = useRef(null);
-  const timelineInView = useInView(timelineRef, { once: true, margin: "-100px" });
 
   // hero rotating photos
   const heroPhotos = [
@@ -518,43 +527,56 @@ export default function Home() {
       </section>
 
       {/* ─── MARQUEE ──────────────────────────────────────────────────────── */}
-      <div className="bg-orange-500 py-[10px]">
-        <Marquee speed={50} gradient={false}>
-          {[...ticker, ...ticker].map((item, i) => (
-            <span key={i} className="inline-flex items-center gap-8 mx-8 font-bold text-[11px] text-white uppercase tracking-[0.18em]">
-              {item}
-              <span className="bg-white/40 rounded-full w-1 h-1 shrink-0" />
-            </span>
-          ))}
-        </Marquee>
+      <div className="bg-orange-500 overflow-hidden">
+        <div className="py-[9px] border-b border-white/20">
+          <Marquee speed={50} gradient={false}>
+            {[...ticker, ...ticker].map((item, i) => (
+              <span key={i} className="inline-flex items-center gap-8 mx-8 font-bold text-[11px] text-white uppercase tracking-[0.18em]">
+                {item}
+                <span className="bg-white/40 rounded-full w-1 h-1 shrink-0" />
+              </span>
+            ))}
+          </Marquee>
+        </div>
+        <div className="py-[9px]">
+          <Marquee speed={38} gradient={false} direction="right">
+            {[...ticker, ...ticker].map((item, i) => (
+              <span key={i} className="inline-flex items-center gap-8 mx-8 font-bold text-[11px] text-white/60 uppercase tracking-[0.18em]">
+                {item}
+                <span className="bg-white/25 rounded-full w-1 h-1 shrink-0" />
+              </span>
+            ))}
+          </Marquee>
+        </div>
       </div>
 
       {/* ─── MISSION ──────────────────────────────────────────────────────── */}
-      {/* Fragmented editorial typography — no cards, just bold text at scale */}
-      <section className="relative bg-white overflow-hidden">
-        {/* Giant decorative "01" */}
+      <section className="relative bg-[#0c1628] overflow-hidden">
+        {/* Ghost MIND watermark */}
         <div
           aria-hidden
-          className="top-1/2 right-0 absolute font-bold text-offWhite-300 leading-none -translate-y-1/2 pointer-events-none select-none"
-          style={{ fontSize: "clamp(16rem, 28vw, 28rem)", lineHeight: 1, opacity: 0.6 }}
+          className="top-1/2 right-[-2rem] absolute font-black text-white/[0.03] leading-none -translate-y-1/2 pointer-events-none select-none font-condensed"
+          style={{ fontSize: "clamp(18rem, 35vw, 40rem)", lineHeight: 1 }}
         >
-          01
+          MIND
         </div>
+        {/* Subtle orange glow bottom-left */}
+        <div aria-hidden className="bottom-0 left-0 absolute bg-orange-500/10 blur-[120px] rounded-full w-[500px] h-[300px] pointer-events-none" />
 
         <div className="z-10 relative mx-auto px-6 sm:px-8 lg:px-12 py-28 max-w-7xl">
           <Reveal>
-            <p className="flex items-center gap-4 mb-16 font-bold text-[11px] text-orange-500 uppercase tracking-[0.22em]">
-              <span className="bg-orange-400 w-8 h-px" />
+            <p className="flex items-center gap-4 mb-16 font-bold text-[11px] text-orange-400 uppercase tracking-[0.22em]">
+              <span className="bg-orange-500 w-8 h-px" />
               Our Mission
             </p>
           </Reveal>
 
           <div className="space-y-0 max-w-4xl">
             {[
-              { text: "Coaches teach the game.", size: "clamp(2rem, 4vw, 3.4rem)", color: "text-navy/30", delay: 0.05 },
-              { text: "Trainers build the body.", size: "clamp(2rem, 4vw, 3.4rem)", color: "text-navy/30", delay: 0.1 },
-              { text: "But nobody builds a", size: "clamp(2rem, 4vw, 3.4rem)", color: "text-navy", delay: 0.15 },
-              { text: "real relationship.", size: "clamp(2.6rem, 5.5vw, 4.8rem)", color: "text-orange-400", delay: 0.2 },
+              { text: "Coaches teach the game.", size: "clamp(2rem, 4vw, 3.4rem)", color: "text-white/20", delay: 0.05 },
+              { text: "Trainers build the body.", size: "clamp(2rem, 4vw, 3.4rem)", color: "text-white/20", delay: 0.1 },
+              { text: "But nobody builds", size: "clamp(2rem, 4vw, 3.4rem)", color: "text-white", delay: 0.15 },
+              { text: "the mental.", size: "clamp(2.6rem, 5.5vw, 4.8rem)", color: "text-orange-400", delay: 0.2 },
             ].map((line) => (
               <Reveal key={line.text} delay={line.delay} y={20}>
                 <p className={`font-bold leading-[1.1] tracking-tight ${line.color}`} style={{ fontSize: line.size }}>
@@ -565,77 +587,157 @@ export default function Home() {
           </div>
 
           <Reveal delay={0.35} className="flex items-center gap-8 mt-16">
-            <div className="flex-1 bg-navy/15 max-w-[80px] h-px" />
-            <p className="font-bold text-[11px] text-navy/35 uppercase tracking-[0.22em]">
+            <div className="flex-1 bg-white/10 max-w-[80px] h-px" />
+            <p className="font-bold text-[11px] text-white/25 uppercase tracking-[0.22em]">
               That&apos;s the gap we&apos;re here to close.
             </p>
           </Reveal>
 
           {/* Stat row */}
-          <Reveal delay={0.4} className="gap-0 grid grid-cols-3 mt-16 pt-10 border-offWhite-300 border-t max-w-lg">
+          <Reveal delay={0.4} className="gap-0 grid grid-cols-3 mt-16 pt-10 border-white/10 border-t max-w-lg">
             {[
               { n: 20, suffix: "+", label: "Sports covered" },
               { n: 100, suffix: "%", label: "Athlete-led" },
               { n: 1, suffix: "-on-1", label: "Every match" },
             ].map((s) => (
               <div key={s.label} className="pr-8">
-                <p className="font-bold tabular-nums text-navy text-3xl">
+                <p className="font-bold tabular-nums text-white text-3xl">
                   <CountOnView end={s.n} suffix={s.suffix} />
                 </p>
-                <p className="mt-1 text-[11px] text-navy/35 uppercase tracking-wider">{s.label}</p>
+                <p className="mt-1 text-[11px] text-white/30 uppercase tracking-wider">{s.label}</p>
               </div>
             ))}
           </Reveal>
         </div>
       </section>
 
+      {/* ─── PROGRAMS ─────────────────────────────────────────────────────── */}
+      <section className="relative bg-offWhite py-28 overflow-hidden">
+        {/* Ghost watermark */}
+        <div aria-hidden className="top-1/2 left-1/2 absolute font-black text-navy/[0.025] leading-none -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none font-condensed whitespace-nowrap" style={{ fontSize: "clamp(7rem, 16vw, 16rem)" }}>PLATFORM</div>
+
+        <div className="z-10 relative mx-auto px-6 sm:px-8 max-w-7xl">
+          <Reveal className="flex flex-wrap justify-between items-end gap-6 mb-14">
+            <div className="max-w-2xl">
+              <p className="mb-3 font-bold text-[11px] text-orange-500 uppercase tracking-[0.22em]">What we do</p>
+              <h2 className="font-black text-navy font-condensed leading-[0.95] mb-5" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
+                MORE THAN<br />MENTORSHIP.
+              </h2>
+              <p className="text-navy/55 leading-relaxed max-w-xl">
+                We started with 1-on-1 mentorship. Now Mentality Sports is a home for the whole mental side of sport — live sessions, training, resources, a newsletter, and a podcast on the way.
+              </p>
+            </div>
+            <Link href="/programs" className="group inline-flex items-center gap-2 font-bold text-navy hover:text-orange-500 text-sm transition-colors shrink-0">
+              Explore all programs <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </Reveal>
+
+          <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {PROGRAMS.map((p, i) => {
+              const pill = programStatusPill[p.status];
+              return (
+                <Reveal key={p.key} delay={i * 0.06} y={24} className="h-full">
+                  <Link
+                    href={p.href}
+                    className="group relative flex flex-col h-full bg-white border border-offWhite-300 rounded-sm p-7 hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                  >
+                    <div aria-hidden className="bottom-0 left-0 absolute bg-orange-500 w-0 group-hover:w-full h-[3px] transition-all duration-500 ease-out" />
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex justify-center items-center bg-orange-500/10 group-hover:bg-orange-500/20 rounded-lg w-12 h-12 transition-colors">
+                        <p.Icon className="w-6 h-6 text-orange-500" />
+                      </div>
+                      {pill && (
+                        <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider ${pill.cls}`}>{pill.text}</span>
+                      )}
+                    </div>
+                    <h3 className="mb-2 font-black text-navy text-xl font-condensed tracking-wide group-hover:text-orange-600 transition-colors">{p.title.toUpperCase()}</h3>
+                    <p className="mb-3 text-[13px] font-semibold text-navy/45">{p.tagline}</p>
+                    <p className="text-[13px] text-navy/60 leading-relaxed">{p.description}</p>
+                    <span className="flex items-center gap-1.5 mt-6 pt-5 border-offWhite-300 border-t font-bold text-navy/40 group-hover:text-orange-500 text-xs uppercase tracking-widest transition-colors mt-auto">
+                      {p.status === "soon" ? "Get notified" : "Explore"} <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </Link>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ─── WHO WE SERVE ─────────────────────────────────────────────────── */}
-      {/* Full-height interactive split — panels push/pull on hover */}
-      <section className="flex md:flex-row flex-col min-h-[560px]">
+      <section className="flex md:flex-row flex-col min-h-[600px]">
         {/* Athletes panel */}
         <motion.div
           onHoverStart={() => setServeHover("athletes")}
           onHoverEnd={() => setServeHover(null)}
-          animate={{ flex: serveHover === "mentors" ? 0.65 : serveHover === "athletes" ? 1.35 : 1 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="relative flex flex-col justify-between bg-navy p-10 lg:p-14 min-h-[280px] md:min-h-0 overflow-hidden cursor-default"
+          animate={{ flex: serveHover === "mentors" ? 0.6 : serveHover === "athletes" ? 1.4 : 1 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="relative flex flex-col justify-between bg-navy p-10 lg:p-14 min-h-[300px] md:min-h-0 overflow-hidden cursor-default"
         >
-          {/* Watermark letter */}
-          <div aria-hidden className="right-4 bottom-0 absolute font-bold text-white/[0.04] leading-none pointer-events-none select-none" style={{ fontSize: "22rem", lineHeight: 1 }}>A</div>
+          {/* Watermark */}
+          <div aria-hidden className="right-0 bottom-[-2rem] absolute font-black text-white/[0.03] leading-none pointer-events-none select-none font-condensed" style={{ fontSize: "24rem", lineHeight: 1 }}>IN<br/>THE<br/>ARENA</div>
+          {/* Corner accent */}
+          <div aria-hidden className="top-0 left-0 absolute border-t-[3px] border-l-[3px] border-orange-500/60 w-16 h-16 pointer-events-none" />
           <div className="z-10 relative">
-            <span className="inline-block bg-orange-500 mb-8 px-3 py-1 rounded-sm font-bold text-[10px] text-white uppercase tracking-widest">Athletes</span>
-            <p className="max-w-xs text-[15px] text-white/65 leading-relaxed">
-              Struggling with the mental side of competing — anxiety, confidence, identity, or just needing honest guidance from someone who gets it.
-
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex justify-center items-center bg-orange-500/20 rounded-lg w-10 h-10">
+                <Shield className="w-5 h-5 text-orange-400" />
+              </div>
+              <span className="font-bold text-[10px] text-orange-400 uppercase tracking-widest">For Athletes</span>
+            </div>
+            <h3 className="mb-4 font-black text-white leading-tight font-condensed" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>
+              FOR THE ONES<br />IN THE ARENA.
+            </h3>
+            <p className="max-w-xs text-[14px] text-white/55 leading-relaxed">
+              Struggling with the mental side — anxiety, confidence, identity, or just needing honest guidance from someone who&apos;s lived it.
             </p>
+            <div className="flex flex-wrap gap-2 mt-5">
+              {["Anxiety", "Confidence", "Identity", "Slumps"].map((tag) => (
+                <span key={tag} className="bg-white/5 px-3 py-1 border border-white/8 rounded-full text-[10px] text-white/35 uppercase tracking-widest">{tag}</span>
+              ))}
+            </div>
           </div>
           <div className="z-10 relative mt-10">
-            <Link href="/signup?role=player" className="group inline-flex items-center gap-2 font-bold text-orange-400 hover:text-orange-300 text-sm transition-colors">
+            <Link href="/signup?role=player" className="group inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-400 px-6 py-3 rounded-sm font-bold text-white text-sm transition-colors">
               Find a Mentor <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </motion.div>
 
-        {/* Divider line */}
-        <div className="hidden md:block bg-white/10 w-px shrink-0" />
+        {/* Divider */}
+        <div className="hidden md:block bg-navy-700 w-[2px] shrink-0" />
 
         {/* Mentors panel */}
         <motion.div
           onHoverStart={() => setServeHover("mentors")}
           onHoverEnd={() => setServeHover(null)}
-          animate={{ flex: serveHover === "athletes" ? 0.65 : serveHover === "mentors" ? 1.35 : 1 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="relative flex flex-col justify-between bg-offWhite p-10 lg:p-14 min-h-[280px] md:min-h-0 overflow-hidden cursor-default"
+          animate={{ flex: serveHover === "athletes" ? 0.6 : serveHover === "mentors" ? 1.4 : 1 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="relative flex flex-col justify-between bg-offWhite p-10 lg:p-14 min-h-[300px] md:min-h-0 overflow-hidden cursor-default"
         >
-          <div aria-hidden className="right-4 bottom-0 absolute font-bold text-navy/[0.05] leading-none pointer-events-none select-none" style={{ fontSize: "22rem", lineHeight: 1 }}>M</div>
+          <div aria-hidden className="right-0 bottom-[-2rem] absolute font-black text-navy/[0.04] leading-none pointer-events-none select-none font-condensed" style={{ fontSize: "24rem", lineHeight: 1 }}>CAME<br/>THROUGH<br/>IT</div>
+          <div aria-hidden className="top-0 left-0 absolute border-t-[3px] border-l-[3px] border-navy/20 w-16 h-16 pointer-events-none" />
           <div className="z-10 relative">
-            <span className="inline-block bg-navy mb-8 px-3 py-1 rounded-sm font-bold text-[10px] text-white uppercase tracking-widest">Mentors</span>
-            <p className="max-w-xs text-[15px] text-navy/65 leading-relaxed">
-              You&apos;ve been through it — the pressure, the doubt, the setbacks. That&apos;s the kind of experience that actually helps someone.
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex justify-center items-center bg-navy/10 rounded-lg w-10 h-10">
+                <Trophy className="w-5 h-5 text-navy" />
+              </div>
+              <span className="font-bold text-[10px] text-navy/50 uppercase tracking-widest">For Mentors</span>
+            </div>
+            <h3 className="mb-4 font-black text-navy leading-tight font-condensed" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}>
+              FOR THOSE WHO<br />CAME THROUGH IT.
+            </h3>
+            <p className="max-w-xs text-[14px] text-navy/55 leading-relaxed">
+              You&apos;ve been through the pressure, the doubt, the setbacks. That experience is the most valuable thing you can give someone.
             </p>
+            <div className="flex flex-wrap gap-2 mt-5">
+              {["15 min/week", "1-on-1", "Your schedule", "Free"].map((tag) => (
+                <span key={tag} className="bg-navy/5 px-3 py-1 border border-navy/10 rounded-full text-[10px] text-navy/40 uppercase tracking-widest">{tag}</span>
+              ))}
+            </div>
           </div>
           <div className="z-10 relative mt-10">
-            <Link href="/signup?role=mentor" className="group inline-flex items-center gap-2 font-bold text-navy hover:text-orange-500 text-sm transition-colors">
+            <Link href="/signup?role=mentor" className="group inline-flex items-center gap-2.5 bg-navy hover:bg-navy-700 px-6 py-3 rounded-sm font-bold text-white text-sm transition-colors">
               Apply to Mentor <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
@@ -652,66 +754,53 @@ export default function Home() {
           </div>
           <Link
             href="/opportunities"
-            className="group inline-flex items-center gap-2.5 bg-[#0a1628] hover:bg-[#e8703a] px-7 py-3.5 rounded-sm font-bold text-[#f5f0e8] text-sm transition-colors shrink-0"
+            className="group inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-400 px-7 py-3.5 font-bold text-white text-sm transition-colors shrink-0"
+            style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
           >
             See Openings
-            <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>
       </section>
 
       {/* ─── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      {/* Vertical timeline with animated draw line */}
-      <section className="bg-white px-6 sm:px-8 py-28 border-offWhite-300 border-t">
-        <div className="mx-auto max-w-5xl">
-          <Reveal className="flex flex-wrap justify-between items-end gap-6 mb-20">
+      <section className="relative bg-offWhite py-28 overflow-hidden">
+        {/* Ghost "PROCESS" watermark */}
+        <div aria-hidden className="top-1/2 left-1/2 absolute font-black text-navy/[0.025] leading-none -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none font-condensed whitespace-nowrap" style={{ fontSize: "clamp(8rem, 18vw, 18rem)" }}>PROCESS</div>
+        <div className="z-10 relative mx-auto px-6 sm:px-8 max-w-7xl">
+          <Reveal className="flex flex-wrap justify-between items-end gap-6 mb-16">
             <div>
               <p className="mb-3 font-bold text-[11px] text-orange-500 uppercase tracking-[0.22em]">The process</p>
-              <h2 className="font-bold text-navy tracking-tight" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>How it works</h2>
+              <h2 className="font-black text-navy font-condensed" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>HOW IT WORKS</h2>
             </div>
             <Link href="/signup?role=player" className="group inline-flex items-center gap-2 font-bold text-navy hover:text-orange-500 text-sm transition-colors shrink-0">
               Apply now <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </Reveal>
 
-          <div ref={timelineRef} className="relative">
-            {/* Animated vertical line */}
-            <div className="hidden sm:block top-2 bottom-2 left-[19px] absolute bg-offWhite-300 w-px" />
-            <motion.div
-              className="hidden sm:block top-2 left-[19px] absolute bg-orange-400 w-px origin-top"
-              initial={{ scaleY: 0 }}
-              animate={timelineInView ? { scaleY: 1 } : {}}
-              transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-              style={{ bottom: 2 }}
-            />
-
-            <div className="space-y-0">
-              {steps.map((s, i) => (
-                <Reveal key={s.n} delay={i * 0.12} y={20}>
-                  <div className="flex items-start gap-8 sm:gap-12 py-10 border-offWhite-300 last:border-0 border-b">
-                    {/* Circle on timeline */}
-                    <div className="hidden relative flex sm:flex flex-col items-center shrink-0">
-                      <div className="z-10 flex justify-center items-center bg-white border-2 border-orange-400 rounded-full w-10 h-10">
-                        <span className="font-bold text-[10px] text-orange-500">{s.n}</span>
-                      </div>
-                    </div>
-
-                    {/* Mobile step number */}
-                    <span className="sm:hidden pt-1 font-bold text-[11px] text-orange-500 shrink-0">{s.n}</span>
-
-                    {/* Content */}
-                    <div className="flex-1 pt-1">
-                      <div className="flex items-baseline gap-4 mb-3">
-                        <h3 className="font-bold text-navy text-xl">{s.title}</h3>
-                        {/* Large ghost number */}
-                        <span className="hidden lg:block font-bold text-offWhite-300 text-5xl leading-none select-none">{s.n}</span>
-                      </div>
-                      <p className="max-w-md text-navy/65 text-sm leading-relaxed">{s.desc}</p>
-                    </div>
+          <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((s, i) => (
+              <Reveal key={s.n} delay={i * 0.1} y={24}>
+                <motion.div
+                  whileHover={{ y: -6, backgroundColor: "#14213D" }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="group relative flex flex-col bg-white border border-offWhite-300 rounded-sm p-8 h-full overflow-hidden cursor-default"
+                >
+                  {/* Ghost step number */}
+                  <div aria-hidden className="top-0 right-2 absolute font-black text-navy/[0.05] group-hover:text-white/[0.06] leading-none pointer-events-none select-none font-condensed transition-colors duration-300" style={{ fontSize: "6rem", lineHeight: 1 }}>{s.n}</div>
+                  {/* Icon */}
+                  <div className="z-10 relative flex justify-center items-center bg-orange-500/10 group-hover:bg-orange-500/20 mb-6 rounded-lg w-11 h-11 transition-colors duration-300">
+                    <s.Icon className="w-5 h-5 text-orange-500 group-hover:text-orange-400 transition-colors duration-300" />
                   </div>
-                </Reveal>
-              ))}
-            </div>
+                  {/* Step label */}
+                  <p className="z-10 relative mb-1 font-bold text-[10px] text-navy/30 group-hover:text-white/30 uppercase tracking-widest transition-colors duration-300">{s.n}</p>
+                  <h3 className="z-10 relative mb-3 font-black text-navy group-hover:text-white text-xl font-condensed tracking-wide transition-colors duration-300">{s.title.toUpperCase()}</h3>
+                  <p className="z-10 relative text-[13px] text-navy/55 group-hover:text-white/55 leading-relaxed transition-colors duration-300">{s.desc}</p>
+                  {/* Bottom accent line */}
+                  <div className="bottom-0 left-0 absolute bg-orange-500 w-0 group-hover:w-full h-[3px] transition-all duration-500 ease-out" />
+                </motion.div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -759,9 +848,11 @@ export default function Home() {
                   {(() => { const f = features[activeFeature]; return (
                     <>
                       <div>
-                        <f.Icon className="mb-6 w-8 h-8 text-orange-400" />
-                        <h3 className="mb-4 font-bold text-white text-2xl">{f.label}</h3>
-                        <p className="max-w-lg text-[15px] text-white/65 leading-relaxed">{f.detail}</p>
+                        <div className="flex justify-center items-center bg-orange-500/15 mb-8 border border-orange-500/20 rounded-2xl w-16 h-16">
+                          <f.Icon className="w-8 h-8 text-orange-400" />
+                        </div>
+                        <h3 className="mb-4 font-black text-white text-2xl font-condensed tracking-wide">{f.label.toUpperCase()}</h3>
+                        <p className="max-w-lg text-[15px] text-white/60 leading-relaxed">{f.detail}</p>
                       </div>
                       <p className="mt-8 font-bold text-[11px] text-white/15 uppercase tracking-[0.18em]">
                         {String(activeFeature + 1).padStart(2, "0")} / {String(features.length).padStart(2, "0")}
@@ -776,46 +867,67 @@ export default function Home() {
       </section>
 
       {/* ─── CHALLENGES ───────────────────────────────────────────────────── */}
-      {/* Marquee of challenges + bold "what we provide" statement blocks */}
-      <section className="bg-offWhite py-28 border-offWhite-300 border-t">
-        {/* Challenge marquee */}
-        <div className="mb-20">
-          <Reveal className="mx-auto mb-8 px-6 sm:px-8 max-w-7xl">
+      <section className="bg-white">
+        {/* Challenge marquee strip */}
+        <div className="bg-offWhite border-offWhite-300 border-b py-5">
+          <Reveal className="mx-auto mb-4 px-6 sm:px-8 max-w-7xl">
             <p className="font-bold text-[11px] text-orange-500 uppercase tracking-[0.22em]">Sound familiar?</p>
           </Reveal>
-          <Marquee speed={35} gradient={false} className="py-2">
+          <Marquee speed={35} gradient={false}>
             {[...challenges, ...challenges].map((c, i) => (
-              <span key={i} className="inline-flex items-center gap-6 mx-6 font-semibold text-navy/40 text-sm">
+              <span key={i} className="inline-flex items-center gap-6 mx-6 font-semibold text-navy/50 text-sm">
                 {c}
-                <span className="bg-orange-400/60 rounded-full w-1 h-1 shrink-0" />
+                <span className="bg-orange-400/50 rounded-full w-1.5 h-1.5 shrink-0" />
               </span>
             ))}
           </Marquee>
         </div>
 
-        {/* What we provide — bold statement cards, not a grid */}
-        <div className="mx-auto px-6 sm:px-8 max-w-7xl">
-          <Reveal className="mb-12">
-            <h2 className="font-bold text-navy tracking-tight" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
-              Here&apos;s what<br />we give you.
+        {/* 2x2 alternating grid */}
+        <div className="mx-auto px-6 sm:px-8 pt-20 pb-24 max-w-7xl">
+          <Reveal className="mb-14">
+            <p className="mb-3 font-bold text-[11px] text-orange-500 uppercase tracking-[0.22em]">What you get</p>
+            <h2 className="font-black text-navy font-condensed" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
+              HERE&apos;S WHAT<br />WE GIVE YOU.
             </h2>
           </Reveal>
 
-          <div className="space-y-px bg-offWhite-300 border border-offWhite-300 rounded-sm overflow-hidden">
+          <div className="gap-3 grid grid-cols-1 sm:grid-cols-2">
             {[
-              { title: "A Real Mentor", desc: "Matched with a current or former athlete whose experience fits yours. Ongoing — not a one-time call.", accent: "bg-orange-500" },
-              { title: "Mental Guidance", desc: "Work through what competing at your level does to your head — with someone who's been there.", accent: "bg-navy" },
-              { title: "Advice Library", desc: "Articles on confidence, anxiety, identity, and the parts of the mental game nobody talks about.", accent: "bg-sage-600" },
-              { title: "Built to Give Back", desc: "Mentors are here because they chose to be. No cost, no subscriptions.", accent: "bg-gold-500" },
+              {
+                title: "A Real Mentor",
+                desc: "Matched with a current or former athlete whose experience fits yours. Ongoing — not a one-time call.",
+                Icon: Users,
+                dark: true,
+              },
+              {
+                title: "Mental Guidance",
+                desc: "Work through what competing at your level does to your head — with someone who's been exactly there.",
+                Icon: Brain,
+                dark: false,
+              },
+              {
+                title: "Advice Library",
+                desc: "Articles on confidence, anxiety, identity, and the parts of the mental game nobody talks about.",
+                Icon: BookOpen,
+                dark: false,
+              },
+              {
+                title: "Built to Give Back",
+                desc: "Mentors are here because they chose to be. No cost, no subscriptions, no algorithm — ever.",
+                Icon: Heart,
+                dark: true,
+              },
             ].map((item, i) => (
-              <Reveal key={item.title} delay={i * 0.07}>
-                <div className="group flex items-start gap-6 bg-white hover:bg-offWhite/60 px-8 py-7 transition-colors">
-                  <div className={`h-2 w-2 rounded-full ${item.accent} mt-2 shrink-0`} />
-                  <div className="flex sm:flex-row flex-col flex-1 sm:items-center sm:gap-12">
-                    <h3 className="w-44 font-bold text-navy text-base shrink-0">{item.title}</h3>
-                    <p className="mt-1 sm:mt-0 text-navy/65 text-sm leading-relaxed">{item.desc}</p>
+              <Reveal key={item.title} delay={i * 0.08} y={24}>
+                <div className={`relative group p-10 rounded-sm overflow-hidden ${item.dark ? "bg-navy" : "bg-offWhite border border-offWhite-300"}`}>
+                  {/* Corner accent */}
+                  <div aria-hidden className={`absolute top-0 right-0 w-24 h-24 pointer-events-none ${item.dark ? "border-t-[2px] border-r-[2px] border-orange-500/20" : "border-t-[2px] border-r-[2px] border-navy/8"}`} />
+                  <div className={`flex justify-center items-center mb-6 rounded-xl w-12 h-12 ${item.dark ? "bg-orange-500/15" : "bg-navy/8"}`}>
+                    <item.Icon className={`w-6 h-6 ${item.dark ? "text-orange-400" : "text-navy"}`} />
                   </div>
-                  <ArrowRight className="hidden sm:block mt-0.5 w-4 h-4 text-navy/20 group-hover:text-orange-400 transition-all group-hover:translate-x-0.5 shrink-0" />
+                  <h3 className={`mb-3 font-black text-xl font-condensed tracking-wide ${item.dark ? "text-white" : "text-navy"}`}>{item.title.toUpperCase()}</h3>
+                  <p className={`text-sm leading-relaxed ${item.dark ? "text-white/55" : "text-navy/60"}`}>{item.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -926,28 +1038,33 @@ export default function Home() {
 
 
       {/* ─── FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="bg-white px-6 sm:px-8 py-28 border-offWhite-300 border-t">
-        <div className="mx-auto max-w-4xl">
+      <section className="relative bg-[#0c1628] px-6 sm:px-8 py-28 overflow-hidden">
+        {/* Subtle grid texture */}
+        <div aria-hidden className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundSize: "60px 60px"
+        }} />
+        <div className="z-10 relative mx-auto max-w-4xl">
           <Reveal className="mb-16">
-            <p className="mb-3 font-bold text-[11px] text-orange-500 uppercase tracking-[0.22em]">Common questions</p>
-            <h2 className="font-bold text-navy tracking-tight" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
-              Straight answers.
+            <p className="mb-3 font-bold text-[11px] text-orange-400 uppercase tracking-[0.22em]">Common questions</p>
+            <h2 className="font-black text-white font-condensed" style={{ fontSize: "clamp(2.4rem, 4.5vw, 3.8rem)" }}>
+              STRAIGHT ANSWERS.
             </h2>
           </Reveal>
 
-          <div className="space-y-px bg-offWhite-300 border border-offWhite-300 rounded-sm overflow-hidden">
+          <div className="space-y-px border border-white/8 rounded-sm overflow-hidden">
             {faqs.map((faq, i) => (
               <Reveal key={faq.q} delay={i * 0.04}>
-                <div className="bg-white">
+                <div className="bg-white/4">
                   <button
                     type="button"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="group flex justify-between items-center gap-6 hover:bg-offWhite/60 px-8 py-6 w-full text-left transition-colors"
+                    className="group flex justify-between items-center gap-6 hover:bg-white/6 px-8 py-6 w-full text-left transition-colors border-b border-white/5 last:border-0"
                     aria-expanded={openFaq === i}
                   >
-                    <span className="font-semibold text-[15px] text-navy leading-snug">{faq.q}</span>
+                    <span className="font-semibold text-[15px] text-white/80 leading-snug">{faq.q}</span>
                     <ChevronDown
-                      className={`h-4 w-4 text-navy/30 shrink-0 transition-transform duration-300 group-hover:text-orange-400 ${openFaq === i ? "rotate-180 text-orange-400" : ""}`}
+                      className={`h-4 w-4 text-white/20 shrink-0 transition-transform duration-300 group-hover:text-orange-400 ${openFaq === i ? "rotate-180 text-orange-400" : ""}`}
                     />
                   </button>
                   <AnimatePresence initial={false}>
@@ -960,7 +1077,7 @@ export default function Home() {
                         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                         className="overflow-hidden"
                       >
-                        <p className="px-8 pb-6 max-w-2xl text-navy/65 text-sm leading-relaxed">{faq.a}</p>
+                        <p className="px-8 pb-6 max-w-2xl text-white/45 text-sm leading-relaxed">{faq.a}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -970,9 +1087,9 @@ export default function Home() {
           </div>
 
           <Reveal delay={0.2} className="mt-10 text-center">
-            <p className="text-navy/40 text-sm">
+            <p className="text-white/25 text-sm">
               Still have questions?{" "}
-              <a href="mailto:hello@mentalitysports.com" className="font-semibold text-orange-500 hover:text-orange-400 transition-colors">
+              <a href="mailto:hello@mentalitysports.com" className="font-semibold text-orange-400 hover:text-orange-300 transition-colors">
                 Email us
               </a>
             </p>
@@ -981,28 +1098,47 @@ export default function Home() {
       </section>
 
       {/* ─── FINAL CTA ────────────────────────────────────────────────────── */}
-      <section className="bg-navy px-6 sm:px-8 py-28">
-        <div className="mx-auto max-w-7xl">
-          <div className="items-center gap-12 grid grid-cols-1 lg:grid-cols-2">
-            <Reveal>
-              <p className="mb-5 font-bold text-[11px] text-orange-400 uppercase tracking-[0.22em]">Jump in</p>
-              <h2 className="font-bold text-white leading-[1.02] tracking-tight" style={{ fontSize: "clamp(2.5rem, 5vw, 4.2rem)" }}>
-                Pick<br />your side.
+      <section className="flex flex-col md:flex-row min-h-[480px]">
+        {/* Athlete side — orange */}
+        <Reveal className="flex-1">
+          <Link href="/signup?role=player" className="group relative flex flex-col justify-between bg-orange-500 hover:bg-orange-400 p-12 lg:p-16 h-full min-h-[240px] overflow-hidden transition-colors duration-300">
+            {/* Ghost text */}
+            <div aria-hidden className="right-[-1rem] bottom-[-2rem] absolute font-black text-white/[0.06] leading-none pointer-events-none select-none font-condensed" style={{ fontSize: "14rem", lineHeight: 1 }}>FIND</div>
+            <div>
+              <Zap className="mb-8 w-7 h-7 text-white/70" />
+              <p className="mb-2 font-bold text-[11px] text-white/60 uppercase tracking-[0.2em]">I&apos;m an Athlete</p>
+              <h2 className="font-black text-white italic leading-[0.9] font-condensed" style={{ fontSize: "clamp(3rem, 6vw, 5.5rem)" }}>
+                FIND YOUR<br />TEAMMATE.
               </h2>
-              <p className="mt-6 max-w-sm text-[15px] text-white/65 leading-relaxed">
-                Athlete looking for a mentor, or former player ready to give back — same place, different door.
-              </p>
-            </Reveal>
-            <Reveal delay={0.1} className="space-y-3">
-              <Link href="/signup?role=player" className="group flex justify-between items-center bg-orange-500 hover:bg-orange-400 px-7 py-4 rounded-sm font-bold text-white text-sm transition-colors">
-                I&apos;m an Athlete <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link href="/signup?role=mentor" className="group flex justify-between items-center bg-white/5 hover:bg-white/10 px-7 py-4 border border-white/15 rounded-sm font-bold text-white text-sm transition-colors">
-                I want to be a Mentor <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </Reveal>
-          </div>
-        </div>
+            </div>
+            <div className="flex items-center gap-3 mt-10">
+              <span className="font-bold text-white/80 text-sm group-hover:text-white transition-colors">Get matched free</span>
+              <ArrowRight className="w-4 h-4 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+        </Reveal>
+
+        {/* Divider */}
+        <div className="bg-navy-700 md:w-[2px] md:h-auto h-[2px] w-full shrink-0" />
+
+        {/* Mentor side — navy */}
+        <Reveal delay={0.08} className="flex-1">
+          <Link href="/signup?role=mentor" className="group relative flex flex-col justify-between bg-navy hover:bg-navy-700 p-12 lg:p-16 h-full min-h-[240px] overflow-hidden transition-colors duration-300">
+            {/* Ghost text */}
+            <div aria-hidden className="right-[-1rem] bottom-[-2rem] absolute font-black text-white/[0.04] leading-none pointer-events-none select-none font-condensed" style={{ fontSize: "14rem", lineHeight: 1 }}>GIVE</div>
+            <div>
+              <Heart className="mb-8 w-7 h-7 text-orange-400/70" />
+              <p className="mb-2 font-bold text-[11px] text-white/30 uppercase tracking-[0.2em]">I&apos;m a Mentor</p>
+              <h2 className="font-black text-white italic leading-[0.9] font-condensed" style={{ fontSize: "clamp(3rem, 6vw, 5.5rem)" }}>
+                GIVE<br />IT BACK.
+              </h2>
+            </div>
+            <div className="flex items-center gap-3 mt-10">
+              <span className="font-bold text-white/50 text-sm group-hover:text-white/80 transition-colors">Apply to mentor</span>
+              <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white/60 group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+        </Reveal>
       </section>
 
     </div>

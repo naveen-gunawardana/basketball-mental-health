@@ -37,6 +37,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/signup", request.url));
   }
 
+  // Protect the application flow — must be signed in
+  if (!user && request.nextUrl.pathname.startsWith("/apply")) {
+    return NextResponse.redirect(new URL("/signin?redirect=/apply", request.url));
+  }
+
   // Protect admin — must have admin, outreach, or operations role in app_metadata
   if (request.nextUrl.pathname.startsWith("/admin")) {
     const role = user?.app_metadata?.role;
@@ -50,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/admin", "/signin", "/signup"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/admin", "/apply", "/signin", "/signup"],
 };
