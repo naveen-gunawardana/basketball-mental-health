@@ -54,16 +54,23 @@ export async function POST(request: Request) {
 
     } else if (type === "welcome") {
       const { email, name, role } = payload;
+      const firstName = (name ?? "there").split(" ")[0];
       await resend.emails.send({
         from: FROM,
         to: email,
         subject: "Welcome to Mentality Sports",
-        html: `<p>Hi ${name},</p>
-<p>Welcome to Mentality Sports!</p>
+        html: `<p>Hi ${firstName},</p>
+<p>Welcome to Mentality Sports — your account is all set.</p>
 ${role === "player"
   ? `<p>Our team is reviewing your application and will match you with a mentor soon. We'll reach out by email when you're matched.</p>`
-  : `<p>Our team is reviewing your mentor application. You'll hear back within a few days once you're approved.</p>`}
-<p>Head to your <a href="${BASE_URL}/dashboard">Locker Room</a> to see your status.</p>
+  : role === "mentor"
+  ? `<p>Our team is reviewing your mentor application. You'll hear back within a few days once you're approved.</p>`
+  : `<p>Here's what you can do next:</p>
+<ul>
+  <li><strong>Apply for 1-on-1 mentorship</strong> — get matched with a mentor who's lived it: <a href="${BASE_URL}/apply">${BASE_URL}/apply</a></li>
+  <li><strong>RSVP to a live group session</strong>: <a href="${BASE_URL}/group-sessions">${BASE_URL}/group-sessions</a></li>
+  <li><strong>Explore the resource library</strong>: <a href="${BASE_URL}/advice">${BASE_URL}/advice</a></li>
+</ul>`}
 <p>— The Mentality Sports Team</p>`,
       });
 

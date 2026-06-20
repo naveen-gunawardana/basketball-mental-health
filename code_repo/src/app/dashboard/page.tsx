@@ -20,15 +20,19 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .maybeSingle();
 
+  // Signed up but hasn't applied yet → send them to the application.
   if (!profile) {
-    redirect("/signup");
+    redirect("/apply");
   }
 
   const role = profile.role ?? user.user_metadata?.role;
 
   if (role === "mentor") {
     redirect("/dashboard/mentor");
-  } else {
+  } else if (role === "player") {
     redirect("/dashboard/player");
+  } else {
+    // role not yet chosen (account-only) → application step
+    redirect("/apply");
   }
 }

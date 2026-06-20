@@ -29,7 +29,8 @@ export default function SignInPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/dashboard");
+      const redirect = new URLSearchParams(window.location.search).get("redirect");
+      router.push(redirect && redirect.startsWith("/") ? redirect : "/dashboard");
       router.refresh();
     }
   }

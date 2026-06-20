@@ -298,8 +298,13 @@ export default function RootLayout({
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-4">Explore</p>
                 <ul className="space-y-2.5 text-sm">
-                  <li><a href="/advice" className="text-white/60 hover:text-white transition-colors">Advice Library</a></li>
-                  <li><a href="/signup" className="text-white/60 hover:text-white transition-colors">Get Involved</a></li>
+                  <li><a href="/programs" className="text-white/60 hover:text-white transition-colors">All Programs</a></li>
+                  <li><a href="/mentorship" className="text-white/60 hover:text-white transition-colors">1-on-1 Mentorship</a></li>
+                  <li><a href="/group-sessions" className="text-white/60 hover:text-white transition-colors">Group Sessions</a></li>
+                  <li><a href="/training" className="text-white/60 hover:text-white transition-colors">Training & Courses</a></li>
+                  <li><a href="/advice" className="text-white/60 hover:text-white transition-colors">Resource Library</a></li>
+                  <li><a href="/newsletter" className="text-white/60 hover:text-white transition-colors">Newsletter</a></li>
+                  <li><a href="/podcast" className="text-white/60 hover:text-white transition-colors">Podcast</a></li>
                   <li>
                     <a href="https://www.instagram.com/mentalitysports" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -330,9 +330,11 @@ export type Database = {
           created_at: string | null
           excerpt: string | null
           id: string
+          media_type: string | null
           published_at: string | null
           read_time: string | null
           slug: string
+          sport: string | null
           status: string | null
           submitted_by: string | null
           submitted_by_name: string | null
@@ -344,9 +346,11 @@ export type Database = {
           created_at?: string | null
           excerpt?: string | null
           id?: string
+          media_type?: string | null
           published_at?: string | null
           read_time?: string | null
           slug: string
+          sport?: string | null
           status?: string | null
           submitted_by?: string | null
           submitted_by_name?: string | null
@@ -358,9 +362,11 @@ export type Database = {
           created_at?: string | null
           excerpt?: string | null
           id?: string
+          media_type?: string | null
           published_at?: string | null
           read_time?: string | null
           slug?: string
+          sport?: string | null
           status?: string | null
           submitted_by?: string | null
           submitted_by_name?: string | null
@@ -519,6 +525,345 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      group_sessions: {
+        Row: {
+          capacity: number | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          duration_min: number
+          host_name: string | null
+          host_title: string | null
+          id: string
+          meeting_url: string | null
+          slug: string
+          sport: string | null
+          starts_at: string
+          status: string
+          title: string
+          topic: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          host_name?: string | null
+          host_title?: string | null
+          id?: string
+          meeting_url?: string | null
+          slug: string
+          sport?: string | null
+          starts_at: string
+          status?: string
+          title: string
+          topic?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_min?: number
+          host_name?: string | null
+          host_title?: string | null
+          id?: string
+          meeting_url?: string | null
+          slug?: string
+          sport?: string | null
+          starts_at?: string
+          status?: string
+          title?: string
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      session_rsvps: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_rsvps_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "group_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          resend_contact_id: string | null
+          source: string | null
+          status: string
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          resend_contact_id?: string | null
+          source?: string | null
+          status?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          resend_contact_id?: string | null
+          source?: string | null
+          status?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_issues: {
+        Row: {
+          content: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          preview_text: string | null
+          recipient_count: number | null
+          resend_broadcast_id: string | null
+          sent_at: string | null
+          slug: string
+          status: string
+          subject: string
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          preview_text?: string | null
+          recipient_count?: number | null
+          resend_broadcast_id?: string | null
+          sent_at?: string | null
+          slug: string
+          status?: string
+          subject: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          preview_text?: string | null
+          recipient_count?: number | null
+          resend_broadcast_id?: string | null
+          sent_at?: string | null
+          slug?: string
+          status?: string
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          category: string | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          instructor: string | null
+          level: string | null
+          slug: string
+          sort_order: number
+          sport: string | null
+          status: string
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          instructor?: string | null
+          level?: string | null
+          slug: string
+          sort_order?: number
+          sport?: string | null
+          status?: string
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          instructor?: string | null
+          level?: string | null
+          slug?: string
+          sort_order?: number
+          sport?: string | null
+          status?: string
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      lessons: {
+        Row: {
+          content: string | null
+          course_id: string
+          created_at: string
+          duration: string | null
+          id: string
+          slug: string
+          sort_order: number
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          course_id: string
+          created_at?: string
+          duration?: string | null
+          id?: string
+          slug: string
+          sort_order?: number
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          course_id?: string
+          created_at?: string
+          duration?: string | null
+          id?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      podcast_episodes: {
+        Row: {
+          apple_url: string | null
+          audio_url: string | null
+          created_at: string
+          description: string | null
+          duration: string | null
+          episode_number: number | null
+          id: string
+          published_at: string | null
+          season: number | null
+          slug: string
+          spotify_url: string | null
+          status: string
+          title: string
+          youtube_url: string | null
+        }
+        Insert: {
+          apple_url?: string | null
+          audio_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          episode_number?: number | null
+          id?: string
+          published_at?: string | null
+          season?: number | null
+          slug: string
+          spotify_url?: string | null
+          status?: string
+          title: string
+          youtube_url?: string | null
+        }
+        Update: {
+          apple_url?: string | null
+          audio_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          episode_number?: number | null
+          id?: string
+          published_at?: string | null
+          season?: number | null
+          slug?: string
+          spotify_url?: string | null
+          status?: string
+          title?: string
+          youtube_url?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

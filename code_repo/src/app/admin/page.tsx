@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import AdminOutreachView from "./outreach-view";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2, Activity, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle, X, Link2, BookOpen, Mail, Trash2, Activity, Clock, Video, Dumbbell, Mic } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -279,14 +279,30 @@ export default function AdminPage() {
             <p className="text-xs text-muted-foreground">Mentality Sports — internal only</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/analytics"
             className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
             <Activity className="h-3.5 w-3.5" /> Analytics
           </Link>
           <Link href="/admin/content"
             className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
-            <BookOpen className="h-3.5 w-3.5" /> Manage Content
+            <BookOpen className="h-3.5 w-3.5" /> Content
+          </Link>
+          <Link href="/admin/group-sessions"
+            className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
+            <Video className="h-3.5 w-3.5" /> Sessions
+          </Link>
+          <Link href="/admin/newsletter"
+            className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
+            <Mail className="h-3.5 w-3.5" /> Newsletter
+          </Link>
+          <Link href="/admin/courses"
+            className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
+            <Dumbbell className="h-3.5 w-3.5" /> Courses
+          </Link>
+          <Link href="/admin/podcast"
+            className="inline-flex items-center gap-1.5 rounded-md border border-offWhite-300 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors">
+            <Mic className="h-3.5 w-3.5" /> Podcast
           </Link>
         </div>
         <div className="flex gap-4 text-center">

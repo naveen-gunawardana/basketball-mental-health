@@ -4,24 +4,31 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Logo } from "@/components/logo";
 import { motion, AnimatePresence } from "framer-motion";
+import { PROGRAMS } from "@/lib/programs";
 
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/advice", label: "Advice" },
-  { href: "/podcast", label: "Podcast" },
   { href: "/opportunities", label: "Join Us" },
   { href: "/dashboard", label: "Locker Room" },
 ];
 
+const statusPill: Record<string, { text: string; cls: string } | null> = {
+  new: { text: "New", cls: "bg-orange-500 text-white" },
+  soon: { text: "Soon", cls: "bg-navy/10 text-navy/50" },
+  live: null,
+};
+
 export function Navigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [programsOpen, setProgramsOpen] = useState(false);
+  const [mobileProgramsOpen, setMobileProgramsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -42,7 +49,6 @@ export function Navigation() {
       .maybeSingle();
     if (!match) return;
 
-    // Count messages not sent by me that haven't been read yet (DB-driven)
     const { count } = await supabase
       .from("messages")
       .select("id", { count: "exact", head: true })
@@ -63,7 +69,6 @@ export function Navigation() {
         event: "UPDATE", schema: "public", table: "messages",
         filter: `match_id=eq.${match.id}`,
       }, (payload) => {
-        // Message was marked read — decrement if it was from the other person
         if (payload.new.read_at && !payload.old?.read_at && payload.new.sender_id !== userId) {
           setUnreadCount((n) => Math.max(0, n - 1));
         }
@@ -102,15 +107,22 @@ export function Navigation() {
     };
   }, []);
 
+  // Close menus on route change
+  useEffect(() => {
+    setMobileOpen(false);
+    setProgramsOpen(false);
+    setMobileProgramsOpen(false);
+  }, [pathname]);
 
   const displayName = user?.user_metadata?.name ?? user?.email ?? "";
+  const programsActive = PROGRAMS.some(
+    (p) => p.href !== "/" && p.href.startsWith("/") && pathname.startsWith(p.href.split("?")[0]) && p.href !== "/signup?role=player"
+  ) || pathname.startsWith("/programs");
 
   return (
     <nav className="sticky top-0 z-50 bg-white/96 backdrop-blur-md transform-gpu">
-      {/* Orange top accent line */}
       <div className="h-[2px] w-full bg-orange-500" />
 
-      {/* Bottom border */}
       <div className="border-b border-offWhite-300">
         <div className="mx-auto flex h-[52px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
@@ -124,43 +136,79 @@ export function Navigation() {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
-            {navItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/" && pathname.startsWith(item.href));
-              const showBadge = item.href === "/dashboard" && unreadCount > 0;
+            {/* Home */}
+            <NavLink href="/" label="Home" pathname={pathname} />
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => {}}
-                  className={cn(
-                    "relative flex flex-col items-center gap-[3px] transition-colors duration-150",
-                    isActive ? "text-navy" : "text-navy/35 hover:text-navy/70"
-                  )}
-                >
-                  <span className="text-[11px] font-bold uppercase tracking-[0.14em]">
-                    {item.label}
-                  </span>
-                  {/* Active dot */}
-                  {isActive ? (
-                    <motion.span
-                      layoutId="nav-dot"
-                      className="h-[3px] w-[3px] rounded-full bg-orange-500"
-                      transition={{ type: "spring", stiffness: 400, damping: 28 }}
-                    />
-                  ) : (
-                    <span className="h-[3px] w-[3px] rounded-full bg-transparent" />
-                  )}
-                  {showBadge && (
-                    <span className="absolute -top-1.5 -right-2.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-[8px] font-bold text-white">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+            {/* Programs dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setProgramsOpen(true)}
+              onMouseLeave={() => setProgramsOpen(false)}
+            >
+              <Link
+                href="/programs"
+                className={cn(
+                  "relative flex flex-col items-center gap-[3px] transition-colors duration-150",
+                  programsActive ? "text-navy" : "text-navy/35 hover:text-navy/70"
+                )}
+              >
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] inline-flex items-center gap-1">
+                  Programs
+                  <ChevronDown className={cn("h-3 w-3 transition-transform", programsOpen && "rotate-180")} />
+                </span>
+                {programsActive ? (
+                  <motion.span layoutId="nav-dot" className="h-[3px] w-[3px] rounded-full bg-orange-500" transition={{ type: "spring", stiffness: 400, damping: 28 }} />
+                ) : (
+                  <span className="h-[3px] w-[3px] rounded-full bg-transparent" />
+                )}
+              </Link>
+
+              <AnimatePresence>
+                {programsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute left-1/2 top-full -translate-x-1/2 pt-3 w-[360px]"
+                  >
+                    <div className="rounded-sm border border-offWhite-300 bg-white shadow-xl shadow-navy/5 overflow-hidden">
+                      <div className="grid grid-cols-1">
+                        {PROGRAMS.map((p) => {
+                          const pill = statusPill[p.status];
+                          return (
+                            <Link
+                              key={p.key}
+                              href={p.href}
+                              className="group flex items-start gap-3 px-4 py-3 hover:bg-offWhite transition-colors border-b border-offWhite-200 last:border-0"
+                            >
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-orange-500/10 group-hover:bg-orange-500/20 transition-colors">
+                                <p.Icon className="h-4 w-4 text-orange-500" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="flex items-center gap-2">
+                                  <span className="text-[13px] font-bold text-navy group-hover:text-orange-600 transition-colors">{p.label}</span>
+                                  {pill && <span className={cn("rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider", pill.cls)}>{pill.text}</span>}
+                                </span>
+                                <span className="block text-[11px] text-navy/45 leading-snug mt-0.5">{p.tagline}</span>
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                      <Link href="/programs" className="flex items-center justify-center gap-1.5 bg-navy px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white hover:bg-navy-700 transition-colors">
+                        All Programs <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Remaining links */}
+            {navItems.slice(1).map((item) => (
+              <NavLink key={item.href} href={item.href} label={item.label} pathname={pathname} badge={item.href === "/dashboard" ? unreadCount : 0} />
+            ))}
           </div>
 
           {/* Right — Instagram + auth */}
@@ -242,47 +290,43 @@ export function Navigation() {
             className="md:hidden overflow-hidden bg-white border-b border-offWhite-300"
           >
             <div className="px-4 pt-2 pb-4">
-              {navItems.map((item, i) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/" && pathname.startsWith(item.href));
-                const showBadge = item.href === "/dashboard" && unreadCount > 0;
-                return (
-                  <motion.div
-                    key={item.href}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.2 }}
-                  >
-                    <Link
-                      href={item.href}
-                      onClick={() => { setMobileOpen(false); }}
-                      className={cn(
-                        "flex items-center justify-between py-3.5 border-b border-offWhite-300 last:border-0",
-                        isActive ? "text-navy" : "text-navy/40"
-                      )}
-                    >
-                      <span className="text-[11px] font-bold uppercase tracking-[0.14em]">{item.label}</span>
-                      <div className="flex items-center gap-2">
-                        {showBadge && (
-                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white">
-                            {unreadCount > 9 ? "9+" : unreadCount}
-                          </span>
-                        )}
-                        {isActive && <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />}
-                      </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
+              {/* Home */}
+              <MobileLink href="/" label="Home" pathname={pathname} onClick={() => setMobileOpen(false)} />
+
+              {/* Programs accordion */}
+              <div className="border-b border-offWhite-300">
+                <button
+                  type="button"
+                  onClick={() => setMobileProgramsOpen((v) => !v)}
+                  className="flex items-center justify-between py-3.5 w-full text-navy/60"
+                >
+                  <span className="text-[11px] font-bold uppercase tracking-[0.14em]">Programs</span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", mobileProgramsOpen && "rotate-180")} />
+                </button>
+                <AnimatePresence initial={false}>
+                  {mobileProgramsOpen && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden pb-2">
+                      <Link href="/programs" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 py-2 pl-2 text-[12px] font-bold text-navy">
+                        All Programs <ArrowRight className="h-3 w-3 text-orange-500" />
+                      </Link>
+                      {PROGRAMS.map((p) => (
+                        <Link key={p.key} href={p.href} onClick={() => setMobileOpen(false)} className="flex items-center gap-3 py-2 pl-2">
+                          <p.Icon className="h-4 w-4 text-orange-500 shrink-0" />
+                          <span className="text-[12px] text-navy/65">{p.label}</span>
+                          {statusPill[p.status] && <span className={cn("rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase", statusPill[p.status]!.cls)}>{statusPill[p.status]!.text}</span>}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {navItems.slice(1).map((item) => (
+                <MobileLink key={item.href} href={item.href} label={item.label} pathname={pathname} badge={item.href === "/dashboard" ? unreadCount : 0} onClick={() => setMobileOpen(false)} />
+              ))}
 
               {/* Mobile auth */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.18, duration: 0.2 }}
-                className="mt-4"
-              >
+              <div className="mt-4">
                 {user ? (
                   <Link
                     href="/profile"
@@ -310,11 +354,62 @@ export function Navigation() {
                     </Link>
                   </div>
                 )}
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </nav>
+  );
+}
+
+function NavLink({ href, label, pathname, badge = 0 }: { href: string; label: string; pathname: string; badge?: number }) {
+  const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+  const showBadge = href === "/dashboard" && badge > 0;
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "relative flex flex-col items-center gap-[3px] transition-colors duration-150",
+        isActive ? "text-navy" : "text-navy/35 hover:text-navy/70"
+      )}
+    >
+      <span className="text-[11px] font-bold uppercase tracking-[0.14em]">{label}</span>
+      {isActive ? (
+        <motion.span layoutId="nav-dot" className="h-[3px] w-[3px] rounded-full bg-orange-500" transition={{ type: "spring", stiffness: 400, damping: 28 }} />
+      ) : (
+        <span className="h-[3px] w-[3px] rounded-full bg-transparent" />
+      )}
+      {showBadge && (
+        <span className="absolute -top-1.5 -right-2.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-[8px] font-bold text-white">
+          {badge > 9 ? "9+" : badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function MobileLink({ href, label, pathname, badge = 0, onClick }: { href: string; label: string; pathname: string; badge?: number; onClick: () => void }) {
+  const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+  const showBadge = href === "/dashboard" && badge > 0;
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={cn(
+        "flex items-center justify-between py-3.5 border-b border-offWhite-300",
+        isActive ? "text-navy" : "text-navy/40"
+      )}
+    >
+      <span className="text-[11px] font-bold uppercase tracking-[0.14em]">{label}</span>
+      <div className="flex items-center gap-2">
+        {showBadge && (
+          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white">
+            {badge > 9 ? "9+" : badge}
+          </span>
+        )}
+        {isActive && <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />}
+      </div>
+    </Link>
   );
 }

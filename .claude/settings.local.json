@@ -10,7 +10,8 @@
       "WebFetch",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(grep --line-buffered -v \"^$\")"
     ]
   }
 }
