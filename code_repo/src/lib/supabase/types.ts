@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           id: string
           match_id: string
+          read_at: string | null
           sender_id: string
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           created_at?: string
           id?: string
           match_id: string
+          read_at?: string | null
           sender_id: string
         }
         Update: {
@@ -34,6 +36,7 @@ export type Database = {
           created_at?: string
           id?: string
           match_id?: string
+          read_at?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -56,29 +59,38 @@ export type Database = {
       matches: {
         Row: {
           call_active_at: string | null
+          completed_at: string | null
           created_at: string | null
           id: string
           meeting_url: string | null
           mentor_id: string
           player_id: string
+          program_end: string | null
+          program_start: string | null
           status: string | null
         }
         Insert: {
           call_active_at?: string | null
+          completed_at?: string | null
           created_at?: string | null
           id?: string
           meeting_url?: string | null
           mentor_id: string
           player_id: string
+          program_end?: string | null
+          program_start?: string | null
           status?: string | null
         }
         Update: {
           call_active_at?: string | null
+          completed_at?: string | null
           created_at?: string | null
           id?: string
           meeting_url?: string | null
           mentor_id?: string
           player_id?: string
+          program_end?: string | null
+          program_start?: string | null
           status?: string | null
         }
         Relationships: [
@@ -587,6 +599,7 @@ export type Database = {
           id: string
           name: string
           session_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -594,6 +607,7 @@ export type Database = {
           id?: string
           name: string
           session_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -601,6 +615,7 @@ export type Database = {
           id?: string
           name?: string
           session_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

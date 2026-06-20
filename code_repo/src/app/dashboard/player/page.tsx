@@ -15,12 +15,14 @@ import { StarterChips } from "@/components/starter-chips";
 import { FirstCallCard } from "@/components/first-call-card";
 import { PostSessionNudge } from "@/components/post-session-nudge";
 import { DashboardRightPanel } from "@/components/dashboard-right-panel";
+import { ProgramArc } from "@/components/program-arc";
 
 interface Profile { name: string; sport: string[] | null; avatar_url: string | null }
 interface PlayerProfile { challenges: string[] | null; goal: string | null; grade: string | null; school: string | null; level: string[] | null }
 interface MentorInfo { id: string; name: string; sport: string[] | null; avatar_url: string | null }
 interface MentorExtras { bio: string | null; why: string | null; skills: string[] | null; playing_level: string[] | null }
-interface MatchData { id: string; meeting_url: string | null; created_at: string; mentor: MentorInfo }
+interface MatchData { id: string; meeting_url: string | null; created_at: string; program_start: string | null; program_end: string | null; status: string | null; mentor: MentorInfo }
+interface CompletedMatch { id: string; mentor: MentorInfo }
 interface SessionRecord { id: string; date: string | null; topics: string[] | null }
 interface RecommendedArticle { slug: string; title: string; read_time: string | null }
 
@@ -34,6 +36,11 @@ export default function PlayerDashboard() {
   const [mentor, setMentor] = useState<MentorInfo | null>(null);
   const [mentorExtras, setMentorExtras] = useState<MentorExtras | null>(null);
   const [matchId, setMatchId] = useState<string | null>(null);
+  const [programStart, setProgramStart] = useState<string | null>(null);
+  const [programEnd, setProgramEnd] = useState<string | null>(null);
+  const [sessionCount, setSessionCount] = useState(0);
+  const [completedMatch, setCompletedMatch] = useState<CompletedMatch | null>(null);
+  const [reenrolling, setReenrolling] = useState(false);
   const { startCall, showPostCallBanner, dismissPostCallBanner } = useCallPresence(matchId);
   const [userId, setUserId] = useState<string | null>(null);
   const [recentSessions, setRecentSessions] = useState<SessionRecord[]>([]);
@@ -64,7 +71,7 @@ export default function PlayerDashboard() {
 
       const { data: matchData } = await supabase
         .from("matches")
-        .select("id, meeting_url, created_at, mentor:mentor_id(id, name, sport, avatar_url)")
+        .select("id, meeting_url, created_at, program_start, program_end, status, mentor:mentor_id(id, name, sport, avatar_url)")
         .eq("player_id", user.id)
         .eq("status", "active")
         .maybeSingle();
@@ -73,6 +80,14 @@ export default function PlayerDashboard() {
         const md = matchData as unknown as MatchData;
         setMatchId(md.id);
         setMentor(md.mentor);
+        setProgramStart(md.program_start);
+        setProgramEnd(md.program_end);
+
+        const { count: doneCount } = await supabase
+          .from("sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("match_id", md.id);
+        setSessionCount(doneCount ?? 0);
 
         const { data: extras } = await supabase
           .from("mentor_profiles")
@@ -101,6 +116,19 @@ export default function PlayerDashboard() {
           .eq("match_id", md.id)
           .gte("scheduled_at", new Date().toISOString());
         setScheduledCallCount(callCount ?? 0);
+      } else {
+        // No active program — surface a recently completed one (archive + re-enroll).
+        const { data: completed } = await supabase
+          .from("matches")
+          .select("id, mentor:mentor_id(id, name, sport, avatar_url)")
+          .eq("player_id", user.id)
+          .eq("status", "completed")
+          .order("program_end", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (completed) {
+          setCompletedMatch(completed as unknown as CompletedMatch);
+        }
       }
 
       const { data: articleData } = await supabase
@@ -123,6 +151,16 @@ export default function PlayerDashboard() {
     if (!seen) setShowIcebreaker(true);
   }, [matchId]);
 
+  async function handleReenroll() {
+    setReenrolling(true);
+    const res = await fetch("/api/reenroll", { method: "POST" });
+    if (res.ok) {
+      window.location.reload();
+    } else {
+      setReenrolling(false);
+    }
+  }
+
   if (loading) {
     return <div className="mx-auto max-w-7xl px-4 py-20 text-center text-muted-foreground">Entering the locker room...</div>;
   }
@@ -134,17 +172,49 @@ export default function PlayerDashboard() {
           <h1 className="text-3xl font-bold text-navy">Locker Room</h1>
           <p className="text-muted-foreground mt-1">Welcome, {profile?.name?.split(" ")[0]}.</p>
         </div>
-        <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-6 mb-8 flex items-start gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 shrink-0">
-            <CalendarClock className="h-5 w-5 text-orange-500" />
+        {completedMatch ? (
+          <>
+            <div className="rounded-lg border-2 border-sage-300 bg-sage-50 p-6 mb-4 flex items-start gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sage-100 shrink-0">
+                <CalendarClock className="h-5 w-5 text-sage-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-navy">Your program with {completedMatch.mentor.name.split(" ")[0]} is complete 🎉</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Four sessions, one month — nice work. Want another month of 1-on-1 with {completedMatch.mentor.name.split(" ")[0]}? Pick up right where you left off.
+                </p>
+                <Button onClick={handleReenroll} disabled={reenrolling} variant="secondary" className="mt-3">
+                  {reenrolling ? "Re-enrolling…" : "Re-enroll for another month"}
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-2">Your conversation</p>
+            {userId && (
+              <div className="mb-8">
+                <ChatWindow
+                  matchId={completedMatch.id}
+                  currentUserId={userId}
+                  otherUserId={completedMatch.mentor.id}
+                  otherPersonName={completedMatch.mentor.name}
+                  otherPersonAvatarUrl={completedMatch.mentor.avatar_url}
+                  readOnly
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-6 mb-8 flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 shrink-0">
+              <CalendarClock className="h-5 w-5 text-orange-500" />
+            </div>
+            <div>
+              <p className="font-semibold text-navy">You&apos;re on the list</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                We&apos;re reviewing your application and finding the right mentor for you. Usually takes a few days — we&apos;ll email you when you&apos;re matched.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-navy">You&apos;re on the list</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              We&apos;re reviewing your application and finding the right mentor for you. Usually takes a few days — we&apos;ll email you when you&apos;re matched.
-            </p>
-          </div>
-        </div>
+        )}
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-4">Browse resources while you wait</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
@@ -225,6 +295,8 @@ export default function PlayerDashboard() {
           Call
         </button>
       </div>
+
+      <ProgramArc done={sessionCount} programEnd={programEnd} className="mb-4 shrink-0" />
 
       {showPostCallBanner && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sage-300 bg-sage-50 px-4 py-3 shrink-0">

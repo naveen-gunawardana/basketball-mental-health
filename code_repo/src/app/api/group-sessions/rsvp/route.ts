@@ -85,6 +85,7 @@ export async function POST(request: Request) {
       session_id: sessionId,
       name,
       email,
+      user_id: user.id,
     });
     if (error && error.code !== "23505") {
       console.error("rsvp insert error:", error);

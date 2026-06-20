@@ -45,6 +45,7 @@ interface ChatWindowProps {
   onMessageSent?: () => void;
   topSlot?: React.ReactNode;
   bottomSlot?: React.ReactNode;
+  readOnly?: boolean;
 }
 
 export interface ChatWindowHandle {
@@ -69,7 +70,7 @@ function timeLabel(d: Date): string {
 }
 
 export const ChatWindow = forwardRef<ChatWindowHandle, ChatWindowProps>(function ChatWindow(
-  { matchId, currentUserId, otherUserId, otherPersonName, otherPersonAvatarUrl, fullHeight, onUnreadChange, onMessageSent, topSlot, bottomSlot },
+  { matchId, currentUserId, otherUserId, otherPersonName, otherPersonAvatarUrl, fullHeight, onUnreadChange, onMessageSent, topSlot, bottomSlot, readOnly },
   ref
 ) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -440,14 +441,16 @@ export const ChatWindow = forwardRef<ChatWindowHandle, ChatWindowProps>(function
                         {msg.content}
                       </div>
                       {/* Reaction trigger */}
-                      <button
-                        type="button"
-                        onClick={() => setReactionPickerFor(showPicker ? null : msg.id)}
-                        aria-label="React"
-                        className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-8" : "-right-8"} h-7 w-7 rounded-full bg-white ring-1 ring-offWhite-300 shadow-sm flex items-center justify-center text-navy/55 hover:text-navy hover:ring-navy/25 opacity-0 group-hover:opacity-100 transition-all`}
-                      >
-                        <Smile className="h-3.5 w-3.5" />
-                      </button>
+                      {!readOnly && (
+                        <button
+                          type="button"
+                          onClick={() => setReactionPickerFor(showPicker ? null : msg.id)}
+                          aria-label="React"
+                          className={`absolute top-1/2 -translate-y-1/2 ${isMe ? "-left-8" : "-right-8"} h-7 w-7 rounded-full bg-white ring-1 ring-offWhite-300 shadow-sm flex items-center justify-center text-navy/55 hover:text-navy hover:ring-navy/25 opacity-0 group-hover:opacity-100 transition-all`}
+                        >
+                          <Smile className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                       {/* Picker */}
                       {showPicker && (
                         <div
@@ -505,38 +508,44 @@ export const ChatWindow = forwardRef<ChatWindowHandle, ChatWindowProps>(function
       {bottomSlot}
 
       {/* Composer */}
-      <div className="border-t border-offWhite-200 px-4 pt-3 pb-4 shrink-0 bg-white">
-        <div className="flex items-end gap-2.5 rounded-2xl bg-offWhite/40 ring-1 ring-offWhite-300 focus-within:ring-navy/30 focus-within:bg-white transition-all px-4 py-2.5">
-          <textarea
-            ref={inputRef}
-            rows={1}
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              const el = e.currentTarget;
-              el.style.height = "auto";
-              el.style.height = Math.min(el.scrollHeight, 140) + "px";
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                send();
-              }
-            }}
-            placeholder={`Message ${firstName}…`}
-            className="flex-1 resize-none bg-transparent text-[14px] outline-none placeholder:text-navy/35 leading-[1.45] py-1 max-h-[140px] text-navy"
-          />
-          <button
-            type="button"
-            onClick={send}
-            disabled={!input.trim() || sending}
-            aria-label="Send message"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-white transition-all hover:bg-navy/85 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed shadow-sm"
-          >
-            <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
-          </button>
+      {readOnly ? (
+        <div className="border-t border-offWhite-200 px-4 py-4 shrink-0 bg-white text-center">
+          <p className="text-xs font-medium text-navy/45">This program has ended — the conversation is read-only.</p>
         </div>
-      </div>
+      ) : (
+        <div className="border-t border-offWhite-200 px-4 pt-3 pb-4 shrink-0 bg-white">
+          <div className="flex items-end gap-2.5 rounded-2xl bg-offWhite/40 ring-1 ring-offWhite-300 focus-within:ring-navy/30 focus-within:bg-white transition-all px-4 py-2.5">
+            <textarea
+              ref={inputRef}
+              rows={1}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                const el = e.currentTarget;
+                el.style.height = "auto";
+                el.style.height = Math.min(el.scrollHeight, 140) + "px";
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  send();
+                }
+              }}
+              placeholder={`Message ${firstName}…`}
+              className="flex-1 resize-none bg-transparent text-[14px] outline-none placeholder:text-navy/35 leading-[1.45] py-1 max-h-[140px] text-navy"
+            />
+            <button
+              type="button"
+              onClick={send}
+              disabled={!input.trim() || sending}
+              aria-label="Send message"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-white transition-all hover:bg-navy/85 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed shadow-sm"
+            >
+              <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

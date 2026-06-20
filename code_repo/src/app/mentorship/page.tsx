@@ -8,7 +8,7 @@ import {
 export const metadata: Metadata = {
   title: "1-on-1 Mentorship | Mentality Sports",
   description:
-    "Get matched with a current or former athlete who's lived the same mental battles. Free, ongoing 1-on-1 mentorship for athletes — confidence, pressure, identity, and more.",
+    "Get matched with a current or former athlete who's lived the same mental battles. A free, focused 1-month 1-on-1 mentorship — four weekly sessions on confidence, pressure, identity, and more.",
   alternates: { canonical: "https://mentalitysports.com/mentorship" },
 };
 
@@ -16,11 +16,11 @@ const steps = [
   { n: "01", title: "Create an account", desc: "Sign up in under a minute — just your name and email. That's all it takes to get in the door.", Icon: UserPlus },
   { n: "02", title: "Apply to be matched", desc: "Once you're in, tell us your sport, level, and what you're working through. This is your application — the more honest, the better the match.", Icon: ClipboardList },
   { n: "03", title: "We review & match", desc: "A real person reads every application and pairs you with a mentor whose background fits yours. You'll get an email when you're matched.", Icon: Users },
-  { n: "04", title: "Grow together", desc: "Meet on your schedule, message between sessions, log reflections, and track weekly goals. No scripts — just real, ongoing support.", Icon: TrendingUp },
+  { n: "04", title: "Work the month", desc: "Four weekly 1-on-1 sessions. You'll pick one mental goal and work it together — messaging between calls, logging reflections, tracking progress. When the month's done, you can re-enroll.", Icon: TrendingUp },
 ];
 
 const features = [
-  { title: "A real mentor", desc: "Matched with a current or former athlete whose experience fits yours. Ongoing — not a one-time call.", Icon: Users },
+  { title: "A real mentor", desc: "Matched with a current or former athlete whose experience fits yours. Four weekly sessions over a month — not a one-time call.", Icon: Users },
   { title: "Private messaging", desc: "A direct line to your mentor between sessions. Ask questions and work through things as they happen.", Icon: MessageCircle },
   { title: "Reflection journal", desc: "Log your mental state, wins, and struggles. Share what you want — your mentor follows up accordingly.", Icon: PenLine },
   { title: "Weekly mental goals", desc: "Set and track effort, focus, and attitude goals with your mentor — the stuff that never shows up in box scores.", Icon: Target },
@@ -32,7 +32,7 @@ export default function MentorshipPage() {
   return (
     <div className="overflow-x-hidden">
       <div className="bg-navy border-b border-white/10 text-center py-2.5 px-4 text-xs text-white/60 tracking-wide">
-        1-on-1 Mentorship is <span className="text-white font-semibold">100% free</span> — athlete to athlete, on your schedule.
+        1-on-1 Mentorship is <span className="text-white font-semibold">100% free</span> — one month, four weekly sessions, athlete to athlete.
       </div>
 
       {/* Hero */}
@@ -47,7 +47,7 @@ export default function MentorshipPage() {
             1-ON-1<br />MENTORSHIP
           </h1>
           <p className="max-w-xl text-white/55 text-[15px] leading-relaxed mb-9">
-            Get paired with a current or former athlete who played through the same mental battles you&apos;re facing right now — anxiety, confidence, identity, playing time, coming back from injury. Real people. Real experience. Free.
+            Get paired with a current or former athlete who played through the same mental battles you&apos;re facing right now — anxiety, confidence, identity, playing time, coming back from injury. Real people. Real experience. Free. One focused month — four weekly 1-on-1 sessions.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/signup?role=player" className="group inline-flex items-center gap-3 bg-orange-500 hover:bg-orange-400 px-7 py-4 font-bold text-white text-sm transition-colors" style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}>

@@ -25,9 +25,20 @@ export async function POST(request: Request) {
     serviceKey,
   );
 
+  // The 1-on-1 mentorship is a 1-month program: 4 weekly sessions.
+  const programStart = new Date();
+  const programEnd = new Date(programStart);
+  programEnd.setUTCDate(programEnd.getUTCDate() + 28);
+
   const { data: created, error } = await admin
     .from("matches")
-    .insert({ player_id: playerId, mentor_id: mentorId, status: "active" })
+    .insert({
+      player_id: playerId,
+      mentor_id: mentorId,
+      status: "active",
+      program_start: programStart.toISOString().slice(0, 10),
+      program_end: programEnd.toISOString().slice(0, 10),
+    })
     .select("id")
     .single();
 
@@ -35,24 +46,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error?.message ?? "match insert failed" }, { status: 500 });
   }
 
-  // Auto-schedule an intro call ~7 days out at 5pm UTC, on the hour.
-  // Mentors/mentees will typically reschedule — this just plants a marker.
-  const intro = new Date();
-  intro.setUTCDate(intro.getUTCDate() + 7);
-  intro.setUTCHours(17, 0, 0, 0);
-
-  const { error: callError } = await admin
-    .from("scheduled_calls")
-    .insert({
+  // Scaffold the 4 weekly sessions (weeks 1–4) at 5pm UTC, on the hour.
+  // Mentors/mentees will typically reschedule — these just plant the cadence.
+  const calls = Array.from({ length: 4 }, (_, i) => {
+    const when = new Date();
+    when.setUTCDate(when.getUTCDate() + 7 * (i + 1));
+    when.setUTCHours(17, 0, 0, 0);
+    return {
       match_id: created.id,
       proposed_by: mentorId,
-      scheduled_at: intro.toISOString(),
-      note: "Intro call — auto-scheduled. Reschedule if this time doesn't work.",
-    });
+      scheduled_at: when.toISOString(),
+      note: `Session ${i + 1} of 4 — auto-scheduled. Reschedule if this time doesn't work.`,
+    };
+  });
+
+  const { error: callError } = await admin.from("scheduled_calls").insert(calls);
 
   // Don't fail the match creation if the auto-call insert fails — just log.
   if (callError) {
-    console.error("auto-schedule intro call failed:", callError.message);
+    console.error("auto-schedule program sessions failed:", callError.message);
   }
 
   return NextResponse.json({ ok: true });

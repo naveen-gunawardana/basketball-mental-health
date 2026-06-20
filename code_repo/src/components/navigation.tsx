@@ -42,12 +42,16 @@ export function Navigation() {
 
   async function fetchUnread(userId: string) {
     const supabase = createClient();
-    const { data: match } = await supabase
+    // A mentor can have several active mentees — take the most recent active
+    // match for the badge rather than erroring on multiple rows.
+    const { data: matchRows } = await supabase
       .from("matches")
       .select("id")
       .or(`mentor_id.eq.${userId},player_id.eq.${userId}`)
       .eq("status", "active")
-      .maybeSingle();
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const match = matchRows?.[0];
     if (!match) return;
 
     const { count } = await supabase

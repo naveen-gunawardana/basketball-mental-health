@@ -15,10 +15,11 @@ import { StarterChips } from "@/components/starter-chips";
 import { FirstCallCard } from "@/components/first-call-card";
 import { PostSessionNudge } from "@/components/post-session-nudge";
 import { DashboardRightPanel } from "@/components/dashboard-right-panel";
+import { ProgramArc } from "@/components/program-arc";
 
 interface PlayerProfile { grade: string | null; school: string | null; level: string[] | null; challenges: string[] | null; goal: string | null }
 interface Mentee { id: string; name: string; sport: string[] | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
-interface Match { id: string; meeting_url: string | null; created_at: string; player: Mentee }
+interface Match { id: string; meeting_url: string | null; created_at: string; program_start: string | null; program_end: string | null; status: string | null; player: Mentee }
 interface SessionRecord { id: string; date: string | null; topics: string[] | null }
 interface ShareArticle { slug: string; title: string; read_time: string | null }
 
@@ -35,6 +36,8 @@ export default function MentorDashboard() {
   const [mentorAvatarUrl, setMentorAvatarUrl] = useState<string | null>(null);
   const [approved, setApproved] = useState<boolean | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [programEnd, setProgramEnd] = useState<string | null>(null);
+  const [sessionCount, setSessionCount] = useState(0);
   const [recentSessions, setRecentSessions] = useState<SessionRecord[]>([]);
   const [shareArticles, setShareArticles] = useState<ShareArticle[]>([]);
   const [, setMessageCount] = useState(0);
@@ -66,7 +69,7 @@ export default function MentorDashboard() {
 
       const { data: matchData } = await supabase
         .from("matches")
-        .select("id, meeting_url, created_at, player:player_id(id, name, sport, avatar_url, player_profiles(grade, school, level, challenges, goal))")
+        .select("id, meeting_url, created_at, program_start, program_end, status, player:player_id(id, name, sport, avatar_url, player_profiles(grade, school, level, challenges, goal))")
         .eq("mentor_id", user.id)
         .eq("status", "active");
 
@@ -75,6 +78,7 @@ export default function MentorDashboard() {
 
       if (typedMatches.length > 0) {
         const firstMatchId = typedMatches[0].id;
+        setProgramEnd(typedMatches[0].program_end);
 
         const { data: sessionData } = await supabase
           .from("sessions")
@@ -83,6 +87,12 @@ export default function MentorDashboard() {
           .order("date", { ascending: false })
           .limit(5);
         setRecentSessions((sessionData ?? []) as SessionRecord[]);
+
+        const { count: doneCount } = await supabase
+          .from("sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("match_id", firstMatchId);
+        setSessionCount(doneCount ?? 0);
 
         const { count: msgCount } = await supabase
           .from("messages")
@@ -251,6 +261,8 @@ export default function MentorDashboard() {
           </Button>
         </div>
       </div>
+
+      <ProgramArc done={sessionCount} programEnd={programEnd} className="mb-4 shrink-0" />
 
       {showPostCallBanner && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sage-300 bg-sage-50 px-4 py-3 shrink-0">
