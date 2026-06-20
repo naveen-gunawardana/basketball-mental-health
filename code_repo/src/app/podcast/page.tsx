@@ -200,9 +200,9 @@ export default function PodcastPage() {
   return (
     <div>
       <div className="bg-navy border-b border-white/10 text-center py-2.5 px-4 text-xs text-white/60 tracking-wide">
-        Our podcast is{" "}
-        <span className="text-white font-semibold">launching soon</span> —
-        subscribe to hear episode one.
+        Episode 1 is{" "}
+        <span className="text-white font-semibold">now live</span> —
+        watch it below.
       </div>
 
       {/* Hero */}
