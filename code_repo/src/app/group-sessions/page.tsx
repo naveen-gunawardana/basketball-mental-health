@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Calendar, Clock, Users, Video, ArrowRight } from "lucide-react";
+import { Calendar, Clock, Users, Video, ArrowRight, Lock } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface SessionItem {
   id: string;
@@ -88,17 +89,27 @@ function SessionCard({ s }: { s: SessionItem }) {
 }
 
 export default function GroupSessionsPage() {
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/group-sessions")
-      .then((r) => r.json())
-      .then((d) => {
-        setSessions(d.sessions ?? []);
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const isAuthed = !!data.user;
+      setAuthed(isAuthed);
+      if (!isAuthed) {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+        return;
+      }
+      fetch("/api/group-sessions")
+        .then((r) => r.json())
+        .then((d) => {
+          setSessions(d.sessions ?? []);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    });
   }, []);
 
   const upcoming = sessions.filter((s) => !s.isPast);
@@ -107,7 +118,7 @@ export default function GroupSessionsPage() {
   return (
     <div>
       <div className="bg-navy border-b border-white/10 text-center py-2.5 px-4 text-xs text-white/60 tracking-wide">
-        Group Sessions are <span className="text-white font-semibold">live, free, and open to all</span> — RSVP with just your email, no account needed.
+        Group Sessions are <span className="text-white font-semibold">live and free for members</span> — sign in to RSVP and join.
       </div>
 
       {/* Hero */}
@@ -116,19 +127,40 @@ export default function GroupSessionsPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex items-center gap-3 mb-5">
             <span className="block bg-orange-400 w-8 h-px" />
-            <span className="font-bold text-[10px] text-orange-400 uppercase tracking-[0.3em]">Live · Virtual · Free</span>
+            <span className="font-bold text-[10px] text-orange-400 uppercase tracking-[0.3em]">Live · Virtual · Members</span>
           </div>
           <h1 className="font-black text-white font-condensed tracking-tight leading-none mb-5" style={{ fontSize: "clamp(2.8rem, 7vw, 5rem)" }}>
             GROUP SESSIONS
           </h1>
           <p className="max-w-xl text-white/55 text-[15px] leading-relaxed">
-            Live virtual workshops on the mental side of sport — confidence, pressure, identity, coming back from injury. Hosted by athletes who&apos;ve been there. Drop in, listen, ask questions. Everyone&apos;s welcome.
+            Live virtual workshops on the mental side of sport — confidence, pressure, identity, coming back from injury. Hosted by athletes who&apos;ve been there. Drop in, listen, ask questions. Free for members.
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        {loading ? (
+        {authed === null ? (
+          <div className="text-center py-20 text-navy/40 text-sm">Loading…</div>
+        ) : !authed ? (
+          /* Logged-out gate — must sign up / in to see and RSVP */
+          <div className="rounded-sm border border-offWhite-300 bg-offWhite p-10 sm:p-14 text-center max-w-xl mx-auto">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/10 mx-auto mb-5">
+              <Lock className="h-5 w-5 text-orange-500" />
+            </div>
+            <h2 className="text-2xl font-black text-navy font-condensed tracking-wide mb-2">MEMBERS ONLY</h2>
+            <p className="text-navy/55 text-sm mb-7 max-w-md mx-auto">
+              Group Sessions are free, but you&apos;ll need an account to see the schedule and RSVP. Creating one takes under a minute.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/signup" className="inline-flex items-center justify-center gap-2 bg-navy px-6 py-3 text-sm font-bold text-white hover:bg-orange-500 transition-colors">
+                Create an account <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/signin?redirect=/group-sessions" className="inline-flex items-center justify-center gap-2 border border-navy/15 px-6 py-3 text-sm font-bold text-navy hover:border-navy/30 transition-colors">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        ) : loading ? (
           <div className="text-center py-20 text-navy/40 text-sm">Loading sessions…</div>
         ) : (
           <>
@@ -140,8 +172,8 @@ export default function GroupSessionsPage() {
             {upcoming.length === 0 ? (
               <div className="rounded-sm border border-dashed border-offWhite-400 bg-offWhite p-10 text-center">
                 <Calendar className="h-8 w-8 text-navy/20 mx-auto mb-3" />
-                <p className="text-navy/55 text-sm mb-1 font-medium">No sessions scheduled right now.</p>
-                <p className="text-navy/40 text-xs">New sessions drop regularly — join the newsletter to hear first.</p>
+                <p className="text-navy/55 text-sm mb-1 font-medium">No live sessions on the calendar right now.</p>
+                <p className="text-navy/40 text-xs">More sessions are coming soon — join the newsletter to be the first to know.</p>
                 <Link href="/newsletter" className="inline-flex items-center gap-1.5 mt-4 text-sm font-semibold text-orange-600 hover:text-orange-500 transition-colors">
                   Get notified <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
