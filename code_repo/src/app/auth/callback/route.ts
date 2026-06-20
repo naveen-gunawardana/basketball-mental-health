@@ -25,10 +25,19 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       if (type === "recovery") {
         return NextResponse.redirect(`${origin}/reset-password`);
+      }
+      // Email confirmed — send welcome now (not at signup, to avoid two emails at once)
+      const user = sessionData?.user;
+      if (user?.email && user?.user_metadata?.name) {
+        fetch(`${origin}/api/notify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "welcome", email: user.email, name: user.user_metadata.name }),
+        }).catch(() => {});
       }
       return NextResponse.redirect(`${origin}/dashboard`);
     }

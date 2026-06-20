@@ -48,13 +48,6 @@ function SignupForm() {
       return;
     }
 
-    // Send a generic welcome (no role yet — that comes at the application step).
-    fetch("/api/notify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "welcome", email, name }),
-    }).catch(() => {});
-
     setLoading(false);
     if (!data.session) {
       router.push("/verify-email");
