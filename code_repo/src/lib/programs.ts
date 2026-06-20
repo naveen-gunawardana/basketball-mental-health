@@ -34,7 +34,7 @@ export const PROGRAMS: Program[] = [
     title: "1-on-1 Mentorship",
     tagline: "Matched with a mentor who's lived it",
     description:
-      "Get paired with a current or former athlete who's been through the same mental battles. Ongoing, free, on your schedule — the flagship program.",
+      "Get paired 1-on-1 with a current or former athlete who's been through the same mental battles. A focused 1-month program — four weekly sessions — free, the flagship.",
     href: "/mentorship",
     Icon: Users,
     status: "live",
@@ -45,7 +45,7 @@ export const PROGRAMS: Program[] = [
     title: "Group Sessions",
     tagline: "Live workshops you can drop into",
     description:
-      "Join live virtual sessions on confidence, pressure, identity, and more — hosted by athletes who get it. RSVP free, no account required.",
+      "Join live virtual sessions on confidence, pressure, identity, and more — hosted by athletes who get it. RSVP free with your member account.",
     href: "/group-sessions",
     Icon: Video,
     status: "new",
@@ -89,10 +89,10 @@ export const PROGRAMS: Program[] = [
     title: "The Podcast",
     tagline: "Honest conversations on sport & mind",
     description:
-      "Real talk with athletes, mentors, and experts on the mental side of competing. Launching soon — subscribe to hear episode one.",
+      "Real talk with athletes, mentors, and experts on the mental side of competing. Episode 1 is live now.",
     href: "/podcast",
     Icon: Mic,
-    status: "soon",
+    status: "new",
   },
 ];
 
