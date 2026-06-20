@@ -105,8 +105,30 @@ export default function JoinUsPage() {
             transition={{ duration: 0.7, delay: 0.32 }}
             className="text-[15px] text-white/55 leading-relaxed max-w-[460px]"
           >
-            Mentor a young athlete, intern with our team, or partner with us. Every role helps build the mental health infrastructure athletes never had.
+            Mentor a young athlete, intern with our team, or partner with us — or just tell us you&apos;re interested in helping and we&apos;ll find the right fit. Every role builds the mental health infrastructure athletes never had.
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="mt-9 flex flex-wrap gap-3"
+          >
+            <a
+              href="mailto:officialmentalitysports@gmail.com?subject=Interested in volunteering with Mentality Sports"
+              className="group inline-flex items-center gap-2.5 rounded-sm bg-[#e8703a] px-7 py-3.5 text-sm font-bold text-white hover:bg-white hover:text-[#0a1628] transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              Interested in volunteering? Get in touch
+              <ArrowUpRight className="h-4 w-4 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+            </a>
+            <Link
+              href="/signup?role=mentor"
+              className="inline-flex items-center gap-2 rounded-sm border border-white/20 bg-white/5 px-7 py-3.5 text-sm font-bold text-[#f5f0e8] hover:bg-white/10 transition-colors"
+            >
+              <Heart className="h-4 w-4" /> Become a mentor
+            </Link>
+          </motion.div>
         </div>
       </section>
 

@@ -14,7 +14,6 @@ import { PROGRAMS } from "@/lib/programs";
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/podcast", label: "Podcast" },
   { href: "/opportunities", label: "Join Us" },
   { href: "/dashboard", label: "Locker Room" },
 ];
