@@ -53,97 +53,118 @@ function spotifyEmbed(url: string): string | null {
   return `https://open.spotify.com/embed/${m[1]}/${m[2]}`;
 }
 
+function youtubeId(url: string): string | null {
+  const m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
 function EpisodeCard({ ep }: { ep: Episode }) {
   const label = epLabel(ep);
-  const embed = ep.spotify_url ? spotifyEmbed(ep.spotify_url) : null;
+  const spotifyEmbedUrl = ep.spotify_url ? spotifyEmbed(ep.spotify_url) : null;
+  const ytId = ep.youtube_url ? youtubeId(ep.youtube_url) : null;
 
   return (
-    <article className="flex flex-col rounded-sm border border-offWhite-300 bg-offWhite p-6 hover:border-orange-300 hover:bg-white transition-colors">
-      <div className="flex items-start gap-5">
-        <div className="flex flex-col items-center justify-center rounded-sm bg-navy text-white w-16 h-16 shrink-0">
-          <Mic className="h-4 w-4 text-orange-400 mb-0.5" />
-          {ep.episode_number != null ? (
-            <span className="text-xl font-black font-condensed leading-none">
-              {String(ep.episode_number).padStart(2, "0")}
-            </span>
-          ) : (
-            <Headphones className="h-5 w-5 text-white/60" />
-          )}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            {label && (
-              <span className="rounded-sm px-2 py-0.5 text-[11px] font-medium bg-orange-50 text-orange-600">
-                {label}
-              </span>
-            )}
-            {ep.duration && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-navy/40">
-                <Clock className="h-3 w-3" /> {ep.duration}
-              </span>
-            )}
-          </div>
-          <h3 className="font-bold text-navy text-base leading-snug mb-1.5">
-            {ep.title}
-          </h3>
-          {ep.description && (
-            <p className="text-xs text-navy/55 leading-relaxed line-clamp-3">
-              {ep.description}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {embed && (
-        <div className="mt-5 overflow-hidden rounded-sm">
+    <article className="flex flex-col rounded-sm border border-offWhite-300 bg-offWhite hover:border-orange-300 hover:bg-white transition-colors overflow-hidden">
+      {/* YouTube embed */}
+      {ytId && (
+        <div className="relative w-full aspect-video bg-navy">
           <iframe
-            src={embed}
-            title={`Listen to ${ep.title} on Spotify`}
-            width="100%"
-            height="152"
-            frameBorder="0"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            className="block"
+            src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1`}
+            title={ep.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
           />
         </div>
       )}
 
-      {(ep.spotify_url || ep.apple_url || ep.youtube_url) && (
-        <div className="flex items-center gap-2 flex-wrap mt-5 pt-4 border-t border-offWhite-300">
-          {ep.spotify_url && (
-            <a
-              href={ep.spotify_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-sm bg-navy hover:bg-navy/90 px-3.5 py-2 text-xs font-semibold text-white transition-colors"
-            >
-              <Play className="h-3.5 w-3.5 text-orange-400" /> Spotify
-            </a>
-          )}
-          {ep.apple_url && (
-            <a
-              href={ep.apple_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-sm border border-offWhite-400 hover:border-navy/30 bg-white px-3.5 py-2 text-xs font-semibold text-navy/70 hover:text-navy transition-colors"
-            >
-              <Apple className="h-3.5 w-3.5" /> Apple Podcasts
-            </a>
-          )}
-          {ep.youtube_url && (
-            <a
-              href={ep.youtube_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-sm border border-offWhite-400 hover:border-navy/30 bg-white px-3.5 py-2 text-xs font-semibold text-navy/70 hover:text-navy transition-colors"
-            >
-              <Youtube className="h-3.5 w-3.5" /> YouTube
-            </a>
-          )}
+      <div className="p-6 flex flex-col flex-1">
+        <div className="flex items-start gap-5">
+          <div className="flex flex-col items-center justify-center rounded-sm bg-navy text-white w-16 h-16 shrink-0">
+            <Mic className="h-4 w-4 text-orange-400 mb-0.5" />
+            {ep.episode_number != null ? (
+              <span className="text-xl font-black font-condensed leading-none">
+                {String(ep.episode_number).padStart(2, "0")}
+              </span>
+            ) : (
+              <Headphones className="h-5 w-5 text-white/60" />
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              {label && (
+                <span className="rounded-sm px-2 py-0.5 text-[11px] font-medium bg-orange-50 text-orange-600">
+                  {label}
+                </span>
+              )}
+              {ep.duration && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-navy/40">
+                  <Clock className="h-3 w-3" /> {ep.duration}
+                </span>
+              )}
+            </div>
+            <h3 className="font-bold text-navy text-base leading-snug mb-1.5">
+              {ep.title}
+            </h3>
+            {ep.description && (
+              <p className="text-xs text-navy/55 leading-relaxed line-clamp-3">
+                {ep.description}
+              </p>
+            )}
+          </div>
         </div>
-      )}
+
+        {spotifyEmbedUrl && (
+          <div className="mt-5 overflow-hidden rounded-sm">
+            <iframe
+              src={spotifyEmbedUrl}
+              title={`Listen to ${ep.title} on Spotify`}
+              width="100%"
+              height="152"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              className="block"
+            />
+          </div>
+        )}
+
+        {(ep.spotify_url || ep.apple_url || ep.youtube_url) && (
+          <div className="flex items-center gap-2 flex-wrap mt-5 pt-4 border-t border-offWhite-300">
+            {ep.spotify_url && (
+              <a
+                href={ep.spotify_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-sm bg-navy hover:bg-navy/90 px-3.5 py-2 text-xs font-semibold text-white transition-colors"
+              >
+                <Play className="h-3.5 w-3.5 text-orange-400" /> Spotify
+              </a>
+            )}
+            {ep.apple_url && (
+              <a
+                href={ep.apple_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-offWhite-400 hover:border-navy/30 bg-white px-3.5 py-2 text-xs font-semibold text-navy/70 hover:text-navy transition-colors"
+              >
+                <Apple className="h-3.5 w-3.5" /> Apple Podcasts
+              </a>
+            )}
+            {ep.youtube_url && (
+              <a
+                href={ep.youtube_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-offWhite-400 hover:border-navy/30 bg-white px-3.5 py-2 text-xs font-semibold text-navy/70 hover:text-navy transition-colors"
+              >
+                <Youtube className="h-3.5 w-3.5" /> YouTube
+              </a>
+            )}
+          </div>
+        )}
+      </div>
     </article>
   );
 }
@@ -250,6 +271,26 @@ export default function PodcastPage() {
                 showName
                 className="max-w-xl"
               />
+            </div>
+
+            {/* Apply to be a guest */}
+            <div className="mt-8 rounded-sm border border-offWhite-300 bg-offWhite p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+              <div>
+                <p className="font-bold text-[10px] text-orange-500 uppercase tracking-[0.3em] mb-2">Share your story</p>
+                <h3 className="text-xl font-black text-navy font-condensed tracking-wide mb-1">
+                  INTERESTED IN BEING A GUEST?
+                </h3>
+                <p className="text-sm text-navy/55 leading-relaxed max-w-md">
+                  We&apos;re looking for athletes, coaches, and mental performance experts with a story worth telling.
+                </p>
+              </div>
+              <a
+                href="/admin"
+                className="shrink-0 inline-flex items-center gap-2 rounded-sm bg-navy hover:bg-navy/90 px-6 py-3 text-sm font-semibold text-white transition-colors"
+              >
+                <Mic className="h-4 w-4 text-orange-400" />
+                Submit a Guest Application
+              </a>
             </div>
           </>
         ) : (
