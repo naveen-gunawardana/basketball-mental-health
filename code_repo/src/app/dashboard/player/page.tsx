@@ -36,7 +36,6 @@ export default function PlayerDashboard() {
   const [mentor, setMentor] = useState<MentorInfo | null>(null);
   const [mentorExtras, setMentorExtras] = useState<MentorExtras | null>(null);
   const [matchId, setMatchId] = useState<string | null>(null);
-  const [programStart, setProgramStart] = useState<string | null>(null);
   const [programEnd, setProgramEnd] = useState<string | null>(null);
   const [sessionCount, setSessionCount] = useState(0);
   const [completedMatch, setCompletedMatch] = useState<CompletedMatch | null>(null);
@@ -80,7 +79,6 @@ export default function PlayerDashboard() {
         const md = matchData as unknown as MatchData;
         setMatchId(md.id);
         setMentor(md.mentor);
-        setProgramStart(md.program_start);
         setProgramEnd(md.program_end);
 
         const { count: doneCount } = await supabase
