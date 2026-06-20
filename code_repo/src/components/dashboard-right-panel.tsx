@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CalendarClock, ChevronDown, ChevronUp, Calendar, AlertTriangle } from "lucide-react";
 import { UpcomingCalls } from "@/components/upcoming-calls";
-import { LogHoursForm } from "@/components/log-hours-form";
-import { ReflectionsPanel } from "@/components/reflections-panel";
-import { MentorWeekStats } from "@/components/mentor-week-stats";
+import { WeeklyGoals } from "@/components/weekly-goals";
 
 interface CommonProps {
   matchId: string;
@@ -80,7 +78,6 @@ export function DashboardRightPanel(props: Props) {
   const { matchId, currentUserId, scheduleRefreshKey, onScheduleClick, onJoinCall, onLogSession, needsFirstCall } = props;
   const isMentor = props.role === "mentor";
   const personName = isMentor ? props.mentee.name : props.mentor.name;
-  const personFirstName = personName.split(" ")[0];
   const personAvatar = isMentor ? props.mentee.avatar_url : props.mentor.avatar_url;
   const personSport = isMentor ? props.mentee.sport : props.mentor.sport;
 
@@ -108,8 +105,8 @@ export function DashboardRightPanel(props: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Mentor: this-week stats */}
-      {isMentor && <MentorWeekStats matchId={matchId} mentorUserId={currentUserId} />}
+      {/* Mentor: how-to-mentor playbook */}
+      {isMentor && <MentorPlaybook />}
 
       {/* Upcoming calls */}
       <Card className="p-5">
@@ -134,6 +131,9 @@ export function DashboardRightPanel(props: Props) {
           </Button>
         )}
       </Card>
+
+      {/* Goals */}
+      <WeeklyGoals matchId={matchId} userId={currentUserId} />
 
       {/* Person info */}
       <Card>
@@ -200,22 +200,6 @@ export function DashboardRightPanel(props: Props) {
           </div>
         )}
       </Card>
-
-      {/* Mentor: Log hours */}
-      {isMentor && (
-        <Card className="p-5">
-          <SectionLabel accent>Log hours</SectionLabel>
-          <p className="text-[11px] text-navy/50 -mt-1 mb-3 leading-snug">Track the time you spend with your athlete.</p>
-          <LogHoursForm matchId={matchId} userId={currentUserId} />
-        </Card>
-      )}
-
-      {/* Mentee: Reflections (standalone, unlimited, optional title) */}
-      {!isMentor && (
-        <Card className="p-5 bg-gradient-to-br from-orange-50/40 to-white">
-          <ReflectionsPanel playerId={currentUserId} mentorFirstName={personFirstName} />
-        </Card>
-      )}
 
       {/* Sessions */}
       <Card className="p-5">
@@ -288,6 +272,40 @@ export function DashboardRightPanel(props: Props) {
         )}
       </Card>
     </div>
+  );
+}
+
+function MentorPlaybook() {
+  const [open, setOpen] = useState(true);
+  const steps = [
+    { n: "1", t: "Meet & set the goal", d: "Get to know your athlete. Pick one mental goal to work on together this month." },
+    { n: "2", t: "Dig in", d: "Share how you handled the same thing. Leave them with one thing to try this week." },
+    { n: "3", t: "Check progress", d: "What worked, what didn't? Adjust together — real games, real reps." },
+    { n: "4", t: "Lock it in", d: "Turn the month into habits. Celebrate the wins and set them up to keep going." },
+  ];
+  return (
+    <Card className="p-5 bg-gradient-to-br from-navy/[0.03] to-white">
+      <button type="button" onClick={() => setOpen(!open)} className="w-full flex items-center justify-between">
+        <SectionLabel accent>Your 4-session playbook</SectionLabel>
+        {open ? <ChevronUp className="h-4 w-4 text-navy/40" /> : <ChevronDown className="h-4 w-4 text-navy/40" />}
+      </button>
+      {open && (
+        <div className="mt-1 space-y-2.5">
+          {steps.map((s) => (
+            <div key={s.n} className="flex gap-3">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-[11px] font-bold text-orange-600">{s.n}</span>
+              <div>
+                <p className="text-[12.5px] font-semibold text-navy leading-tight">{s.t}</p>
+                <p className="text-[11.5px] text-navy/55 leading-snug mt-0.5">{s.d}</p>
+              </div>
+            </div>
+          ))}
+          <p className="text-[11px] text-navy/45 leading-snug pt-2 border-t border-offWhite-200 mt-1">
+            Listen more than you talk. Be consistent — showing up matters more than perfect advice. No scripts.
+          </p>
+        </div>
+      )}
+    </Card>
   );
 }
 

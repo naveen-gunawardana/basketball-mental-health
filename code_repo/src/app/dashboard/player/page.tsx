@@ -16,6 +16,7 @@ import { FirstCallCard } from "@/components/first-call-card";
 import { PostSessionNudge } from "@/components/post-session-nudge";
 import { DashboardRightPanel } from "@/components/dashboard-right-panel";
 import { ProgramArc } from "@/components/program-arc";
+import { CertificateRequest } from "@/components/certificate-request";
 
 interface Profile { name: string; sport: string[] | null; avatar_url: string | null }
 interface PlayerProfile { challenges: string[] | null; goal: string | null; grade: string | null; school: string | null; level: string[] | null }
@@ -186,6 +187,9 @@ export default function PlayerDashboard() {
                 </Button>
               </div>
             </div>
+            {userId && (
+              <CertificateRequest userId={userId} role="mentee" matchId={completedMatch.id} programInfo={`Mentored by ${completedMatch.mentor.name}`} className="mb-4" />
+            )}
             <p className="text-xs font-semibold uppercase tracking-widest text-navy/40 mb-2">Your conversation</p>
             {userId && (
               <div className="mb-8">
@@ -295,6 +299,10 @@ export default function PlayerDashboard() {
       </div>
 
       <ProgramArc done={sessionCount} programEnd={programEnd} className="mb-4 shrink-0" />
+
+      {sessionCount >= 4 && matchId && userId && (
+        <CertificateRequest userId={userId} role="mentee" matchId={matchId} programInfo={mentor ? `Mentored by ${mentor.name}` : undefined} className="mb-4 shrink-0" />
+      )}
 
       {showPostCallBanner && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sage-300 bg-sage-50 px-4 py-3 shrink-0">

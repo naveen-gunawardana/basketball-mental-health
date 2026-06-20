@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Clock, BookOpen, PenLine, X, CalendarClock } from "lucide-react";
+import { Clock, BookOpen, PenLine, X, CalendarClock, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LogSessionForm } from "@/components/log-session-form";
 import { AvatarUpload } from "@/components/avatar-upload";
@@ -16,6 +16,7 @@ import { FirstCallCard } from "@/components/first-call-card";
 import { PostSessionNudge } from "@/components/post-session-nudge";
 import { DashboardRightPanel } from "@/components/dashboard-right-panel";
 import { ProgramArc } from "@/components/program-arc";
+import { CertificateRequest } from "@/components/certificate-request";
 
 interface PlayerProfile { grade: string | null; school: string | null; level: string[] | null; challenges: string[] | null; goal: string | null }
 interface Mentee { id: string; name: string; sport: string[] | null; avatar_url: string | null; player_profiles: PlayerProfile | null }
@@ -257,12 +258,19 @@ export default function MentorDashboard() {
             Call
           </button>
           <Button size="sm" variant="outline" className="hidden sm:flex" asChild>
+            <Link href="/dashboard/mentor/transcript"><FileText className="h-3.5 w-3.5 mr-1.5" />Transcript</Link>
+          </Button>
+          <Button size="sm" variant="outline" className="hidden sm:flex" asChild>
             <Link href="/advice/submit"><PenLine className="h-3.5 w-3.5 mr-1.5" />Give Advice</Link>
           </Button>
         </div>
       </div>
 
       <ProgramArc done={sessionCount} programEnd={programEnd} className="mb-4 shrink-0" />
+
+      {sessionCount >= 4 && activeMatch && userId && (
+        <CertificateRequest userId={userId} role="mentor" matchId={activeMatch.id} programInfo={`Mentored ${activeMatch.player.name}`} className="mb-4 shrink-0" />
+      )}
 
       {showPostCallBanner && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-sage-300 bg-sage-50 px-4 py-3 shrink-0">

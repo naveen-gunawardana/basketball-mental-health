@@ -212,6 +212,41 @@ ${note ? `<p>Note: ${note}</p>` : ""}
 <p>— The Mentality Sports Team</p>`,
       });
 
+    } else if (type === "certificate_request") {
+      const { userId, role, programInfo } = payload;
+      const admin = getAdmin();
+      const { data: profile } = await admin.from("profiles").select("name").eq("id", userId).single();
+      const userEmail = await getUserEmail(userId);
+      const isMentor = role === "mentor";
+      const certName = isMentor ? "Certificate of Mentorship" : "Certificate of Completion";
+
+      // Notify the team to issue + send the certificate.
+      await resend.emails.send({
+        from: FROM,
+        to: "officialmentalitysports@gmail.com",
+        subject: `Certificate request — ${isMentor ? "Mentor" : "Athlete"}: ${profile?.name ?? userEmail ?? userId}`,
+        html: `<p>A ${isMentor ? "mentor" : "athlete"} has requested their ${certName}.</p>
+<ul>
+  <li><strong>Name:</strong> ${profile?.name ?? "—"}</li>
+  <li><strong>Email:</strong> ${userEmail ?? "—"}</li>
+  <li><strong>Role:</strong> ${role}</li>
+  ${programInfo ? `<li><strong>Program:</strong> ${programInfo}</li>` : ""}
+</ul>
+<p>Please issue and send their ${certName}.</p>`,
+      });
+
+      // Confirm to the requester.
+      if (userEmail) {
+        await resend.emails.send({
+          from: FROM,
+          to: userEmail,
+          subject: "We got your certificate request",
+          html: `<p>Hi ${(profile?.name ?? "there").split(" ")[0]},</p>
+<p>Thanks for completing your ${isMentor ? "mentorship" : "1-month program"}! We've received your request and our team will email you your <strong>${certName}</strong> shortly.</p>
+<p>— The Mentality Sports Team</p>`,
+        });
+      }
+
     } else {
       return NextResponse.json({ error: "Unknown notification type" }, { status: 400 });
     }
