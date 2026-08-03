@@ -79,6 +79,10 @@ export function buildIssueHtml(opts: {
 
   return `<!DOCTYPE html>
 <html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 <body style="margin:0;padding:0;background:#F6F3EC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;background:#ffffff;">
     <div style="background:#14213D;padding:28px 32px;">
