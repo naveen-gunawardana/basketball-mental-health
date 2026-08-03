@@ -14,10 +14,11 @@ function getAdmin() {
 }
 
 export async function POST(request: Request) {
-  // Verify caller is an admin (API routes aren't covered by middleware).
+  // Verify caller has admin dashboard access (API routes aren't covered by middleware).
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.app_metadata?.role !== "admin") {
+  const role = user?.app_metadata?.role;
+  if (!role || !["admin", "outreach", "operations"].includes(role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
