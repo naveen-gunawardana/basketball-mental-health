@@ -165,6 +165,7 @@ export default function AdminNewsletterPage() {
   }
 
   async function sendIssue(issueId: string) {
+    const isResend = issues.find((i) => i.id === issueId)?.status === "sent";
     setSendingId(issueId);
     setConfirmSendId(null);
     setSendResult("");
@@ -172,7 +173,7 @@ export default function AdminNewsletterPage() {
       const res = await fetch("/api/admin/newsletter/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ issueId }),
+        body: JSON.stringify({ issueId, resend: isResend }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -210,34 +211,47 @@ export default function AdminNewsletterPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Confirm send overlay */}
-      {confirmSendId && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-sm w-full max-w-sm p-6">
-            <h2 className="text-base font-bold text-navy mb-2">Send this issue?</h2>
-            <p className="text-sm text-navy/60 mb-5">
-              This will email{" "}
-              <span className="font-semibold text-navy">{subscribedList.length}</span>{" "}
-              subscribed reader{subscribedList.length === 1 ? "" : "s"}. This can&apos;t be undone.
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setConfirmSendId(null)}
-                className="rounded-sm border border-offWhite-300 px-4 py-2 text-sm font-medium text-navy hover:bg-offWhite transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => sendIssue(confirmSendId)}
-                className="inline-flex items-center gap-2 rounded-sm bg-orange-500 hover:bg-orange-400 px-4 py-2 text-sm font-bold text-white transition-colors"
-              >
-                <Send className="h-3.5 w-3.5" /> Send now
-              </button>
+      {confirmSendId && (() => {
+        const target = issues.find((i) => i.id === confirmSendId);
+        const isResend = target?.status === "sent";
+        return (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-sm w-full max-w-sm p-6">
+              <h2 className="text-base font-bold text-navy mb-2">
+                {isResend ? "Resend this issue?" : "Send this issue?"}
+              </h2>
+              <p className="text-sm text-navy/60 mb-5">
+                {isResend && (
+                  <>
+                    This was already sent on {fmtDate(target?.sent_at ?? null)} to{" "}
+                    {target?.recipient_count ?? 0} subscriber{target?.recipient_count === 1 ? "" : "s"}.{" "}
+                  </>
+                )}
+                This will email{" "}
+                <span className="font-semibold text-navy">{subscribedList.length}</span>{" "}
+                subscribed reader{subscribedList.length === 1 ? "" : "s"}
+                {isResend ? " again, with a “(Resend)” subject prefix" : ""}. This can&apos;t be undone.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setConfirmSendId(null)}
+                  className="rounded-sm border border-offWhite-300 px-4 py-2 text-sm font-medium text-navy hover:bg-offWhite transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => sendIssue(confirmSendId)}
+                  className="inline-flex items-center gap-2 rounded-sm bg-orange-500 hover:bg-orange-400 px-4 py-2 text-sm font-bold text-white transition-colors"
+                >
+                  <Send className="h-3.5 w-3.5" /> {isResend ? "Resend now" : "Send now"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Confirm delete overlay */}
       {confirmDeleteId && (
@@ -503,12 +517,27 @@ export default function AdminNewsletterPage() {
                           </div>
                           <div className="shrink-0 flex items-center gap-2">
                             {isSent ? (
-                              <Link
-                                href={`/newsletter/${issue.slug}`}
-                                className="inline-flex items-center gap-1.5 rounded-sm border border-offWhite-400 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors"
-                              >
-                                View <ExternalLink className="h-3 w-3" />
-                              </Link>
+                              <>
+                                <Link
+                                  href={`/newsletter/${issue.slug}`}
+                                  className="inline-flex items-center gap-1.5 rounded-sm border border-offWhite-400 px-3 py-1.5 text-xs font-medium text-navy hover:bg-offWhite transition-colors"
+                                >
+                                  View <ExternalLink className="h-3 w-3" />
+                                </Link>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmSendId(issue.id)}
+                                  disabled={sendingId === issue.id}
+                                  className="inline-flex items-center gap-1.5 rounded-sm border border-orange-300 text-orange-600 hover:bg-orange-50 disabled:opacity-60 px-3 py-1.5 text-xs font-bold transition-colors"
+                                >
+                                  {sendingId === issue.id ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  ) : (
+                                    <Send className="h-3.5 w-3.5" />
+                                  )}
+                                  Resend
+                                </button>
+                              </>
                             ) : (
                               <button
                                 type="button"

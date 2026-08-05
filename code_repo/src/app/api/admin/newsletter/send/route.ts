@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email is not configured (RESEND_API_KEY missing)." }, { status: 500 });
   }
 
-  const { issueId } = await request.json();
+  const { issueId, resend: isResend } = await request.json();
   if (!issueId) {
     return NextResponse.json({ error: "issueId required" }, { status: 400 });
   }
@@ -41,7 +41,9 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (!issue) return NextResponse.json({ error: "Issue not found" }, { status: 404 });
-  if (issue.status === "sent") {
+  // Resending an already-sent issue is allowed only when explicitly requested
+  // (the "Resend" button) — a plain "Send now" click should never double-send.
+  if (issue.status === "sent" && !isResend) {
     return NextResponse.json({ error: "This issue has already been sent." }, { status: 400 });
   }
 
@@ -49,6 +51,9 @@ export async function POST(request: Request) {
   let broadcastId: string | null = null;
   let recipientCount = 0;
   const failedEmails: string[] = [];
+  // Flag resends in the subject line so anyone who already got this issue
+  // doesn't see an unexplained identical duplicate in their inbox.
+  const outboundSubject = isResend ? `(Resend) ${issue.subject}` : issue.subject;
 
   if (getAudienceId()) {
     // Preferred path: a single Resend Broadcast to the audience. Resend owns
@@ -62,7 +67,7 @@ export async function POST(request: Request) {
 
     try {
       broadcastId = await sendBroadcast({
-        subject: issue.subject,
+        subject: outboundSubject,
         previewText: issue.preview_text ?? undefined,
         name: issue.title,
         html: buildIssueHtml({
@@ -96,7 +101,7 @@ export async function POST(request: Request) {
             const { error } = await resend.emails.send({
               from: EMAIL_FROM,
               to: s.email,
-              subject: issue.subject,
+              subject: outboundSubject,
               // One-click List-Unsubscribe (RFC 8058). Inbox providers weigh
               // this heavily when deciding whether bulk-looking mail lands
               // in the primary inbox vs. spam.
