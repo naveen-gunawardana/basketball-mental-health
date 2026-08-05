@@ -17,6 +17,7 @@ import {
   Info,
   ExternalLink,
   FileText,
+  Trash2,
 } from "lucide-react";
 
 interface Subscriber {
@@ -86,6 +87,10 @@ export default function AdminNewsletterPage() {
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [confirmSendId, setConfirmSendId] = useState<string | null>(null);
   const [sendResult, setSendResult] = useState<string>("");
+
+  // Delete state
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   async function loadSubscribers() {
     const supabase = createClient();
@@ -173,10 +178,11 @@ export default function AdminNewsletterPage() {
       if (!res.ok) {
         setSendResult(data?.error ?? "Send failed. Try again.");
       } else {
+        const failedNote = data.failedCount ? ` (${data.failedCount} failed to send)` : "";
         setSendResult(
           `Sent to ${data.recipientCount ?? 0} subscriber${
             data.recipientCount === 1 ? "" : "s"
-          } via ${data.mode === "broadcast" ? "Resend Broadcast" : "direct send"}.`,
+          } via ${data.mode === "broadcast" ? "Resend Broadcast" : "direct send"}${failedNote}.`,
         );
         await loadIssues();
       }
@@ -185,6 +191,20 @@ export default function AdminNewsletterPage() {
     }
     setSendingId(null);
     setTimeout(() => setSendResult(""), 6000);
+  }
+
+  async function deleteIssue(issueId: string) {
+    setDeletingId(issueId);
+    setConfirmDeleteId(null);
+    const supabase = createClient();
+    const { error } = await supabase.from("newsletter_issues").delete().eq("id", issueId);
+    if (error) {
+      setSendResult(`Could not delete: ${error.message}`);
+      setTimeout(() => setSendResult(""), 6000);
+    } else {
+      await loadIssues();
+    }
+    setDeletingId(null);
   }
 
   return (
@@ -213,6 +233,35 @@ export default function AdminNewsletterPage() {
                 className="inline-flex items-center gap-2 rounded-sm bg-orange-500 hover:bg-orange-400 px-4 py-2 text-sm font-bold text-white transition-colors"
               >
                 <Send className="h-3.5 w-3.5" /> Send now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm delete overlay */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-sm w-full max-w-sm p-6">
+            <h2 className="text-base font-bold text-navy mb-2">Delete this issue?</h2>
+            <p className="text-sm text-navy/60 mb-5">
+              This permanently removes it from the archive. If it was already sent, this
+              doesn&apos;t recall it from anyone&apos;s inbox. This can&apos;t be undone.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteId(null)}
+                className="rounded-sm border border-offWhite-300 px-4 py-2 text-sm font-medium text-navy hover:bg-offWhite transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteIssue(confirmDeleteId)}
+                className="inline-flex items-center gap-2 rounded-sm bg-red-600 hover:bg-red-500 px-4 py-2 text-sm font-bold text-white transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete
               </button>
             </div>
           </div>
@@ -452,7 +501,7 @@ export default function AdminNewsletterPage() {
                               </p>
                             )}
                           </div>
-                          <div className="shrink-0">
+                          <div className="shrink-0 flex items-center gap-2">
                             {isSent ? (
                               <Link
                                 href={`/newsletter/${issue.slug}`}
@@ -475,6 +524,19 @@ export default function AdminNewsletterPage() {
                                 Send now
                               </button>
                             )}
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteId(issue.id)}
+                              disabled={deletingId === issue.id}
+                              title="Delete issue"
+                              className="inline-flex items-center justify-center rounded-sm border border-offWhite-400 p-1.5 text-navy/50 hover:text-red-600 hover:border-red-300 hover:bg-red-50 disabled:opacity-60 transition-colors"
+                            >
+                              {deletingId === issue.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                            </button>
                           </div>
                         </div>
                       </div>

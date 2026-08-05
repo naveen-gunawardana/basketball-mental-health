@@ -45,18 +45,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "This issue has already been sent." }, { status: 400 });
   }
 
-  // How many subscribers will receive it (our source of truth).
-  const { count: subCount } = await admin
-    .from("newsletter_subscribers")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "subscribed");
-  const recipientCount = subCount ?? 0;
-
   let mode: "broadcast" | "direct";
   let broadcastId: string | null = null;
+  let recipientCount = 0;
+  const failedEmails: string[] = [];
 
   if (getAudienceId()) {
-    // Preferred path: a single Resend Broadcast to the audience.
+    // Preferred path: a single Resend Broadcast to the audience. Resend owns
+    // delivery to the whole list here, so we report our subscriber count as
+    // the recipient count (we don't get per-address results back).
+    const { count: subCount } = await admin
+      .from("newsletter_subscribers")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "subscribed");
+    recipientCount = subCount ?? 0;
+
     try {
       broadcastId = await sendBroadcast({
         subject: issue.subject,
@@ -86,22 +89,42 @@ export async function POST(request: Request) {
     const BATCH = 40;
     for (let i = 0; i < list.length; i += BATCH) {
       const chunk = list.slice(i, i + BATCH);
-      await Promise.all(
-        chunk.map((s) =>
-          resend.emails
-            .send({
+      const results = await Promise.all(
+        chunk.map(async (s) => {
+          const unsubscribeUrl = `${BASE_URL}/api/newsletter/unsubscribe?token=${s.unsubscribe_token}`;
+          try {
+            const { error } = await resend.emails.send({
               from: EMAIL_FROM,
               to: s.email,
               subject: issue.subject,
+              // One-click List-Unsubscribe (RFC 8058). Inbox providers weigh
+              // this heavily when deciding whether bulk-looking mail lands
+              // in the primary inbox vs. spam.
+              headers: {
+                "List-Unsubscribe": `<${unsubscribeUrl}>`,
+                "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+              },
               html: buildIssueHtml({
                 title: issue.title,
                 contentMd: issue.content,
-                unsubscribeUrl: `${BASE_URL}/api/newsletter/unsubscribe?token=${s.unsubscribe_token}`,
+                unsubscribeUrl,
               }),
-            })
-            .catch((e) => console.error(`send to ${s.email} failed:`, e)),
-        ),
+            });
+            // Resend resolves (doesn't throw) on API-level errors, so this
+            // check is required — a bare .catch() here would silently miss
+            // real failures and report success anyway.
+            if (error) throw error;
+            return { email: s.email, ok: true as const };
+          } catch (e) {
+            console.error(`send to ${s.email} failed:`, e);
+            return { email: s.email, ok: false as const };
+          }
+        }),
       );
+      for (const r of results) {
+        if (r.ok) recipientCount++;
+        else failedEmails.push(r.email);
+      }
     }
   }
 
@@ -115,5 +138,5 @@ export async function POST(request: Request) {
     })
     .eq("id", issue.id);
 
-  return NextResponse.json({ ok: true, mode, recipientCount, broadcastId });
+  return NextResponse.json({ ok: true, mode, recipientCount, failedCount: failedEmails.length, broadcastId });
 }
