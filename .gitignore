@@ -7,6 +7,18 @@ Thumbs.db
 .vscode/
 *.swp
 
+# Secrets — never commit. outreach/.env holds Gmail app passwords and the
+# Resend key; this repo is public.
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Supabase CLI scratch state (version cache, linked project ref)
+supabase/.temp/
+
 # Misc
 *.log
 
