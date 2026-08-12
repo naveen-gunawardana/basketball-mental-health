@@ -196,14 +196,26 @@ export default function PodcastPage() {
   }, []);
 
   const hasEpisodes = episodes.length > 0;
+  // Episodes come back newest-first, so the banner always advertises the latest drop.
+  const latestEpisode = episodes[0];
 
   return (
     <div>
-      <div className="bg-navy border-b border-white/10 text-center py-2.5 px-4 text-xs text-white/60 tracking-wide">
-        Episode 1 is{" "}
-        <span className="text-white font-semibold">now live</span> —
-        watch it below.
-      </div>
+      {hasEpisodes && (
+        <div className="bg-navy border-b border-white/10 text-center py-2.5 px-4 text-xs text-white/60 tracking-wide">
+          {latestEpisode?.episode_number != null ? (
+            <>
+              Episode {latestEpisode.episode_number} is{" "}
+              <span className="text-white font-semibold">now live</span> — watch it below.
+            </>
+          ) : (
+            <>
+              New episode{" "}
+              <span className="text-white font-semibold">now live</span> — watch it below.
+            </>
+          )}
+        </div>
+      )}
 
       {/* Hero */}
       <div className="relative bg-[#0c1628] overflow-hidden">
