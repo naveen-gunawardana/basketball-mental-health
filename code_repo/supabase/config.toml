@@ -223,7 +223,7 @@ host = "smtp.resend.com"
 port = 465
 user = "resend"
 pass = "env(RESEND_API_KEY)"
-admin_email = "hello@mentalitysports.com"
+admin_email = "no-reply@mentalitysports.com"
 sender_name = "Mentality Sports"
 
 # Uncomment to customize email template
