@@ -30,6 +30,26 @@ function SignupForm() {
 
   const applyHref = roleHint ? `/apply?role=${roleHint}` : "/apply";
 
+  // Supabase surfaces raw auth errors that mean nothing to a signup visitor
+  // ("Email rate limit exceeded"). Map the ones users actually hit to copy that
+  // tells them what to do next; anything unrecognised falls through as-is.
+  function friendlyAuthError(message: string) {
+    const m = message.toLowerCase();
+    if (m.includes("rate limit") || m.includes("too many requests")) {
+      return "We're sending more emails than usual right now. Wait a minute and try again — if it keeps happening, email hello@mentalitysports.com and we'll get you set up.";
+    }
+    if (m.includes("already registered") || m.includes("already been registered")) {
+      return "That email already has an account. Try signing in instead, or reset your password if you've forgotten it.";
+    }
+    if (m.includes("invalid email") || (m.includes("email address") && m.includes("invalid"))) {
+      return "That email address doesn't look right. Double-check it and try again.";
+    }
+    if (m.includes("password") && (m.includes("short") || m.includes("at least") || m.includes("weak"))) {
+      return "Please pick a password with at least 6 characters.";
+    }
+    return message;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -43,7 +63,7 @@ function SignupForm() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error.message));
       setLoading(false);
       return;
     }
